@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<EXAMPLE><!----><ORDER version="1.0" xml:lang="de">
+<!--This is another comment with special chars: -->
+<HEADER>
+<X_ORDER_ID>0000053535</X_ORDER_ID>
+<CUSTOMER_ID>1010</CUSTOMER_ID>
+<NAME_1>`P</NAME_1>
+<NAME_2>`P</NAME_2>
+</HEADER>
+<ENTRIES>
+<ENTRY><ARTICLE>&lt;Test&gt;</ARTICLE>
+<ENTRY_NO>10</ENTRY_NO>
+</ENTRY>
+<ENTRY><ARTICLE>&lt;Test 2&gt;</ARTICLE>
+<ENTRY_NO>20</ENTRY_NO>
+</ENTRY>
+</ENTRIES>
+<FOOTER><TEXT>This is a text.</TEXT></FOOTER>
+</ORDER>
+</EXAMPLE>

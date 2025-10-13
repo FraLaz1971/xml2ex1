@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Powersettings>
+  <PowerScheme>Testing</PowerScheme>
+  <cpuspeed>Adaptive</cpuspeed>
+  <LockScreentime>no</LockScreentime>
+  <Wbrightvalue>no</Wbrightvalue>
+  <Ibrightvalue>no</Ibrightvalue>
+  <Dimtime>no</Dimtime>
+</Powersettings>
