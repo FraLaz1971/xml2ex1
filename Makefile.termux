@@ -1,6 +1,6 @@
 CC=gcc
 LD=gcc
-XML2_HOME=/usr
+XML2_HOME=/data/data/com.termux/files/usr
 CFLAGS=-I$(XML2_HOME)/include/libxml2 -I$(XML2_HOME)/include/libxslt
 PNG_CFLAGS=-I$(XML2_HOME)/include/libpng16
 LDFLAGS=-L$(XML2_HOME)/lib
@@ -19,10 +19,11 @@ readxml2: readxml2.c
 testWriter: testWriter.c
         $(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 pngprog001: pngprog001.c
-        $(CC) $(PNG_CFLAGS) $< -o $@ $(LDFLAGS) $(PNG_LIBS)
+	$(CC) $(PNG_CFLAGS) $< -o $@ $(LDFLAGS) $(PNG_LIBS)
 temp1: temp1.c
-        $(CC) $< -o $@
+	$(CC) $< -o $@
 temp2: temp2.c
-        $(CC) $< -o $@
+	$(CC) $< -o $@
 clean:
         $(RM) *.o readxml readxml2 createxml testWriter pngprog001 temp1 temp2
+
