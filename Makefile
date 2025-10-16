@@ -9,20 +9,22 @@ LIBS=-lxml2 -lxslt
 PNG_LIBS=-lpng -lz
 RM=rm -rf
 .PHONY: all clean
-all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2
+all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2 xmltm2ascii
 createxml: createxml.c
-        $(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 readxml: readxml.c
-        $(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
+xmltm2ascii: xmltm2ascii.c
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 readxml2: readxml2.c
-        $(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 testWriter: testWriter.c
-        $(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
-pngprog001: pngprog001.c
-        $(CC) $(PNG_CFLAGS) $< -o $@ $(LDFLAGS) $(PNG_LIBS)
-temp1: temp1.c
-        $(CC) $< -o $@
-temp2: temp2.c
-        $(CC) $< -o $@
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
+pngprog001:	pngprog001.c
+	$(CC) $(PNG_CFLAGS) $< -o $@ $(LDFLAGS) $(PNG_LIBS)
+temp1:	temp1.c
+	$(CC) $< -o $@
+temp2:	temp2.c
+	$(CC) $< -o $@
 clean:
-        $(RM) *.o readxml readxml2 createxml testWriter pngprog001 temp1 temp2
+	$(RM) *.o readxml readxml2 createxml testWriter pngprog001 temp1 temp2 xmltm2ascii
