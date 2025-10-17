@@ -1,0 +1,382 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1700.sch"
+    href="http://pds.nasa.gov/pds4/pds/geom/v1/PDS4_GEOM_1700_1401.sch"
+    href="http://pds.nasa.gov/pds4/pds/v1/PDS4_IMG_1100.sch"
+    href="http://psa.esa.int/psa/v1/PDS4_PSA_1000.sch"
+    href="http://psa.esa.int/psa/v1/PDS4_PSA_BC_1000.sch"
+    href="http://psa.esa.int/psa/bc/simbio/v1/simbio.sch"
+    schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<Product_Observational xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:geom="http://pds.nasa.gov/pds4/geom/v1" xmlns:img="http://pds.nasa.gov/pds4/img/v1" xmlns:psa="http://psa.esa.int/psa/v1" xmlns:simbio="http://psa.esa.int/psa/bc/simbio/v1" xmlns:pds4="http://pds.nasa.gov/pds4/pds/v1" xsi:schemaLocation="     http://pds.nasa.gov/pds4/pds/v1 http://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1700.xsd     http://pds.nasa.gov/pds4/geom/v1 http://pds.nasa.gov/pds4/geom/v1/PDS4_GEOM_1700_1401.xsd     http://psa.esa.int/psa/v1 http://psa.esa.int/psa/v1/PDS4_PSA_LDD_1000.xsd     http://psa.esa.int/psa/bc/simbio/v1 http://psa.esa.int/psa/bc/simbio/v1/PDS4_PSA_BC_SIM_LDD_1000.xsd     http://pds.nasa.gov/pds4/img/v1 http://pds.nasa.gov/pds4/img/v1/PDS4_IMG_1100.xsd">
+  <Identification_Area>
+    <!-- PDS4 rules/recommendation for logical_identifier naming conventions TBD -->
+    <logical_identifier>urn:esa:psa:bc_mpo_simbio-sys:data_raw:sim_raw_stc_data_template</logical_identifier>
+    <version_id>1.0</version_id>
+    <title>BEPICOLOMBO MPO SIMBIO-SYS MERCURY ORBIT STC RAW DATA PRODUCT</title>
+    <information_model_version>1.7.0.0</information_model_version>
+    <product_class>Product_Observational</product_class>
+    <Citation_Information>
+      <author_list>$AUTHOR_LIST</author_list>
+      <editor_list>$EDITOR_LIST</editor_list>
+      <publication_year>2017</publication_year>
+      <keyword>$KEYWORD</keyword>
+      <description>$CITATION_DESCRIPTION</description>
+    </Citation_Information>
+    <Modification_History>
+      <Modification_Detail>
+        <modification_date>2016-12-15</modification_date>
+        <version_id>1.0</version_id>
+        <description>
+                    Preliminary version of PDS4 label for SIMBIO-SYS STC raw data
+                </description>
+      </Modification_Detail>
+    </Modification_History>
+  </Identification_Area>
+  <Observation_Area>
+    <Time_Coordinates>
+      <start_date_time>2021-07-09T14:50:01.226072Z</start_date_time>
+      <stop_date_time>2021-07-09T14:50:01.226072Z</stop_date_time>
+    </Time_Coordinates>
+    <Primary_Result_Summary>
+      <purpose>Science</purpose>
+      <processing_level>Raw</processing_level>
+      <description>
+                STC INSTRUMENT RAW DATA
+            </description>
+    </Primary_Result_Summary>
+    <!-- Mission -->
+    <Investigation_Area>
+      <name>BepiColombo</name>
+      <type>Mission</type>
+      <Internal_Reference>
+        <lid_reference>urn:esa:psa:bc:context:investigation.bc</lid_reference>
+        <reference_type>data_to_investigation</reference_type>
+      </Internal_Reference>
+    </Investigation_Area>
+    <Observing_System>
+      <name>BepiColombo MPO SIMBIO-SYS</name>
+      <!-- Instrument Host -->
+      <Observing_System_Component>
+        <name>Mercury Planetary Orbiter</name>
+        <type>Spacecraft</type>
+        <Internal_Reference>
+          <lid_reference>urn:esa:psa:context:instrument_host:spacecraft.mpo</lid_reference>
+          <reference_type>is_instrument_host</reference_type>
+        </Internal_Reference>
+      </Observing_System_Component>
+      <!-- Instrument -->
+      <Observing_System_Component>
+        <name>SIMBIO-SYS</name>
+        <type>Instrument</type>
+        <description>Spectrometers and Images for MPO BepiColombo Integrated Observatory System</description>
+        <Internal_Reference>
+          <lid_reference>urn:esa:psa:context:instrument:simbio-sys.mpo</lid_reference>
+          <reference_type>is_instrument</reference_type>
+        </Internal_Reference>
+      </Observing_System_Component>
+      <!-- Sub-Instrument
+         <Observing_System_Component>
+                <name>STC</name>
+                <type>Sub-Instrument</type>
+                <description> </description>
+                <Internal_Reference>
+                    <lid_reference>urn:esa:psa:context:instrument:simbio-sys.mpo</lid_reference>
+                    <reference_type>is_instrument</reference_type>
+                </Internal_Reference>
+            </Observing_System_Component>         Is it possible to ADD?      -->
+    </Observing_System>
+    <!-- Target -->
+    <Target_Identification>
+      <name>MERCURY</name>
+      <type>Planet</type>
+      <Internal_Reference>
+        <lid_reference>urn:nasa:pds:target.MERCURY</lid_reference>
+        <reference_type>data_to_target</reference_type>
+      </Internal_Reference>
+    </Target_Identification>
+    <geom:Surface_Geometry_Specific>
+      <geom:Footprint_Vertices>
+        <geom:Pixel_Intercept>
+          <geom:pixel_latitude/>
+          <geom:pixel_longitude/>
+          <geom:reference_pixel>
+            <geom:vertical_coordinate_pixel>1</geom:vertical_coordinate_pixel>
+            <geom:horizontal_coordinate_pixel>1</geom:horizontal_coordinate_pixel>
+          </geom:reference_pixel>
+        </geom:Pixel_Intercept>
+        <geom:Pixel_Intercept>
+          <geom:pixel_latitude/>
+          <geom:pixel_longitude/>
+          <geom:reference_pixel>
+            <geom:vertical_coordinate_pixel>1</geom:vertical_coordinate_pixel>
+            <geom:horizontal_coordinate_pixel>256</geom:horizontal_coordinate_pixel>
+          </geom:reference_pixel>
+        </geom:Pixel_Intercept>
+        <geom:Pixel_Intercept>
+          <geom:pixel_latitude/>
+          <geom:pixel_longitude/>
+          <geom:reference_pixel>
+            <geom:vertical_coordinate_pixel>256</geom:vertical_coordinate_pixel>
+            <geom:horizontal_coordinate_pixel>256</geom:horizontal_coordinate_pixel>
+          </geom:reference_pixel>
+        </geom:Pixel_Intercept>
+        <geom:Pixel_Intercept>
+          <geom:pixel_latitude/>
+          <geom:pixel_longitude/>
+          <geom:reference_pixel>
+            <geom:vertical_coordinate_pixel>256</geom:vertical_coordinate_pixel>
+            <geom:horizontal_coordinate_pixel>1</geom:horizontal_coordinate_pixel>
+          </geom:reference_pixel>
+        </geom:Pixel_Intercept>
+      </geom:Footprint_Vertices>
+      <geom:subspacecraft_latitude/>
+      <geom:subspacecraft_longitude/>
+      <geom:subsolar_latitude/>
+      <geom:subsolar_longitude/>
+    </geom:Surface_Geometry_Specific>
+    <geom:Illumination_Geometry>
+      <geom:Illumination_Min_Max>
+        <geom:minimum_emission_angle/>
+        <geom:maximum_emission_angle/>
+        <geom:minimum_incidence_angle/>
+        <geom:maximum_incidence_angle/>
+        <geom:minimum_phase_angle/>
+        <geom:maximum_phase_angle/>
+      </geom:Illumination_Min_Max>
+    </geom:Illumination_Geometry>
+    <geom:Distances>
+      <geom:Distances_Specific>
+        <geom:target_heliocentric_distance/>
+        <geom:spacecraft_target_center_distance/>
+      </geom:Distances_Specific>
+    </geom:Distances>
+    <!-- For VIHI could be necessary Discipline_area, for the wavelengths list and geomtery informations -->
+    <!-- =========================================================================================== -->
+    <!-- Mission Area                                                                                -->
+    <!-- =========================================================================================== -->
+    <Mission_Area>
+      <!-- =========================================================================================== -->
+      <!-- PSA & BepiColombo specific attributes                                                       -->
+      <!-- =========================================================================================== -->
+      <psa:Mission_Information>
+        <psa:spacecraft_clock_start_count>0/1.0</psa:spacecraft_clock_start_count>
+        <psa:spacecraft_clock_stop_count>0/2.0</psa:spacecraft_clock_stop_count>
+        <psa:mission_phase_name>Cruise</psa:mission_phase_name>
+        <psa:mission_phase_identifier>cruise</psa:mission_phase_identifier>
+        <psa:start_orbit_number>0</psa:start_orbit_number>
+        <psa:stop_orbit_number>0</psa:stop_orbit_number>
+      </psa:Mission_Information>
+      <psa:Sub-Instrument>
+        <psa:identifier>STC</psa:identifier>
+        <psa:name>Stereo Channel</psa:name>
+        <psa:type>Stereo Imaging Camera</psa:type>
+        <!-- Add Description?? -->
+      </psa:Sub-Instrument>
+      <img:Filter>
+        <img:sequence>
+          <img:filter_name>Panchromatic</img:filter_name>
+          <img:filter_id>P700</img:filter_id>
+          <img:center_filter_wavelength> </img:center_filter_wavelength>
+          <img:full_width_half_maximum> </img:full_width_half_maximum>
+          <img:comment> </img:comment>
+        </img:sequence>
+      </img:Filter>
+      <psa:Observation_Context>
+        <!-- Discussion needed to decide observation attributes required for SIMBIO-SYS -->
+        <psa:instrument_pointing_mode>Surface</psa:instrument_pointing_mode>
+        <psa:instrument_pointing_description>$POINTING_MODE</psa:instrument_pointing_description>
+        <psa:observation_identifier>$OBSERVATION_ID</psa:observation_identifier>
+      </psa:Observation_Context>
+      <psa:Processing_Context>
+        <!-- Discussion needed to decide processing context attributes applicable / required for SIMBIO-SYS -->
+        <psa:processing_software_title>sim-tm2raw</psa:processing_software_title>
+        <psa:processing_software_version>0.1</psa:processing_software_version>
+        <psa:Processing_Inputs>
+          <psa:Processing_Input_Identification>
+            <psa:type>telemetry</psa:type>
+            <psa:file_name>telemetry_input_file_name.xml</psa:file_name>
+          </psa:Processing_Input_Identification>
+        </psa:Processing_Inputs>
+      </psa:Processing_Context>
+      <!-- =========================================================================================== -->
+      <!-- SIMBIO-SYS specific attributes                                                              -->
+      <!-- =========================================================================================== -->
+      <!-- To be removed, see psa:Sub-Instrument attributes
+            <simbio:detector_id>VIHI</simbio:detector_id>
+            <simbio:detector_name>VISIBLE IR HYPERSPECTRAL IMAGER</simbio:detector_name>
+            -->
+      <!-- Need to add channel number and filter id -->
+      <!--   <img:Exposure_Duration unit="second">5</img:Exposure_Duration>-->
+      <simbio:STC>
+        <simbio:Integration_Time>0.00403200</simbio:Integration_Time>
+        <simbio:Repetition_Time>1</simbio:Repetition_Time>
+        <simbio:Windows_Read>5</simbio:Windows_Read>
+        <simbio:Window>
+          <simbio:Window_Number>1</simbio:Window_Number>
+          <simbio:Pixels>
+            <simbio:start_pixel>
+              <simbio:row>100</simbio:row>
+              <simbio:column>3</simbio:column>
+            </simbio:start_pixel>
+            <simbio:stop_pixel>
+              <simbio:row>163</simbio:row>
+              <simbio:column>4</simbio:column>
+            </simbio:stop_pixel>
+          </simbio:Pixels>
+          <simbio:Compression>
+            <simbio:Compression_Box>64x64</simbio:Compression_Box>
+            <simbio:Compression_Rate>63</simbio:Compression_Rate>
+          </simbio:Compression>
+        </simbio:Window>
+        <simbio:Window>
+          <simbio:Window_Number>1</simbio:Window_Number>
+        </simbio:Window>
+        <simbio:Test_Mode>No_Test_Mode</simbio:Test_Mode>
+        <!-- Possible Values: PE_Test_Mode, ME_STC_Test_Mode, No_Test_Mode -->
+        <simbio:Detector_Clock unit="MHz">5</simbio:Detector_Clock>
+        <simbio:STC_HK>
+          <simbio:TEC_Current unit="A">-0.823844</simbio:TEC_Current>
+          <simbio:PE_Voltage unit="V">3.223855</simbio:PE_Voltage>
+        </simbio:STC_HK>
+        <simbio:STC_General_Parameter>
+          <simbio:Channel_1_IFOV unit="deg">XXX</simbio:Channel_1_IFOV>
+          <simbio:Channel_2_IFOV unit="deg">XXX</simbio:Channel_2_IFOV>
+          <simbio:Channel_1_Focal_Lenght unit="m">XXX</simbio:Channel_1_Focal_Lenght>
+          <simbio:Channel_2_Focal_Lenght unit="m">XXX</simbio:Channel_2_Focal_Lenght>
+          <simbio:Channel_1_F_Number>XXX</simbio:Channel_1_F_Number>
+          <simbio:Channel_2_F_Number>XXX</simbio:Channel_2_F_Number>
+          <simbio:Detector>
+            <simbio:Description>XXX</simbio:Description>
+            <simbio:Pixel_Height unit="m">XXX</simbio:Pixel_Height>
+            <simbio:Pixel_Width unit="m">XXX</simbio:Pixel_Width>
+            <simbio:Type>XXX</simbio:Type>
+          </simbio:Detector>
+          <simbio:Filter_Available>XXX</simbio:Filter_Available>
+        </simbio:STC_General_Parameter>
+        <simbio:STC_Model>
+          <simbio:Vector_Center>
+            <simbio:Vector_Cartesian_Position_Base>
+              <simbio:x_position>XXX</simbio:x_position>
+              <simbio:y_position>XXX</simbio:y_position>
+              <simbio:z_position>XXX</simbio:z_position>
+            </simbio:Vector_Cartesian_Position_Base>
+          </simbio:Vector_Center>
+          <simbio:Vector_Axis>
+            <simbio:Vector_Cartesian_Unit>
+              <simbio:x_unit>XXX</simbio:x_unit>
+              <simbio:y_unit>XXX</simbio:y_unit>
+              <simbio:z_unit>XXX</simbio:z_unit>
+            </simbio:Vector_Cartesian_Unit>
+          </simbio:Vector_Axis>
+          <simbio:Vector_Horizontal>
+            <simbio:Vector_Cartesian_Pixel>
+              <simbio:x_pixel>XXX</simbio:x_pixel>
+              <simbio:y_pixel>XXX</simbio:y_pixel>
+              <simbio:z_pixel>XXX</simbio:z_pixel>
+            </simbio:Vector_Cartesian_Pixel>
+          </simbio:Vector_Horizontal>
+          <simbio:Vector_Vertical>
+            <simbio:Vector_Cartesian_Pixel>
+              <simbio:x_pixel>XXX</simbio:x_pixel>
+              <simbio:y_pixel>XXX</simbio:y_pixel>
+              <simbio:z_pixel>XXX</simbio:z_pixel>
+            </simbio:Vector_Cartesian_Pixel>
+          </simbio:Vector_Vertical>
+        </simbio:STC_Model>
+      </simbio:STC>
+      <img:Imaging_Instrument_Parameters>
+        <img:Device_Temperature>
+          <img:name>TemperatureFPA1</img:name>
+          <img:temperature_calibrated unit="K">247.733872</img:temperature_calibrated>
+        </img:Device_Temperature>
+        <img:Device_Temperature>
+          <img:name>TemperatureFPA2</img:name>
+          <img:temperature_calibrated unit="K">264.457290</img:temperature_calibrated>
+        </img:Device_Temperature>
+        <img:Device_Temperature>
+          <img:name>TemperaturePE</img:name>
+          <img:temperature_calibrated unit="K">315.090738</img:temperature_calibrated>
+        </img:Device_Temperature>
+        <img:Device_Temperature>
+          <img:name>TemperatureChannel1</img:name>
+          <img:temperature_calibrated unit="K">292.957072</img:temperature_calibrated>
+        </img:Device_Temperature>
+        <img:Device_Temperature>
+          <img:name>TemperatureChannel2</img:name>
+          <img:temperature_calibrated unit="K">299.117436</img:temperature_calibrated>
+        </img:Device_Temperature>
+        <img:Filter>
+          <img:sequence>
+            <img:filter_name>PAN</img:filter_name>
+            <img:filter_id>P700</img:filter_id>
+            <img:center_filter_wavelength> </img:center_filter_wavelength>
+            <img:full_width_half_maximum> </img:full_width_half_maximum>
+            <img:comment> </img:comment>
+          </img:sequence>
+        </img:Filter>
+      </img:Imaging_Instrument_Parameters>
+    </Mission_Area>
+  </Observation_Area>
+  <File_Area_Observational>
+    <!-- ============================================================== -->
+    <!-- File Information                                               -->
+    <!-- ============================================================== -->
+    <File>
+      <file_name>sim_img_stc_low_xxx_0_filterx_NNNNN_20210709T145001226072Z.dat</file_name>
+      <creation_date_time>2021-07-10</creation_date_time>
+      <file_size unit="byte">16384</file_size>
+      <records>2</records>
+      <md5_checksum>2c5b143a733749e5b673ed3a13918451</md5_checksum>
+    </File>
+    <!-- PDS4 definition for SIMBIO-SYS STC HK -->
+    <Array_2D_Image>
+      <local_identifier>STC_IMAGE</local_identifier>
+      <offset unit="byte">0</offset>
+      <axes>2</axes>
+      <axis_index_order>Last Index Fastest</axis_index_order>
+      <encoding_type>Binary</encoding_type>
+      <description>To be completed by instrument team</description>
+      <Element_Array>
+        <data_type>UnsignedMSB2</data_type>
+        <unit>not_applicable</unit>
+        <scaling_factor>0</scaling_factor>
+        <value_offset>0</value_offset>
+      </Element_Array>
+      <Axis_Array>
+        <axis_name>Line</axis_name>
+        <elements>50</elements>
+        <unit>not_applicable</unit>
+        <sequence_number>1</sequence_number>
+        <Band_Bin_Set/>
+      </Axis_Array>
+      <Axis_Array>
+        <axis_name>Sample</axis_name>
+        <elements>50</elements>
+        <unit>not_applicable</unit>
+        <sequence_number>2</sequence_number>
+        <Band_Bin_Set/>
+      </Axis_Array>
+      <Special_Constants>
+        <saturated_constant>saturated_constant0</saturated_constant>
+        <missing_constant>missing_constant0</missing_constant>
+        <error_constant>error_constant0</error_constant>
+        <invalid_constant>invalid_constant0</invalid_constant>
+        <unknown_constant>unknown_constant0</unknown_constant>
+        <not_applicable_constant>not_applicable_constant0</not_applicable_constant>
+      </Special_Constants>
+      <Object_Statistics>
+        <maximum>0</maximum>
+        <minimum>0</minimum>
+        <mean>0</mean>
+        <standard_deviation>50</standard_deviation>
+        <bit_mask>0</bit_mask>
+        <median>0</median>
+        <maximum_scaled_value>0</maximum_scaled_value>
+        <minimum_scaled_value>0</minimum_scaled_value>
+      </Object_Statistics>
+      <Display_2D_Image>
+        <line_display_direction>Down</line_display_direction>
+        <sample_display_direction>Right</sample_display_direction>
+      </Display_2D_Image>
+    </Array_2D_Image>
+  </File_Area_Observational>
+</Product_Observational>
