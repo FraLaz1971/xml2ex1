@@ -343,14 +343,14 @@
       </Element_Array>
       <Axis_Array>
         <axis_name>Line</axis_name>
-        <elements>50</elements>
+        <elements>64</elements>
         <unit>not_applicable</unit>
         <sequence_number>1</sequence_number>
         <Band_Bin_Set/>
       </Axis_Array>
       <Axis_Array>
         <axis_name>Sample</axis_name>
-        <elements>50</elements>
+        <elements>128</elements>
         <unit>not_applicable</unit>
         <sequence_number>2</sequence_number>
         <Band_Bin_Set/>

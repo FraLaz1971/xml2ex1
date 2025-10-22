@@ -9,14 +9,20 @@ LIBS=-lxml2 -lxslt
 PNG_LIBS=-lpng -lz
 RM=rm -rf
 .PHONY: all clean
-all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2 xmltm2ascii readraw readraw16
+all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2 xmltm2ascii readraw readraw16 sval xmlreader readlabel
 createxml: createxml.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 readxml: readxml.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
+xmlreader: xmlreader.c
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
+readlabel: readlabel.c
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 xmltm2ascii: xmltm2ascii.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 readxml2: readxml2.c
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
+sval: sval.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 testWriter: testWriter.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
@@ -31,4 +37,4 @@ readraw: readraw.c
 readraw16: readraw16.c
 	$(CC) $< -o $@
 clean:
-	$(RM) *.o readxml readxml2 createxml testWriter pngprog001 temp1 temp2 xmltm2ascii readraw readraw16
+	$(RM) *.o readxml readxml2 createxml testWriter pngprog001 temp1 temp2 xmltm2ascii readraw readraw16 sval xmlreader readlabel
