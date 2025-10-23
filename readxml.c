@@ -22,8 +22,7 @@
  *
  * Dump information about the current node
  */
-static void
-processNode(xmlTextReaderPtr reader) {
+static void processNode(xmlTextReaderPtr reader) {
     const xmlChar *name, *value;
 
     name = xmlTextReaderConstName(reader);

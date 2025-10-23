@@ -1,13 +1,40 @@
 #include <stdio.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
+/*
+ * typedef enum {
+    XML_ELEMENT_NODE=		1,
+    XML_ATTRIBUTE_NODE=		2,
+    XML_TEXT_NODE=		    3,
+    XML_CDATA_SECTION_NODE=	4,
+    XML_ENTITY_REF_NODE=	5,
+    XML_ENTITY_NODE=		6,
+    XML_PI_NODE=		    7,
+    XML_COMMENT_NODE=		8,
+    XML_DOCUMENT_NODE=		9,
+    XML_DOCUMENT_TYPE_NODE=	10,
+    XML_DOCUMENT_FRAG_NODE=	11,
+    XML_NOTATION_NODE=		12,
+    XML_HTML_DOCUMENT_NODE=	13,
+    XML_DTD_NODE=		    14,
+    XML_ELEMENT_DECL=		15,
+    XML_ATTRIBUTE_DECL=		16,
+    XML_ENTITY_DECL=		17,
+    XML_NAMESPACE_DECL=		18,
+    XML_XINCLUDE_START=		19,
+    XML_XINCLUDE_END=		20
+#ifdef LIBXML_DOCB_ENABLED
+   ,XML_DOCB_DOCUMENT_NODE=	21
+#endif
+} xmlElementType;
 
+ * */
 void process_node_with_all_attributes(xmlNode *node) {
     if (node == NULL || node->type != XML_ELEMENT_NODE) {
         return;
     }
 
-    printf("Processing attributes for node: %s\n", node->name);
+    printf("node: %s\n", node->name);
 
     // Iterate over regular attributes (non-namespace)
     xmlAttr *attribute;
@@ -36,9 +63,13 @@ void process_all_nodes(xmlNode *a_node) {
     xmlNode *cur_node = NULL;
 
     for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
+		 
+         printf("node type: %d content: %s ",cur_node->type,cur_node->content);
         if (cur_node->type == XML_ELEMENT_NODE) {
             process_node_with_all_attributes(cur_node);
-        }
+        } else if (cur_node->type == XML_TEXT_NODE) {
+			printf("text ");
+		}
         // Recursively process children
         process_all_nodes(cur_node->children);
     }
@@ -63,7 +94,7 @@ int main(int argc, char** argv) {
         fprintf(stderr, "Error: unable to parse XML file %s\n", filename);
         return 1;
     }
-
+	// xmlParserCtxtPtr xp=xmlNewParserCtxt();
     // Get the root element
     root_element = xmlDocGetRootElement(doc);
     if (root_element == NULL) {

@@ -9,8 +9,10 @@ LIBS=-lxml2 -lxslt
 PNG_LIBS=-lpng -lz
 RM=rm -rf
 .PHONY: all clean
-all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2 xmltm2ascii readraw readraw16 sval xmlreader readlabel
+all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2 xmltm2ascii readraw readraw16 sval xmlreader readlabel createlabel
 createxml: createxml.c
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
+createlabel: createlabel.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 readxml: readxml.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
@@ -37,4 +39,4 @@ readraw: readraw.c
 readraw16: readraw16.c
 	$(CC) $< -o $@
 clean:
-	$(RM) *.o readxml readxml2 createxml testWriter pngprog001 temp1 temp2 xmltm2ascii readraw readraw16 sval xmlreader readlabel
+	$(RM) *.o readxml readxml2 createxml testWriter pngprog001 temp1 temp2 xmltm2ascii readraw readraw16 sval xmlreader readlabel createlabel

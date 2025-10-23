@@ -57,18 +57,8 @@ int main(int argc, char **argv) {
 				puts("");
 			xmlNodePtr node = xmlTextReaderCurrentNode(reader);
 			xmlAttr* attribute = node->properties;
-			/*while(attribute)
-			{
-				xmlChar* value2 = xmlNodeListGetString(node->doc, attribute->children, 1);
-				//do something with value
-				printf("attribute value = %s\n",value2);
-				xmlFree(value2); 
-				attribute = attribute->next;
-			}*/
-			process_attributes(node);
+				process_attributes(node);
 			}
-			//val=xmlTextReaderGetAttributeNs(reader,localName,namespaceURI);
-			//printf("%s %s %s \n",val,localName,namespaceURI);
 			if(xmlTextReaderHasValue(reader)){
                 const xmlChar *value = xmlTextReaderValue(reader);
                 printf("Value: %s\n", value);
@@ -79,6 +69,8 @@ int main(int argc, char **argv) {
             } else if (nodeType == XML_READER_TYPE_TEXT) {
                 const xmlChar *value = xmlTextReaderValue(reader);
                 printf("Text: %s\n", value);
+            } else if (nodeType == XML_READER_TYPE_SIGNIFICANT_WHITESPACE) {
+                printf("significant white space\n");
             }
 
             // Move to the next node
@@ -100,11 +92,11 @@ int main(int argc, char **argv) {
 }
 
 void process_attributes(xmlNode *node) {
-if (node == NULL || node->type != XML_ELEMENT_NODE) {
+    if (node == NULL || node->type != XML_ELEMENT_NODE) {
         return;
     }
 
-    printf("Processing attributes for node: %s\n", node->name);
+    printf("node: %s\n", node->name);
 
     // Iterate over regular attributes (non-namespace)
     xmlAttr *attribute;
