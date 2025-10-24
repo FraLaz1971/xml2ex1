@@ -13,7 +13,7 @@ all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2 xmltm2ascii re
 createxml: createxml.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 createlabel: createlabel.c
-	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
+	$(CC) -g -O2 $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 readxml: readxml.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 xmlreader: xmlreader.c
