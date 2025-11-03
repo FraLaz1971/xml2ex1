@@ -102,8 +102,8 @@ struct PRODUCT_OBSERVATIONAL {
 
 struct PDS {
 	int version;
-	char *xmlintest;
-	char *xml_model;
+	char xmlintest[MAXFNAML];
+	char xml_model[MAXFNAML];
 	char ifname[MAXFNAML];
 	char ofname[MAXFNAML];
 	char **pfnames; /* names of the product files referred by the label*/
