@@ -2,11 +2,17 @@
 ###
 Example programs using the libxml2 c library. Contains also programs using the libpng library.
 ###
-- createxml.c
+- createxml.c ---> simple program that dump a xml file on the stdout, useful to be modified for real applications.
 - pngprog001.c ---> reads a png image and creates another png image
-- readxml.c
-- readxml2.c
+- readxml.c ---> reads an xml file and prints nodes/elements/attributes/namespaces
+- readxml2.c ---> same as readxml.c but validate also
 - temp1.c
 - temp2.c ---> create binary array files
 - testWriter.c
 - xmltm2ascii.c
+- createlabel.c ---> create a xml PDS4 label for the MESSENGER global TDM
+- readraw.c
+- readraw16.c
+- readxml.c
+- testWriter.c
+- xmltm2ascii.c ---> saves xml file telemetry packets data in ascii hex dump (each row is a packet)

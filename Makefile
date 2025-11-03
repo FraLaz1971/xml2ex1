@@ -1,4 +1,4 @@
-CC=gcc
+CC=gcc -g -O2
 LD=gcc
 XML2_HOME=/usr
 CFLAGS=-I$(XML2_HOME)/include/libxml2 -I$(XML2_HOME)/include/libxslt
@@ -9,11 +9,16 @@ LIBS=-lxml2 -lxslt
 PNG_LIBS=-lpng -lz
 RM=rm -rf
 .PHONY: all clean
-all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2 xmltm2ascii readraw readraw16 parse1 parse2 sval createlabel write_png read_png
+#all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2 xmltm2ascii readraw readraw16 parse1 parse2 sval createlabel write_png read_png
+all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2 xmltm2ascii readraw readraw16  sval createlabel write_png read_png
+pds.o: pds.c
+	$(CC) -c $(CFLAGS) $< -o $@
 createxml: createxml.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 createlabel: createlabel.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
+archivepds: archivepds.c pds.o
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
 readxml: readxml.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 readxml2: readxml2.c

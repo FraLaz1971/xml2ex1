@@ -22,7 +22,6 @@ int main(int argc, char **argv)
     LIBXML_TEST_VERSION;
 
 	doc = xmlNewDoc(BAD_CAST "1.0");
-/*	writer = xmlNewTextWriterDoc(&doc, 0); */
     root_node = xmlNewNode(NULL, BAD_CAST "Product_Observational");    
     xmlDocSetRootElement(doc, root_node);
     attribute = root_node->properties;
