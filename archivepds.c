@@ -7,11 +7,11 @@
 #include "pds.h"
 
 int main(int argc, char **argv)
-{	
+{
 	int status=0;
     xmlDocPtr doc = NULL;       /* document pointer */
     xmlNodePtr root_node = NULL, node = NULL, node1 = NULL, pi=NULL;/* node pointers */
-	xmlNodePtr p1 = NULL; /* node pointers */
+    xmlNodePtr p1 = NULL; /* node pointers */
     xmlDtdPtr dtd = NULL;       /* DTD pointer */
     xmlAttr *attribute = NULL;
     xmlAttrPtr attr = NULL;
@@ -42,59 +42,37 @@ int main(int argc, char **argv)
 	/* setup data structures and links */
 	timecoord.tstart=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
 	timecoord.tstop=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
-	timecoord.tstart->name=(char*)malloc(MAXFNAML);
-	timecoord.tstart->value=(char*)malloc(32);
-	timecoord.tstop->name=(char*)malloc(MAXFNAML);
-	timecoord.tstop->value=(char*)malloc(32);
 	prodfnam=(char **)malloc(pds.numproducts*sizeof(char *));
 	pds.products=(FILE**)malloc(pds.numproducts*sizeof(FILE *));
 	for(i=0;i<pds.numproducts;i++){
 		prodfnam[i]=(char *)malloc(MAXFNAML);
-		pds.products[i] = (FILE*)malloc(sizeof(FILE));
+		pds.products[i] = (FILE*)malloc(2048);
 		if(argv[i+2]!=NULL){
-			strcpy(prodfnam[i],argv[i+2]);
+			strcpy((char*)prodfnam[i],argv[i+2]);
 		} else {
 			perror("ERROR: filename lacking, exiting");
 			exit(1);
 		}
 	}
-	po.value=NULL;
 	pds.pfnames=prodfnam;
-	pds.xmlintest=(char *)malloc(MAXFNAML);strcpy(pds.xmlintest,"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
-	pds.xml_model=(char *)malloc(MAXFNAML);strcpy(pds.xml_model,"href=\"https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1K00.sch\" \n schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
-	po.name=(char *)malloc(MAXFNAML); strcpy(po.name,"Product_Observational");
-	po.value=NULL;
-	ia.name=(char *)malloc(MAXFNAML); strcpy(ia.name,"Identification_Area");
-	ia.value=NULL;
-	oa.name=(char *)malloc(MAXFNAML); strcpy(oa.name,"Observation_Area");
-	oa.value=NULL;
-	fao.name=(char *)malloc(MAXFNAML); strcpy(fao.name,"File_Area_Observational");
-	fao.value=NULL;
+	pds.xmlintest=(char *)malloc(MAXFNAML);strcpy((char*)pds.xmlintest,"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
+	pds.xml_model=(char *)malloc(MAXFNAML);strcpy((char*)pds.xml_model,"href=\"https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1K00.sch\" \n schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
+	strcpy((char*)ia.name,"Identification_Area");
+	strcpy((char*)oa.name,"Observation_Area");
+	strcpy((char*)fao.name,"File_Area_Observational");
 	po.ia=&ia; po.oa=&oa; po.fao=&fao; pds.po=&po;
 	lp=stdout;
-	logical_identifier.name=(char *)malloc(MAXFNAML);
-	logical_identifier.value=(char *)malloc(MAXFNAML);
-	version_id.name=(char *)malloc(MAXFNAML);
-	version_id.value=(char *)malloc(MAXFNAML);
-	title.name=(char *)malloc(MAXFNAML);
-	title.value=(char *)malloc(MAXFNAML);
-	information_model_version.name=(char *)malloc(MAXFNAML);
-	information_model_version.value=(char *)malloc(MAXFNAML);
-	product_class.name=(char *)malloc(MAXFNAML);
-	product_class.value=(char *)malloc(MAXFNAML);
-	modification_history.name=(char *)malloc(MAXFNAML);
-	modification_history.value=NULL;
-	strcpy(logical_identifier.name,"logical_identifier");
-	strcpy(logical_identifier.value,"urn:nasa:pds:data:mess-h-mdis-5-dem-elevation-v1.0:msgr_dem_usg_sc_j_v02");
-	strcpy(version_id.name,"version_id");
-	strcpy(version_id.value,"1.0");
-	strcpy(title.name,"title");
-	strcpy(title.value,"mess-h-mdis-5-dem-elevation-v1.0 msgr_dem_usg_sc_j_v02");
-	strcpy(information_model_version.name,"information_model_version");
-	strcpy(information_model_version.value,"1.20.0.0");
-	strcpy(product_class.name,"product_class");
-	strcpy(product_class.value,"Product_Observational");
-	strcpy(modification_history.name,"Modification_History");
+	strcpy((char*)logical_identifier.name,"logical_identifier");
+	strcpy((char*)logical_identifier.value,"urn:nasa:pds:data:mess-h-mdis-5-dem-elevation-v1.0:msgr_dem_usg_sc_j_v02");
+	strcpy((char*)version_id.name,"version_id");
+	strcpy((char*)version_id.value,"1.0");
+	strcpy((char*)title.name,"title");
+	strcpy((char*)title.value,"mess-h-mdis-5-dem-elevation-v1.0 msgr_dem_usg_sc_j_v02");
+	strcpy((char*)information_model_version.name,"information_model_version");
+	strcpy((char*)information_model_version.value,"1.20.0.0");
+	strcpy((char*)product_class.name,"product_class");
+	strcpy((char*)product_class.value,"Product_Observational");
+	strcpy((char*)modification_history.name,"Modification_History");
 	po.ia->leaves=(struct ELEMENT **)malloc(6*sizeof(struct ELEMENT*));
 	for(i=0;i<6;i++)
 		po.ia->leaves[i]=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
@@ -104,46 +82,38 @@ int main(int argc, char **argv)
 	po.ia->leaves[3] = &information_model_version;
 	po.ia->leaves[4] = &product_class;
 	po.ia->leaves[5] = &modification_history;
-	strcpy(timecoord.tstart->name,"start_date_time");
-	strcpy(timecoord.tstart->value,"2011-03-18T00:00:00Z");
-	strcpy(timecoord.tstop->name,"stop_date_time");
-	strcpy(timecoord.tstop->value,"2014-11-01T00:00:00Z");
+	strcpy((char*)timecoord.tstart->name,"start_date_time");
+	strcpy((char*)timecoord.tstart->value,"]2011-03-18T00:00:00Z");
+	strcpy((char*)timecoord.tstop->name,"stop_date_time");
+	strcpy((char*)timecoord.tstop->value,"2014-11-01T00:00:00Z");
 	oa.times=&timecoord;
 	oa.leaves=(struct ELEMENT **)malloc(1*sizeof(struct ELEMENT*));
-	observing_system.name=(char*)malloc(MAXFNAML);strcpy(observing_system.name,"Observing_System");
-	observing_system.value=NULL;
 	for(i=0;i<1;i++)
 		oa.leaves[i]=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
 	oa.leaves[0]=&observing_system;
 	observing_system.osc=(struct OBSERVING_SYSTEM_COMPONENT**)malloc(2*sizeof(struct OBSERVING_SYSTEM_COMPONENT*));
 	for(i=0;i<2;i++){
 		observing_system.osc[i]=(struct OBSERVING_SYSTEM_COMPONENT*)malloc(sizeof(struct OBSERVING_SYSTEM_COMPONENT));
-		observing_system.osc[i]->ename=(char *)malloc(MAXFNAML);
-		observing_system.osc[i]->value=(char *)malloc(MAXFNAML);
 		observing_system.osc[i]->name=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
 		observing_system.osc[i]->type=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
-		observing_system.osc[i]->name->name=(char *)malloc(MAXFNAML);
-		observing_system.osc[i]->name->value=(char *)malloc(MAXFNAML);
-		observing_system.osc[i]->type->name=(char *)malloc(MAXFNAML);
-		observing_system.osc[i]->type->value=(char *)malloc(MAXFNAML);
 	}
-	strcpy(observing_system.osc[0]->name->name,"name");
-	strcpy(observing_system.osc[0]->name->value,"messenger");
-	strcpy(observing_system.osc[0]->type->name,"type");
-	strcpy(observing_system.osc[0]->type->value,"Spacecraft");
-	strcpy(observing_system.osc[1]->name->name,"name");
-	strcpy(observing_system.osc[1]->name->value,"mercury dual imaging system narrow angle camera");
-	strcpy(observing_system.osc[1]->type->name,"type");
-	strcpy(observing_system.osc[1]->type->value,"Instrument");
+	strcpy((char*)observing_system.osc[0]->name->name,"name");
+	strcpy((char*)observing_system.osc[0]->name->value,"messenger");
+	strcpy((char*)observing_system.osc[0]->type->name,"type");
+	strcpy((char*)observing_system.osc[0]->type->value,"Spacecraft");
+	strcpy((char*)observing_system.osc[1]->name->name,"name");
+	strcpy((char*)observing_system.osc[1]->name->value,"mercury dual imaging system narrow angle camera");
+	strcpy((char*)observing_system.osc[1]->type->name,"type");
+	strcpy((char*)observing_system.osc[1]->type->value,"Instrument");
 	oa.target=(struct TARGET_IDENTIFICATION*)malloc(sizeof(struct TARGET_IDENTIFICATION));
 /*	oa.target[0].name->name=(char *)malloc(MAXFNAML);
 	oa.target[0].name->value=(char *)malloc(MAXFNAML);
 	oa.target[0].type->name=(char *)malloc(MAXFNAML);
 	oa.target[0].type->value=(char *)malloc(MAXFNAML);
-	strcpy(oa.target[0].name->name,"name");
-	strcpy(oa.target[0].name->value,"mercury");
-	strcpy(oa.target[0].type->name,"type");
-	strcpy(oa.target[0].type->value,"Planet");*/
+	strcpy((char*)oa.target[0].name->name,char[MAXFNAML]name");
+	strcpy((char*)oa.target[0].name->value,char[MAXFNAML]mercury");
+	strcpy((char*)oa.target[0].type->name,char[MAXFNAML]type");
+	strcpy((char*)oa.target[0].type->value,char[MAXFNAML]Planet");*/
 	if (init_pds(lp,&pds, prodfnam)) perror("error in initing pds product archiving"); 
     LIBXML_TEST_VERSION;
 
@@ -200,7 +170,7 @@ int main(int argc, char **argv)
 	//p1=p1->parent;
 	//p1 = xmlNewChild(p1, NULL, BAD_CAST "Array_2D_Image", BAD_CAST NULL);
 	//p1 = xmlNewChild(p1, NULL, BAD_CAST "offset", BAD_CAST "0");
-	//attr = xmlSetProp(p1, "unit","byte");
+	//attr = xmlSetProp(p1, "unit",char[MAXFNAML]byte");
 	//p1=p1->parent;
 	//xmlNewChild(p1, NULL, BAD_CAST "axes", BAD_CAST "2");
 	//xmlNewChild(p1, NULL, BAD_CAST "axis_indes_order", BAD_CAST "Last Index Fastest");
@@ -232,29 +202,7 @@ int main(int argc, char **argv)
 		free(prodfnam[i]);
 		free(pds.products[i]);
 	}
-	free(po.name);
-	free(ia.name);
-	free(oa.name);
 	free(oa.target);
-	free(fao.name);
-	free(logical_identifier.value);
-	free(observing_system.name);
-	free(timecoord.tstart);
-	free(timecoord.tstop);
-	free(logical_identifier.name);
-	free(version_id.name);
-	free(version_id.value);
-	free(title.name);
-	free(title.value);
-	free(information_model_version.name);
-	free(information_model_version.value);
-	free(product_class.name);
-	free(product_class.value);
-	free(modification_history.name);
-	free(timecoord.tstart->name);
-	free(timecoord.tstart->value);
-	free(timecoord.tstop->name);
-	free(timecoord.tstop->value);
 	free(timecoord.tstart);
 	free(timecoord.tstop);
 	free(oa.leaves[0]);
@@ -263,8 +211,6 @@ int main(int argc, char **argv)
 		free(po.ia->leaves[i]);
 	free(po.ia->leaves);
 	for(i=0;i<2;i++){
-		free(observing_system.osc[i]->ename);
-		free(observing_system.osc[i]->value);
 		free(observing_system.osc[i]->name);
 		free(observing_system.osc[i]->type);
 		free(observing_system.osc[i]);

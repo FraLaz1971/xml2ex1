@@ -3,18 +3,18 @@
 #include <libxml/parser.h>
 #include <libxml/xmlwriter.h>
 #include <libxml/tree.h>
-#define MAXFNAML 256 /* maximum file name allowed (conventional) may include path */
+#define MAXFNAML 256 /* maximum file name[MAXFNAML] allowed (conventional) may include path */
 struct ATTRIBUTE {
-	char * name;
-	char * value;
+	char * name[MAXFNAML];
+	char * value[MAXFNAML];
 };
 
 struct ELEMENT {
 	struct ELEMENT *parent;
 	struct ATTRIBUTE *attributes;
 	int nattr; /* number of attributes */
-	char * name;
-	char *value;
+	char name[MAXFNAML];
+	char value[MAXFNAML][MAXFNAML];
 	struct OBSERVING_SYSTEM_COMPONENT **osc;
 	struct ELEMENT **leaves;
 	int nleaves; /* number of leaves */
@@ -22,21 +22,21 @@ struct ELEMENT {
 	struct ELEMENT *succ;
 };
 struct TIME_COORDINATES {
-	char * name;
-	char *value;
+	char name[MAXFNAML];
+	char value[MAXFNAML];
 	struct ELEMENT *tstart;
 	struct ELEMENT *tstop;
 };
 struct INTERNAL_REFERENCE{
-	char * name;
-	char *value;
+	char name[MAXFNAML];
+	char value[MAXFNAML];
 	struct ELEMENT *lid_reference;
 	struct ELEMENT *reference_type;
 };
 struct INVESTIGATION_AREA {
-	char * ename;
-	char *value;
-	struct ELEMENT *name;
+	char ename[MAXFNAML];
+	char value[MAXFNAML];
+	struct ELEMENT *name[MAXFNAML];
 	struct ELEMENT *type;
 	struct INTERNAL_REFERENCE *iref;
 };
@@ -44,22 +44,22 @@ struct IDENTIFICATION_AREA {
 	struct PRODUCT_OBSERVATIONAL *parent;
 	struct ATTRIBUTE *attributes;
 	int nattr; /* number of attributes */
-	char * name;
-	char *value;
+	char name[MAXFNAML];
+	char value[MAXFNAML];
 	struct ELEMENT **leaves;
 	int nleaves; /* number of leaves */
 	struct ELEMENT *prev;
 	struct ELEMENT *succ;
 };
 struct TARGET_IDENTIFICATION{
-	char * ename;
-	char *value;
+	char ename[MAXFNAML];
+	char value[MAXFNAML];
 	struct ELEMENT *name;
 	struct ELEMENT *type;
 };
 struct OBSERVING_SYSTEM_COMPONENT{
-	char * ename;
-	char *value;
+	char ename[MAXFNAML];
+	char value[MAXFNAML];
 	struct ELEMENT *name;
 	struct ELEMENT *type;
 };
@@ -67,8 +67,8 @@ struct OBSERVATION_AREA {
 	struct PRODUCT_OBSERVATIONAL *parent;
 	struct ATTRIBUTE *attributes;
 	int nattr; /* number of attributes */
-	char * name;
-	char *value;
+	char name[MAXFNAML];
+	char value[MAXFNAML];
 	struct TIME_COORDINATES *times;
 	struct INVESTIGATION_AREA *investa;
 	struct TARGET_IDENTIFICATION *target;
@@ -82,8 +82,8 @@ struct FILE_AREA_OBSERVATIONAL {
 	struct PRODUCT_OBSERVATIONAL *parent;
 	struct ATTRIBUTE *attributes;
 	int nattr; /* number of attributes */
-	char * name;
-	char *value;
+	char name[MAXFNAML];
+	char value[MAXFNAML];
 	struct ELEMENT **leaves;
 	int nleaves; /* number of leaves */
 	struct ELEMENT *prev;
@@ -96,16 +96,16 @@ struct PRODUCT_OBSERVATIONAL {
 	struct OBSERVATION_AREA *oa;
 	struct FILE_AREA_OBSERVATIONAL *fao;
 	struct ELEMENT ** oleaves; /* other elements, in case */
-	char * name;
-	char *value;
+	char name[MAXFNAML];
+	char value[MAXFNAML];
 };
 
 struct PDS {
 	int version;
 	char *xmlintest;
 	char *xml_model;
-	char *ifname;
-	char *ofname;
+	char ifname[MAXFNAML];
+	char ofname[MAXFNAML];
 	char **pfnames; /* names of the product files referred by the label*/
 	FILE **products; /* product files pointed by the pds label */
 	int numproducts;

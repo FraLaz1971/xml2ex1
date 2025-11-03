@@ -1,4 +1,4 @@
-CC=gcc
+CC=gcc -g -O2
 LD=gcc
 XML2_HOME=/data/data/com.termux/files/usr
 CFLAGS=-I$(XML2_HOME)/include/libxml2 -I$(XML2_HOME)/include/libxslt
@@ -9,11 +9,15 @@ LIBS=-lxml2 -lxslt
 PNG_LIBS=-lpng -lz
 RM=rm -rf
 .PHONY: all clean
-all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2 xmltm2ascii readraw readraw16 parse1 parse2 sval createlabel write_png read_png write_gs_png read_gs_png
+all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2 xmltm2ascii readraw readraw16 parse1 parse2 sval createlabel write_png read_png write_gs_png read_gs_png archivepds
+pds.o: pds.c
+	$(CC) -c $(CFLAGS) $<
 createxml: createxml.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 createlabel: createlabel.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
+archivepds: archivepds.c pds.o
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
 readxml: readxml.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 readxml2: readxml2.c
@@ -47,5 +51,5 @@ readraw: readraw.c
 readraw16: readraw16.c
 	$(CC) $< -o $@
 clean:
-	$(RM) *.o readxml readxml2 createxml testWriter pngprog001 temp1 temp2 xmltm2ascii readraw readraw16 parse1 parse2 sval createlabel write_png read_png write_gs_png read_gs_png
+	$(RM) *.o readxml readxml2 createxml testWriter pngprog001 temp1 temp2 xmltm2ascii readraw readraw16 parse1 parse2 sval createlabel write_png read_png write_gs_png read_gs_png archivepds
 
