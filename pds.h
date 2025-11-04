@@ -5,7 +5,6 @@
 #include <libxml/tree.h>
 #define MAXFNAML 256 /* maximum file name[MAXFNAML] allowed (conventional) may include path */
 #define MAXLEAV 10
-int verbose = 0;
 struct ATTRIBUTE {
 	char name[MAXFNAML];
 	char value[MAXFNAML];
