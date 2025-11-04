@@ -5,9 +5,17 @@
 #include <libxml/tree.h>
 #define MAXFNAML 256 /* maximum file name[MAXFNAML] allowed (conventional) may include path */
 #define MAXLEAV 10
+int verbose = 0;
 struct ATTRIBUTE {
 	char name[MAXFNAML];
 	char value[MAXFNAML];
+};
+
+struct OBSERVING_SYSTEM_COMPONENT{
+	char ename[MAXFNAML];
+	char value[MAXFNAML];
+	struct ELEMENT *name;
+	struct ELEMENT *type;
 };
 
 struct ELEMENT {
@@ -16,7 +24,7 @@ struct ELEMENT {
 	int nattr; /* number of attributes */
 	char name[MAXFNAML];
 	char value[MAXFNAML];
-	struct OBSERVING_SYSTEM_COMPONENT *osc;
+	struct OBSERVING_SYSTEM_COMPONENT osc[MAXLEAV];
 	struct ELEMENT *leaves;
 	int nleaves; /* number of leaves */
 	struct ELEMENT *prev;
@@ -59,12 +67,6 @@ struct IDENTIFICATION_AREA {
 	struct ELEMENT *succ;
 };
 struct TARGET_IDENTIFICATION{
-	char ename[MAXFNAML];
-	char value[MAXFNAML];
-	struct ELEMENT name;
-	struct ELEMENT type;
-};
-struct OBSERVING_SYSTEM_COMPONENT{
 	char ename[MAXFNAML];
 	char value[MAXFNAML];
 	struct ELEMENT name;
