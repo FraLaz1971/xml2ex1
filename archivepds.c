@@ -20,7 +20,7 @@ int main(int argc, char **argv)
     xmlChar *attr_name;
     xmlChar * attr_value;
     char buff[256];
-    int i, j, res;
+    int i, j, res, numproducts;
 	struct PDS pds; struct PRODUCT_OBSERVATIONAL po; struct IDENTIFICATION_AREA ia;
 	struct OBSERVATION_AREA oa; struct FILE_AREA_OBSERVATIONAL fao;
 	struct ELEMENT logical_identifier;
@@ -31,6 +31,10 @@ int main(int argc, char **argv)
 	struct ELEMENT modification_history;
 	struct ELEMENT observing_system;
 	struct TIME_COORDINATES timecoord;
+	struct INTERNAL_REFERENCE iref;
+	struct INVESTIGATION_AREA iaa;
+	struct ARRAY_2D_IMAGE array2d;
+
 	FILE *lp; /* pds4 label file handler */
 	char **prodfnam;
 	if(argc<3){
@@ -38,14 +42,47 @@ int main(int argc, char **argv)
 		fprintf(stderr,"e.g: %s 1 image.raw \n",argv[0]);
 		return 1;
 	}
-	pds.numproducts = atoi(argv[1]); /* number of products pointed by the label */
+	numproducts = atoi(argv[1]); /* number of products pointed by the label */
 	/* setup data structures and links */
-	timecoord.tstart=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
-	timecoord.tstop=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
-	prodfnam=(char **)malloc(pds.numproducts*sizeof(char *));
-	pds.products=(FILE**)malloc(pds.numproducts*sizeof(FILE *));
-	for(i=0;i<pds.numproducts;i++){
+	po.ia=&ia; po.oa=&oa; po.fao=&fao; pds.po=&po;
+	prodfnam=(char **)malloc(numproducts*sizeof(char *));
+	for(i=0;i<numproducts;i++)
 		prodfnam[i]=(char *)malloc(MAXFNAML);
+	po.attributes=(struct ATTRIBUTE *)malloc(sizeof(struct ATTRIBUTE));
+	po.ia->leaves=(struct ELEMENT **)malloc(6*sizeof(struct ELEMENT*));
+	for(i=0;i<6;i++)
+		po.ia->leaves[i]=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	oa.leaves=(struct ELEMENT **)malloc(sizeof(struct ELEMENT *));
+	for(i=0;i<1;i++)
+		oa.leaves[i]=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	modification_history.leaves=(struct ELEMENT **)malloc(sizeof(struct ELEMENT*));
+	modification_history.leaves[0]=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	modification_history.leaves[0]->leaves=(struct ELEMENT **)malloc(sizeof(struct ELEMENT*));
+	for(i=0;i<3;i++)
+		modification_history.leaves[0]->leaves[i]=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	strcpy((char *)oa.leaves[0]->name,"Observing System");
+	pds.products=(FILE**)malloc(numproducts*sizeof(FILE *)); 
+	oa.target=(struct TARGET_IDENTIFICATION*)malloc(sizeof(struct TARGET_IDENTIFICATION));
+	observing_system.osc=(struct OBSERVING_SYSTEM_COMPONENT*)malloc(2*sizeof(struct OBSERVING_SYSTEM_COMPONENT));
+	pds.po->fao->leaves=(struct ELEMENT **)malloc(sizeof(struct ELEMENT*));
+	pds.po->fao->leaves[0]=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	pds.po->fao->leaves[0]->leaves=(struct ELEMENT **)malloc(2*sizeof(struct ELEMENT*));
+	pds.po->fao->leaves[0]->leaves[0]=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	pds.po->fao->leaves[0]->leaves[1]=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	array2d.leaves=(struct ELEMENT **)malloc(6*sizeof(struct ELEMENT*));
+	for(i=0;i<6;i++)
+		array2d.leaves[i]=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	array2d.leaves[0]->attributes=(struct ATTRIBUTE *)malloc(sizeof(struct ATTRIBUTE));	
+	array2d.leaves[3]->leaves=(struct ELEMENT **)malloc(4*sizeof(struct ELEMENT*));
+	array2d.leaves[3]->leaves[0]=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	array2d.leaves[4]->leaves=(struct ELEMENT **)malloc(3*sizeof(struct ELEMENT*));
+	for(i=0;i<3;i++)
+		array2d.leaves[4]->leaves[i]=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	array2d.leaves[5]->leaves=(struct ELEMENT **)malloc(3*sizeof(struct ELEMENT*));
+	for(i=0;i<3;i++)
+		array2d.leaves[5]->leaves[i]=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	fprintf(stderr,"main() numproducts = %d\n",numproducts);
+	for(i=0;i<numproducts;i++){
 		pds.products[i] = (FILE*)malloc(2048);
 		if(argv[i+2]!=NULL){
 			strcpy((char*)prodfnam[i],argv[i+2]);
@@ -54,14 +91,12 @@ int main(int argc, char **argv)
 			exit(1);
 		}
 	}
-	pds.pfnames=prodfnam;
 	strcpy((char*)pds.xmlintest,"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
 	strcpy((char*)pds.xml_model,"href=\"https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1K00.sch\" \n schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
+	strcpy((char*)po.name,"Product_Observational");
 	strcpy((char*)ia.name,"Identification_Area");
 	strcpy((char*)oa.name,"Observation_Area");
 	strcpy((char*)fao.name,"File_Area_Observational");
-	po.ia=&ia; po.oa=&oa; po.fao=&fao; pds.po=&po;
-	lp=stdout;
 	strcpy((char*)logical_identifier.name,"logical_identifier");
 	strcpy((char*)logical_identifier.value,"urn:nasa:pds:data:mess-h-mdis-5-dem-elevation-v1.0:msgr_dem_usg_sc_j_v02");
 	strcpy((char*)version_id.name,"version_id");
@@ -73,46 +108,83 @@ int main(int argc, char **argv)
 	strcpy((char*)product_class.name,"product_class");
 	strcpy((char*)product_class.value,"Product_Observational");
 	strcpy((char*)modification_history.name,"Modification_History");
-	po.ia->leaves=(struct ELEMENT **)malloc(6*sizeof(struct ELEMENT*));
-	for(i=0;i<6;i++)
-		po.ia->leaves[i]=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	strcpy((char*)modification_history.leaves[0]->name,"Modification_Detail");
+	strcpy((char*)modification_history.leaves[0]->leaves[0]->name,"modification_date");
+	strcpy((char*)modification_history.leaves[0]->leaves[0]->value,"2025-10-20");
+	strcpy((char*)modification_history.leaves[0]->leaves[1]->name,"version_id");
+	strcpy((char*)modification_history.leaves[0]->leaves[1]->value,"1.0");
+	strcpy((char*)modification_history.leaves[0]->leaves[2]->name,"description");
+	strcpy((char*)modification_history.leaves[0]->leaves[2]->value,"PDS4 product label generated by SETM libraries");
 	po.ia->leaves[0] = &logical_identifier;
 	po.ia->leaves[1] = &version_id;
 	po.ia->leaves[2] = &title;
 	po.ia->leaves[3] = &information_model_version;
 	po.ia->leaves[4] = &product_class;
 	po.ia->leaves[5] = &modification_history;
-	strcpy((char*)timecoord.tstart->name,"start_date_time");
-	strcpy((char*)timecoord.tstart->value,"]2011-03-18T00:00:00Z");
-	strcpy((char*)timecoord.tstop->name,"stop_date_time");
-	strcpy((char*)timecoord.tstop->value,"2014-11-01T00:00:00Z");
+	strcpy((char*)timecoord.name,"Time_Coordinates");
+	strcpy((char*)timecoord.tstart.name,"start_date_time");
+	strcpy((char*)timecoord.tstart.value,"2011-03-18T00:00:00Z");
+	strcpy((char*)timecoord.tstop.name,"stop_date_time");
+	strcpy((char*)timecoord.tstop.value,"2014-11-01T00:00:00Z");
+	strcpy((char*)observing_system.name,"Observing_System");
+	strcpy((char*)observing_system.osc[0].ename,"Observing_System_Component");
+	strcpy((char*)observing_system.osc[0].name.name,"name");
+	strcpy((char*)observing_system.osc[0].name.value,"messenger");
+	strcpy((char*)observing_system.osc[0].type.name,"type");
+	strcpy((char*)observing_system.osc[0].type.value,"Spacecraft");
+	strcpy((char*)observing_system.osc[1].ename,"Observing_System_Component");
+	strcpy((char*)observing_system.osc[1].name.name,"name");
+	strcpy((char*)observing_system.osc[1].name.value,"mercury dual imaging system narrow angle camera");
+	strcpy((char*)observing_system.osc[1].type.name,"type");
+	strcpy((char*)observing_system.osc[1].type.value,"Instrument");
+	strcpy((char*)oa.target[0].ename,"Target_Identification");
+	strcpy((char*)oa.target[0].name.name,"name");
+	strcpy((char*)oa.target[0].name.value,"mercury");
+	strcpy((char*)oa.target[0].type.name,"type");
+	strcpy((char*)oa.target[0].type.value,"Planet");
+	strcpy((char*)iaa.ename,"Investigation Area");
+	strcpy((char*)iaa.name.name,"name");
+	strcpy((char*)iaa.name.value,"messenger");
+	strcpy((char*)iaa.type.name,"type");
+	strcpy((char*)iaa.type.value,"Spacecraft");
+	strcpy((char*)iref.name,"Internal_Reference");
+	strcpy((char*)iref.lid_reference.name,"lid_reference");
+	strcpy((char*)iref.lid_reference.value,"urn:nasa:pds:investigation.messenger");
+	strcpy((char*)iref.reference_type.name,"reference_type");
+	strcpy((char*)iref.reference_type.value,"data_to_investigation");
+	strcpy((char*)pds.po->fao->leaves[0]->name,"File");
+	strcpy((char*)pds.po->fao->leaves[0]->leaves[0]->name,"file_name");
+	strcpy((char*)pds.po->fao->leaves[0]->leaves[0]->value,prodfnam[0]);
+	strcpy(array2d.name,"Array_2D_Image");
+	strcpy(array2d.leaves[0]->name,"offset"); 
+	strcpy(array2d.leaves[0]->attributes->name,"unit");
+	strcpy(array2d.leaves[0]->attributes->value,"byte");
+	strcpy(array2d.leaves[0]->value,"0");
+	strcpy(array2d.leaves[1]->name,"axes");
+	strcpy(array2d.leaves[1]->value,"2");
+	strcpy(array2d.leaves[2]->name,"axis_index_order");
+	strcpy(array2d.leaves[2]->value,"Last Index Fastest");
+	strcpy(array2d.leaves[3]->name,"Element_Array");
+	strcpy(array2d.leaves[3]->leaves[0]->name,"data_type");
+	strcpy(array2d.leaves[3]->leaves[0]->value,"SignedLSB2");
+	strcpy(array2d.leaves[4]->name,"Axis_Array");
+	strcpy(array2d.leaves[4]->leaves[0]->name,"axis_name");
+	strcpy(array2d.leaves[4]->leaves[0]->value,"Line");
+	strcpy(array2d.leaves[4]->leaves[1]->name,"elements");
+	strcpy(array2d.leaves[4]->leaves[1]->value,"11520");
+	strcpy(array2d.leaves[4]->leaves[2]->name,"sequence_number");
+	strcpy(array2d.leaves[4]->leaves[2]->value,"1");
+	strcpy(array2d.leaves[5]->name,"Axis_Array");
+	strcpy(array2d.leaves[5]->leaves[0]->name,"axis_name");
+	strcpy(array2d.leaves[5]->leaves[0]->value,"Sample");
+	strcpy(array2d.leaves[5]->leaves[1]->name,"elements");
+	strcpy(array2d.leaves[5]->leaves[1]->value,"23040");
+	strcpy(array2d.leaves[5]->leaves[2]->name,"sequence_number");
+	strcpy(array2d.leaves[5]->leaves[2]->value,"2");
+	lp=stdout; 	pds.pfnames=prodfnam;
 	oa.times=&timecoord;
-	oa.leaves=(struct ELEMENT **)malloc(1*sizeof(struct ELEMENT*));
-	for(i=0;i<1;i++)
-		oa.leaves[i]=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
 	oa.leaves[0]=&observing_system;
-	observing_system.osc=(struct OBSERVING_SYSTEM_COMPONENT**)malloc(2*sizeof(struct OBSERVING_SYSTEM_COMPONENT*));
-	for(i=0;i<2;i++){
-		observing_system.osc[i]=(struct OBSERVING_SYSTEM_COMPONENT*)malloc(sizeof(struct OBSERVING_SYSTEM_COMPONENT));
-		observing_system.osc[i]->name=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
-		observing_system.osc[i]->type=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
-	}
-	strcpy((char*)observing_system.osc[0]->name->name,"name");
-	strcpy((char*)observing_system.osc[0]->name->value,"messenger");
-	strcpy((char*)observing_system.osc[0]->type->name,"type");
-	strcpy((char*)observing_system.osc[0]->type->value,"Spacecraft");
-	strcpy((char*)observing_system.osc[1]->name->name,"name");
-	strcpy((char*)observing_system.osc[1]->name->value,"mercury dual imaging system narrow angle camera");
-	strcpy((char*)observing_system.osc[1]->type->name,"type");
-	strcpy((char*)observing_system.osc[1]->type->value,"Instrument");
-	oa.target=(struct TARGET_IDENTIFICATION*)malloc(sizeof(struct TARGET_IDENTIFICATION));
-	oa.target[0].name=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
-	oa.target[0].type=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
-	strcpy((char*)oa.target[0].name->name,"name");
-	strcpy((char*)oa.target[0].name->value,"mercury");
-	strcpy((char*)oa.target[0].type->name,"type");
-	strcpy((char*)oa.target[0].type->value,"Planet");
-	if (init_pds(lp,&pds, prodfnam)) perror("error in initing pds product archiving"); 
+	if (init_pds(lp,&pds, prodfnam,argv)) perror("error in initing pds product archiving"); 
     LIBXML_TEST_VERSION;
 
 	doc = xmlNewDoc(BAD_CAST "1.0");
@@ -126,7 +198,6 @@ int main(int argc, char **argv)
     // Add it before the root element
     xmlAddPrevSibling(root_node, pi);
 
-	printf("main() Before xmlNewChild(root_node, ...)");
     xmlNewChild(root_node, NULL, BAD_CAST pds.po->ia->name, BAD_CAST NULL); /* Identification_Area node element */
     p1=root_node->children;
     xmlNewChild(p1, NULL, BAD_CAST logical_identifier.name, BAD_CAST logical_identifier.value);
@@ -135,54 +206,58 @@ int main(int argc, char **argv)
     xmlNewChild(p1, NULL, BAD_CAST information_model_version.name, BAD_CAST information_model_version.value);
     xmlNewChild(p1, NULL, BAD_CAST product_class.name, BAD_CAST product_class.value);
     p1=xmlNewChild(p1, NULL, BAD_CAST modification_history.name, BAD_CAST NULL);
-    p1=xmlNewChild(p1, NULL, BAD_CAST "Modification_Detail", BAD_CAST NULL);
-    xmlNewChild(p1, NULL, BAD_CAST "Modification_Date", BAD_CAST "2025-10-24");
-    xmlNewChild(p1, NULL, BAD_CAST "version_id", BAD_CAST "1.0");
-    xmlNewChild(p1, NULL, BAD_CAST "description", BAD_CAST "PDS4 product label generated by SETM libraries");
+    p1=xmlNewChild(p1, NULL, BAD_CAST modification_history.leaves[0]->name, BAD_CAST NULL);
+    xmlNewChild(p1, NULL, BAD_CAST modification_history.leaves[0]->leaves[0]->name, BAD_CAST modification_history.leaves[0]->leaves[0]->value);
+    xmlNewChild(p1, NULL, BAD_CAST modification_history.leaves[0]->leaves[1]->name, BAD_CAST modification_history.leaves[0]->leaves[1]->value);
+    xmlNewChild(p1, NULL, BAD_CAST modification_history.leaves[0]->leaves[2]->name, BAD_CAST modification_history.leaves[0]->leaves[2]->value);
     p1=p1->parent;p1=p1->parent;p1=p1->parent;
     p1 = xmlNewChild(p1, NULL, BAD_CAST pds.po->oa->name, BAD_CAST NULL); /* Observation_Area node element */
-	p1 = xmlNewChild(p1, NULL, BAD_CAST "Time_Coordinates", BAD_CAST NULL);
-	xmlNewChild(p1, NULL, BAD_CAST "start_date_time", BAD_CAST "2025-10-24T09:00:00Z");
-	xmlNewChild(p1, NULL, BAD_CAST "stop_date_time", BAD_CAST "2025-10-24T12:00:00Z");
+	p1 = xmlNewChild(p1, NULL, BAD_CAST timecoord.name, BAD_CAST NULL);
+	xmlNewChild(p1, NULL, BAD_CAST timecoord.tstart.name, BAD_CAST timecoord.tstart.value);
+	xmlNewChild(p1, NULL, BAD_CAST timecoord.tstop.name, BAD_CAST timecoord.tstop.value);
 	p1=p1->parent;
-	p1 = xmlNewChild(p1, NULL, BAD_CAST "Investigation_Area", BAD_CAST NULL);
-	xmlNewChild(p1, NULL, BAD_CAST "name", BAD_CAST "messenger");
-	xmlNewChild(p1, NULL, BAD_CAST "type", BAD_CAST "Mission");
-	p1=xmlNewChild(p1, NULL, BAD_CAST "Internal_Reference", BAD_CAST NULL);
-	xmlNewChild(p1, NULL, BAD_CAST "lid_reference", BAD_CAST "urn:nasa:pds:investigation.messenger");
-	xmlNewChild(p1, NULL, BAD_CAST "reference_type", BAD_CAST "data_to_investigation");
+	p1 = xmlNewChild(p1, NULL, BAD_CAST iaa.ename, BAD_CAST NULL); /* Investigation_Area node element */
+	xmlNewChild(p1, NULL, BAD_CAST iaa.name.name, BAD_CAST iaa.name.value);
+	xmlNewChild(p1, NULL, BAD_CAST iaa.type.name, BAD_CAST iaa.type.value);
+	p1=xmlNewChild(p1, NULL, BAD_CAST iref.name, BAD_CAST NULL);
+	xmlNewChild(p1, NULL, BAD_CAST iref.lid_reference.name, BAD_CAST iref.lid_reference.value);
+	xmlNewChild(p1, NULL, BAD_CAST iref.reference_type.name, BAD_CAST iref.reference_type.value);
 	p1=p1->parent;p1=p1->parent;
-	p1 = xmlNewChild(p1, NULL, BAD_CAST "Observing_System", BAD_CAST NULL);
-	p1 = xmlNewChild(p1, NULL, BAD_CAST "Observing_System_Component", BAD_CAST NULL);
-	xmlNewChild(p1, NULL, BAD_CAST "name", BAD_CAST "mercury dual imaging system narrow angle camera");
-	xmlNewChild(p1, NULL, BAD_CAST "type", BAD_CAST "Instrument");
+	p1 = xmlNewChild(p1, NULL, BAD_CAST observing_system.name, BAD_CAST NULL);
+	p1 = xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[0].ename, BAD_CAST NULL);
+	xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[0].name.name, BAD_CAST observing_system.osc[0].name.value);
+	xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[0].type.name, BAD_CAST observing_system.osc[0].type.value);
+	p1=p1->parent;
+	p1 = xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[1].ename, BAD_CAST NULL);
+	xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[1].name.name, BAD_CAST observing_system.osc[1].name.value);
+	xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[1].type.name, BAD_CAST observing_system.osc[1].type.value);
 	p1=p1->parent;p1=p1->parent;
-	p1 = xmlNewChild(p1, NULL, BAD_CAST "Target_Identification", BAD_CAST NULL);
-	xmlNewChild(p1, NULL, BAD_CAST "name", BAD_CAST "mercury");
-	xmlNewChild(p1, NULL, BAD_CAST "planet", BAD_CAST "Planet");
+	p1 = xmlNewChild(p1, NULL, BAD_CAST oa.target[0].ename, BAD_CAST NULL);
+	xmlNewChild(p1, NULL, BAD_CAST oa.target[0].name.name, BAD_CAST oa.target[0].name.value);
+	xmlNewChild(p1, NULL, BAD_CAST oa.target[0].type.name, BAD_CAST oa.target[0].type.value);
 	p1=p1->parent;p1=p1->parent;
 	p1 = xmlNewChild(p1, NULL, BAD_CAST pds.po->fao->name, BAD_CAST NULL); /* File_Area_Observational node element */
-	p1 = xmlNewChild(p1, NULL, BAD_CAST "File", BAD_CAST NULL);
-	xmlNewChild(p1, NULL, BAD_CAST "file_name", BAD_CAST "MSGR_DEM_USG_SC_J_V02.IMG");
+	p1 = xmlNewChild(p1, NULL, BAD_CAST pds.po->fao->leaves[0]->name, BAD_CAST NULL);
+	xmlNewChild(p1, NULL, BAD_CAST pds.po->fao->leaves[0]->leaves[0]->name, BAD_CAST pds.po->fao->leaves[0]->leaves[0]->value);
 	p1=p1->parent;
-	p1 = xmlNewChild(p1, NULL, BAD_CAST "Array_2D_Image", BAD_CAST NULL);
-	p1 = xmlNewChild(p1, NULL, BAD_CAST "offset", BAD_CAST "0");
-	attr = xmlSetProp(p1, "unit","byte");
+	p1 = xmlNewChild(p1, NULL, BAD_CAST array2d.name, BAD_CAST NULL);
+	p1 = xmlNewChild(p1, NULL, BAD_CAST array2d.leaves[0]->name, BAD_CAST BAD_CAST array2d.leaves[0]->value);
+	attr = xmlSetProp(p1, array2d.leaves[0]->attributes[0].name,array2d.leaves[0]->attributes[0].value);
 	p1=p1->parent;
-	xmlNewChild(p1, NULL, BAD_CAST "axes", BAD_CAST "2");
-	xmlNewChild(p1, NULL, BAD_CAST "axis_indes_order", BAD_CAST "Last Index Fastest");
-	p1 = xmlNewChild(p1, NULL, BAD_CAST "Element_Array", BAD_CAST NULL);
-	xmlNewChild(p1, NULL, BAD_CAST "data_type", BAD_CAST "SignedLSB2");
+	xmlNewChild(p1, NULL, BAD_CAST array2d.leaves[1]->name, BAD_CAST array2d.leaves[1]->value);
+	xmlNewChild(p1, NULL, BAD_CAST array2d.leaves[2]->name, BAD_CAST array2d.leaves[2]->value);
+	p1 = xmlNewChild(p1, NULL, BAD_CAST array2d.leaves[3]->name, BAD_CAST NULL);
+	xmlNewChild(p1, NULL, BAD_CAST array2d.leaves[3]->leaves[0]->name, BAD_CAST array2d.leaves[3]->leaves[0]->value);
 	p1=p1->parent;
-	p1 = xmlNewChild(p1, NULL, BAD_CAST "Axis_Array", BAD_CAST NULL);
-	xmlNewChild(p1, NULL, BAD_CAST "axis_name", BAD_CAST "Line");
-	xmlNewChild(p1, NULL, BAD_CAST "elements", BAD_CAST "11520");
-	xmlNewChild(p1, NULL, BAD_CAST "sequence_number", BAD_CAST "1");
+	p1 = xmlNewChild(p1, NULL, BAD_CAST array2d.leaves[4]->name, BAD_CAST NULL);
+	xmlNewChild(p1, NULL, BAD_CAST array2d.leaves[4]->leaves[0]->name, BAD_CAST array2d.leaves[4]->leaves[0]->value);
+	xmlNewChild(p1, NULL, BAD_CAST array2d.leaves[4]->leaves[1]->name, BAD_CAST array2d.leaves[4]->leaves[1]->value);
+	xmlNewChild(p1, NULL, BAD_CAST array2d.leaves[4]->leaves[2]->name, BAD_CAST array2d.leaves[4]->leaves[2]->value);
 	p1=p1->parent;
-	p1 = xmlNewChild(p1, NULL, BAD_CAST "Axis_Array", BAD_CAST NULL);
-	xmlNewChild(p1, NULL, BAD_CAST "axis_name", BAD_CAST "Sample");
-	xmlNewChild(p1, NULL, BAD_CAST "elements", BAD_CAST "23040");
-	xmlNewChild(p1, NULL, BAD_CAST "sequence_number", BAD_CAST "2");
+	p1 = xmlNewChild(p1, NULL, BAD_CAST array2d.leaves[5]->name, BAD_CAST NULL);
+	xmlNewChild(p1, NULL, BAD_CAST array2d.leaves[5]->leaves[0]->name, BAD_CAST array2d.leaves[5]->leaves[0]->value);
+	xmlNewChild(p1, NULL, BAD_CAST array2d.leaves[5]->leaves[1]->name, BAD_CAST array2d.leaves[5]->leaves[1]->value);
+	xmlNewChild(p1, NULL, BAD_CAST array2d.leaves[5]->leaves[2]->name, BAD_CAST array2d.leaves[5]->leaves[2]->value);
 	p1=p1->parent;p1=p1->parent;p1=p1->parent;p1=p1->parent;
 
     /*
@@ -194,27 +269,26 @@ int main(int argc, char **argv)
     xmlFreeDoc(doc);
 
     xmlCleanupParser();
-
-	for(i=0;i<pds.numproducts;i++){
+	for(i=0;i<numproducts;i++){
 		free(prodfnam[i]);
 		free(pds.products[i]);
+		free(pds.po->fao->leaves[0]->leaves[0]);		
 	}
-	free(oa.target[0].name);
-	free(oa.target[0].name);
+/*	free(pds.po->fao->leaves);
+	free(pds.po->fao->leaves[0]); */
+	free(prodfnam);
+	/* prodfname freed */
 	free(oa.target);
-
-	free(timecoord.tstart);
-	free(timecoord.tstop);
-	free(oa.leaves[0]);
-	free(oa.leaves);
-	for(i=0;i<6;i++)
-		free(po.ia->leaves[i]);
+/*	for(i=0;i<6;i++)
+		free(po.ia->leaves[i]);*/
 	free(po.ia->leaves);
-	for(i=0;i<2;i++){
-		free(observing_system.osc[i]->name);
-		free(observing_system.osc[i]->type);
-		free(observing_system.osc[i]);
-	}
+/*	free(oa.leaves[0]);
+	*/
+/*	free(oa.target);*/
+	free(modification_history.leaves);
+	free(array2d.leaves);
+	free(oa.leaves);
+	free(po.attributes); /* po.attributes freed */
 	free(observing_system.osc);
   return status;
 }
