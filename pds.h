@@ -4,6 +4,7 @@
 #include <libxml/xmlwriter.h>
 #include <libxml/tree.h>
 #define MAXFNAML 256 /* maximum file name[MAXFNAML] allowed (conventional) may include path */
+#define MAXLEAV 10
 struct ATTRIBUTE {
 	char name[MAXFNAML];
 	char value[MAXFNAML];
@@ -16,11 +17,12 @@ struct ELEMENT {
 	char name[MAXFNAML];
 	char value[MAXFNAML];
 	struct OBSERVING_SYSTEM_COMPONENT *osc;
-	struct ELEMENT **leaves;
+	struct ELEMENT *leaves;
 	int nleaves; /* number of leaves */
 	struct ELEMENT *prev;
 	struct ELEMENT *succ;
 };
+
 struct MODIFICATION_DETAIL{
 	struct ELEMENT mdate; /* modification date */
 	struct ELEMENT versid; /* version id */
@@ -51,7 +53,7 @@ struct IDENTIFICATION_AREA {
 	int nattr; /* number of attributes */
 	char name[MAXFNAML];
 	char value[MAXFNAML];
-	struct ELEMENT **leaves;
+	struct ELEMENT leaves[MAXLEAV];
 	int nleaves; /* number of leaves */
 	struct ELEMENT *prev;
 	struct ELEMENT *succ;
@@ -77,7 +79,7 @@ struct OBSERVATION_AREA {
 	struct TIME_COORDINATES *times;
 	struct INVESTIGATION_AREA *investa;
 	struct TARGET_IDENTIFICATION *target;
-	struct ELEMENT **leaves; /* leaves[0]=observing system*/
+	struct ELEMENT leaves[MAXLEAV]; /* leaves[0]=observing system*/
 	int nleaves; /* number of leaves */
 	struct ELEMENT *prev;
 	struct ELEMENT *succ;
@@ -89,7 +91,7 @@ struct FILE_AREA_OBSERVATIONAL {
 	int nattr; /* number of attributes */
 	char name[MAXFNAML];
 	char value[MAXFNAML];
-	struct ELEMENT **leaves;
+	struct ELEMENT leaves[MAXLEAV];
 	int nleaves; /* number of leaves */
 	struct ELEMENT *prev;
 	struct ELEMENT *succ;
@@ -97,7 +99,7 @@ struct FILE_AREA_OBSERVATIONAL {
 struct ARRAY_2D_IMAGE{
 	char name[MAXFNAML];
 	char value[MAXFNAML];
-	struct ELEMENT **leaves;
+	struct ELEMENT leaves[MAXLEAV];
 	int nleaves; /* number of leaves */
 	struct ELEMENT *prev;
 	struct ELEMENT *succ;
@@ -107,7 +109,7 @@ struct PRODUCT_OBSERVATIONAL {
 	struct IDENTIFICATION_AREA *ia;
 	struct OBSERVATION_AREA *oa;
 	struct FILE_AREA_OBSERVATIONAL *fao;
-	struct ELEMENT **oleaves; /* other elements, in case */
+	struct ELEMENT oleaves[MAXLEAV]; /* other elements, in case */
 	char name[MAXFNAML];
 	char value[MAXFNAML];
 };

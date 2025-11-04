@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "pds.h"
 int init_pds(FILE *xmlp,struct PDS *pds,char **prodfnam, char **argv){
 	int i;
