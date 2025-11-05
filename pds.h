@@ -1,10 +1,15 @@
+#ifndef PDS_H
+#define PDS_H
 #include <stdio.h>
 #include <string.h>
 #include <libxml/parser.h>
 #include <libxml/xmlwriter.h>
 #include <libxml/tree.h>
-#define MAXFNAML 256 /* maximum file name[MAXFNAML] allowed (conventional) may include path */
-#define MAXLEAV 10
+#define MAXFNAML 1024 /* maximum file name[MAXFNAML] allowed (conventional) may include path */
+#define MAXLEAV 16
+
+enum endian{LSB,MSB};
+
 struct ATTRIBUTE {
 	char name[MAXFNAML];
 	char value[MAXFNAML];
@@ -118,7 +123,7 @@ struct PRODUCT_OBSERVATIONAL {
 struct PDS {
 	int version;
 	char xmlintest[MAXFNAML];
-	char xml_model[MAXFNAML];
+	char xml_model[10][MAXFNAML];
 	char ifname[MAXFNAML];
 	char ofname[MAXFNAML];
 	char **pfnames; /* names of the product files referred by the label*/
@@ -131,3 +136,4 @@ int init_pds(FILE *xmlp,struct PDS *pds,char **prodfnam,char **argv);
 int read_pds(FILE *ixmlp,struct PDS *pds);
 int write_pds(FILE *oxmlp,struct PDS *pds);
 int close_pds(FILE *xmlp,struct PDS *pds);
+#endif  /* PDS_H */

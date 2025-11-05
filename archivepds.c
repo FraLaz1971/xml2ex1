@@ -131,7 +131,7 @@ int main(int argc, char **argv)
 	}
 	if(verbose)fprintf(stderr,"main() starting copying strings\n");
 	strcpy((char*)pds.xmlintest,"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
-	strcpy((char*)pds.xml_model[0],"href=\"https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1L00.sch\" \n schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
+	strcpy((char*)pds.xml_model[0],"href=\"https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1L00.sch\" schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
 	strcpy((char*)pds.xml_model[1],"href=\"https://psa.esa.int/psa/v1/PDS4_PSA_1L00_1401.sch\" schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
 	strcpy((char*)pds.xml_model[2],"href=\"https://pds.nasa.gov/pds4/geom/v1/PDS4_GEOM_1L00_1970.sch\" schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
 	strcpy((char*)pds.xml_model[3],"href=\"https://pds.nasa.gov/pds4/disp/v1/PDS4_DISP_1L00_1510.sch\" schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 	strcpy((char*)pds.xml_model[5],"href=\"https://psa.esa.int/psa/mission/em16/v1/PDS4_EM16_1L00_1300.sch\" schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
 	strcpy((char*)po.name,"Product_Observational");
 	strcpy((char*)po.attributes[0].name,"xsi:schemaLocation");
-	strcpy((char*)po.attributes[0].value,"http://pds.nasa.gov/pds4/pds/v1 https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1L00.xsd http://psa.esa.int/psa/v1 https://psa.esa.int/psa/v1/PDS4_PSA_1L00_1401.xsd http://pds.nasa.gov/pds4/geom/v1 https://pds.nasa.gov/pds4/geom/v1/PDS4_GEOM_1L00_1970.xsd http://pds.nasa.gov/pds4/disp/v1 https://pds.nasa.gov/pds4/disp/v1/PDS4_DISP_1L00_1510.xsd http://psa.esa.int/psa/em16/tgo/cas/v1 https://psa.esa.int/psa/em16/tgo/cas/v1/PDS4_EM16_TGO_CAS_1L00_1200.xsd http://psa.esa.int/psa/mission/em16/v1 https://psa.esa.int/psa/mission/em16/v1/PDS4_EM16_1L00_1300.xsd");
+	strcpy((char*)po.attributes[0].value,"http://pds.nasa.gov/pds4/pds/v1 https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1L00.xsd  http://psa.esa.int/psa/v1  https://psa.esa.int/psa/v1/PDS4_PSA_1L00_1401.xsd  http://pds.nasa.gov/pds4/geom/v1  https://pds.nasa.gov/pds4/geom/v1/PDS4_GEOM_1L00_1970.xsd  http://pds.nasa.gov/pds4/disp/v1  https://pds.nasa.gov/pds4/disp/v1/PDS4_DISP_1L00_1510.xsd  http://psa.esa.int/psa/em16/tgo/cas/v1  https://psa.esa.int/psa/em16/tgo/cas/v1/PDS4_EM16_TGO_CAS_1L00_1200.xsd  http://psa.esa.int/psa/mission/em16/v1  https://psa.esa.int/psa/mission/em16/v1/PDS4_EM16_1L00_1300.xsd");
 	strcpy((char*)po.attributes[1].name,"xmlns");
 	strcpy((char*)po.attributes[1].value,"http://pds.nasa.gov/pds4/pds/v1");
 	strcpy((char*)po.attributes[2].name,"xmlns:em16_tgo_cas");
@@ -162,7 +162,7 @@ int main(int argc, char **argv)
 	strcpy((char*)title.name,"title");
 	strcpy((char*)title.value,"Test to develop BC SIMBIO-SYS STC TDM PDS4 labels");
 	strcpy((char*)information_model_version.name,"information_model_version");
-	strcpy((char*)information_model_version.value,"1.20.0.0");
+	strcpy((char*)information_model_version.value,"1.21.0.0");
 	strcpy((char*)product_class.name,"product_class");
 	strcpy((char*)product_class.value,"Product_Observational");
 	if(verbose)fprintf(stderr,"main() before Modification_History\n");
