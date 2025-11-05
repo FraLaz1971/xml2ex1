@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include "pds.h"
-int verbose = 0;
 
 int init_pds(FILE *xmlp,struct PDS *pds,char **prodfnam, char **argv){
 	int i;

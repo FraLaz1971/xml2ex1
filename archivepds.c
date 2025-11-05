@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     char sheight[32];
     unsigned int width = 0;  /* Sample == n. of columns OO */
     unsigned int height = 0; /* Line == n. of rows */
-    const char* confname="arpds.conf";
+    const char* confname;
     char buf[1024];
     FILE *cfp;
     int i, res, numproducts;
@@ -47,11 +47,12 @@ int main(int argc, char **argv)
 	FILE *lp; /* pds4 label file handler */
 	char **prodfnam;
 	if(argc<3){
-		fprintf(stderr,"usage:%s <nproducts> <prodname1> <prodname2> ... <prodnamen>\n",argv[0]);
-		fprintf(stderr,"e.g: %s 1 image.raw \n",argv[0]);
+		fprintf(stderr,"usage:%s <file.conf> <nproducts> <prodname1> <prodname2> ... <prodnamen>\n",argv[0]);
+		fprintf(stderr,"e.g: %s arpdf.conf 1 image.raw \n",argv[0]);
 		return 1;
 	}
 	/*read configutation file */
+  confname=argv[1];
   cfp=fopen(confname, "r");
   if(cfp==NULL){
      perror("configuration file not present");
@@ -98,13 +99,13 @@ int main(int argc, char **argv)
   fprintf(stderr,"PDS4 <data_type> = %s\n",dtype);
   fclose(cfp);
 
-	numproducts = atoi(argv[1]); /* number of products pointed by the label */
+	numproducts = atoi(argv[2]); /* number of products pointed by the label */
 	/* setup data structures and links */
 	po.ia=&ia; po.oa=&oa; po.fao=&fao; pds.po=&po;
 	prodfnam=(char **)malloc(numproducts*sizeof(char *));
 	for(i=0;i<numproducts;i++)
 		prodfnam[i]=(char *)malloc(MAXFNAML);
-	po.attributes=(struct ATTRIBUTE *)malloc(sizeof(struct ATTRIBUTE));
+	po.attributes=(struct ATTRIBUTE *)malloc(MAXLEAV*sizeof(struct ATTRIBUTE));
 	pds.products=(FILE**)malloc(numproducts*sizeof(FILE *)); 
 	oa.target=(struct TARGET_IDENTIFICATION*)malloc(sizeof(struct TARGET_IDENTIFICATION));
 	/*observing_system.osc=(struct OBSERVING_SYSTEM_COMPONENT*)malloc(2*sizeof(struct OBSERVING_SYSTEM_COMPONENT));*/
@@ -122,7 +123,7 @@ int main(int argc, char **argv)
 	for(i=0;i<numproducts;i++){
 		pds.products[i] = (FILE*)malloc(2048);
 		if(argv[i+2]!=NULL){
-			strcpy((char*)prodfnam[i],argv[i+2]);
+			strcpy((char*)prodfnam[i],argv[i+3]);
 		} else {
 			perror("ERROR: filename lacking, exiting");
 			exit(1);
@@ -130,17 +131,36 @@ int main(int argc, char **argv)
 	}
 	if(verbose)fprintf(stderr,"main() starting copying strings\n");
 	strcpy((char*)pds.xmlintest,"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
-	strcpy((char*)pds.xml_model,"href=\"https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1K00.sch\" \n schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
+	strcpy((char*)pds.xml_model[0],"href=\"https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1L00.sch\" \n schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
+	strcpy((char*)pds.xml_model[1],"href=\"https://psa.esa.int/psa/v1/PDS4_PSA_1L00_1401.sch\" schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
+	strcpy((char*)pds.xml_model[2],"href=\"https://pds.nasa.gov/pds4/geom/v1/PDS4_GEOM_1L00_1970.sch\" schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
+	strcpy((char*)pds.xml_model[3],"href=\"https://pds.nasa.gov/pds4/disp/v1/PDS4_DISP_1L00_1510.sch\" schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
+	strcpy((char*)pds.xml_model[4],"href=\"https://psa.esa.int/psa/em16/tgo/cas/v1/PDS4_EM16_TGO_CAS_1L00_1200.sch\" schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
+	strcpy((char*)pds.xml_model[5],"href=\"https://psa.esa.int/psa/mission/em16/v1/PDS4_EM16_1L00_1300.sch\" schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
 	strcpy((char*)po.name,"Product_Observational");
+	strcpy((char*)po.attributes[0].name,"xsi:schemaLocation");
+	strcpy((char*)po.attributes[0].value,"http://pds.nasa.gov/pds4/pds/v1 https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1L00.xsd http://psa.esa.int/psa/v1 https://psa.esa.int/psa/v1/PDS4_PSA_1L00_1401.xsd http://pds.nasa.gov/pds4/geom/v1 https://pds.nasa.gov/pds4/geom/v1/PDS4_GEOM_1L00_1970.xsd http://pds.nasa.gov/pds4/disp/v1 https://pds.nasa.gov/pds4/disp/v1/PDS4_DISP_1L00_1510.xsd http://psa.esa.int/psa/em16/tgo/cas/v1 https://psa.esa.int/psa/em16/tgo/cas/v1/PDS4_EM16_TGO_CAS_1L00_1200.xsd http://psa.esa.int/psa/mission/em16/v1 https://psa.esa.int/psa/mission/em16/v1/PDS4_EM16_1L00_1300.xsd");
+	strcpy((char*)po.attributes[1].name,"xmlns");
+	strcpy((char*)po.attributes[1].value,"http://pds.nasa.gov/pds4/pds/v1");
+	strcpy((char*)po.attributes[2].name,"xmlns:em16_tgo_cas");
+	strcpy((char*)po.attributes[2].value,"http://psa.esa.int/psa/em16/tgo/cas/v1");
+	strcpy((char*)po.attributes[3].name,"xmlns:geom");
+	strcpy((char*)po.attributes[3].value,"http://pds.nasa.gov/pds4/geom/v1");
+	strcpy((char*)po.attributes[4].name,"xmlns:disp");
+	strcpy((char*)po.attributes[4].value,"http://pds.nasa.gov/pds4/disp/v1");
+	strcpy((char*)po.attributes[5].name,"xmlns:psa");
+	strcpy((char*)po.attributes[5].value,"http://psa.esa.int/psa/v1");
+	strcpy((char*)po.attributes[6].name,"xmlns:xsi");
+	strcpy((char*)po.attributes[6].value,"http://www.w3.org/2001/XMLSchema-instance");
 	strcpy((char*)ia.name,"Identification_Area");
 	strcpy((char*)oa.name,"Observation_Area");
 	strcpy((char*)fao.name,"File_Area_Observational");
 	strcpy((char*)logical_identifier.name,"logical_identifier");
-	strcpy((char*)logical_identifier.value,"urn:nasa:pds:data:mess-h-mdis-5-dem-elevation-v1.0:msgr_dem_usg_sc_j_v02");
+	strcpy((char*)logical_identifier.value,"urn:esa:psa:em16_tgo_cas:data_raw:cas_raw_sc_20250416t233856-20250416t233900-33001-50-pan-1409764716-29-0");
 	strcpy((char*)version_id.name,"version_id");
 	strcpy((char*)version_id.value,"1.0");
 	strcpy((char*)title.name,"title");
-	strcpy((char*)title.value,"mess-h-mdis-5-dem-elevation-v1.0 msgr_dem_usg_sc_j_v02");
+	strcpy((char*)title.value,"Test to develop BC SIMBIO-SYS STC TDM PDS4 labels");
 	strcpy((char*)information_model_version.name,"information_model_version");
 	strcpy((char*)information_model_version.value,"1.20.0.0");
 	strcpy((char*)product_class.name,"product_class");
@@ -234,11 +254,33 @@ int main(int argc, char **argv)
     root_node = xmlNewNode(NULL, BAD_CAST po.name);    
     xmlDocSetRootElement(doc, root_node);
     attribute = root_node->properties;
+	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[0].name,(const xmlChar *)po.attributes[0].value); /* product observational attribute */
+	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[1].name,(const xmlChar *)po.attributes[1].value); /* product observational attribute */
+	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[2].name,(const xmlChar *)po.attributes[2].value); /* product observational attribute */
+	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[3].name,(const xmlChar *)po.attributes[3].value); /* product observational attribute */
+	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[4].name,(const xmlChar *)po.attributes[4].value); /* product observational attribute */
+	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[5].name,(const xmlChar *)po.attributes[5].value); /* product observational attribute */
+	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[6].name,(const xmlChar *)po.attributes[6].value); /* product observational attribute */
     	 // Create the xml-model processing instruction
-    pi = xmlNewPI(BAD_CAST "xml-model", BAD_CAST pds.xml_model);
-
+    pi = xmlNewPI(BAD_CAST "xml-model", BAD_CAST pds.xml_model[0]);
     // Add it before the root element
     xmlAddPrevSibling(root_node, pi);
+    pi = xmlNewPI(BAD_CAST "xml-model", BAD_CAST pds.xml_model[1]);
+    // Add it before the root element
+    xmlAddPrevSibling(root_node, pi);
+    pi = xmlNewPI(BAD_CAST "xml-model", BAD_CAST pds.xml_model[2]);
+    // Add it before the root element
+    xmlAddPrevSibling(root_node, pi);
+    pi = xmlNewPI(BAD_CAST "xml-model", BAD_CAST pds.xml_model[3]);
+    // Add it before the root element
+    xmlAddPrevSibling(root_node, pi);
+    pi = xmlNewPI(BAD_CAST "xml-model", BAD_CAST pds.xml_model[4]);
+     // Add it before the root element
+    xmlAddPrevSibling(root_node, pi);
+   pi = xmlNewPI(BAD_CAST "xml-model", BAD_CAST pds.xml_model[5]);
+    // Add it before the root element
+    xmlAddPrevSibling(root_node, pi);
+
     if(verbose)fprintf(stderr,"main() opening <Identification_Area> node element step 1 \n");
     xmlNewChild(root_node, NULL, BAD_CAST pds.po->ia->name, BAD_CAST NULL); /* Identification_Area node element */
     p1=root_node->children;
