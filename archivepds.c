@@ -27,7 +27,8 @@ int main(int argc, char **argv)
     unsigned int width = 0;  /* Sample == n. of columns OO */
     unsigned int height = 0; /* Line == n. of rows */
     const char* confname;
-    char buf[1024];
+    int j;
+    char buf[1024], key[256];
     FILE *cfp;
     int i, res, numproducts;
 	struct PDS pds; struct PRODUCT_OBSERVATIONAL po; struct IDENTIFICATION_AREA ia;
@@ -92,6 +93,22 @@ int main(int argc, char **argv)
  }
   sprintf(swidth,"%u",width);
   sprintf(sheight,"%u",height);
+  for(i=0;i<10;i++){
+	res=fscanf(cfp,"%5s %s\n",key,pds.xml_model[i]);
+	for(j=0;j<strlen(pds.xml_model[i]);j++)		
+		if(pds.xml_model[i][j]=='>') pds.xml_model[i][j]=' ';
+	if(strcmp(pds.xml_model[i]," ")) fprintf(stderr,"key: %5s  value:%s\n",key,pds.xml_model[i]);
+  }
+  po.attributes=(struct ATTRIBUTE *)malloc(MAXLEAV*sizeof(struct ATTRIBUTE));
+  for(i=0;i<10;i++){
+	res=fscanf(cfp,"%15s %s\n",key,po.attributes[i].name);
+	res=fscanf(cfp,"%16s %s\n",key,po.attributes[i].value);
+	for(j=0;j<strlen(po.attributes[i].value);j++)
+		if(po.attributes[i].value[j]=='>') po.attributes[i].value[j]=' ';
+	if(strcmp(po.attributes[i].name,">"))
+		fprintf(stderr,"%16s  %s\n",po.attributes[i].name,po.attributes[i].value);
+  }
+  return 0;
   /* printout variables content for debug */
   fprintf(stderr,"BITPIX = %d\n",bitpix);
   fprintf(stderr,"SIGN = %d\n",sign);
@@ -107,7 +124,6 @@ int main(int argc, char **argv)
 	prodfnam=(char **)malloc(numproducts*sizeof(char *));
 	for(i=0;i<numproducts;i++)
 		prodfnam[i]=(char *)malloc(MAXFNAML);
-	po.attributes=(struct ATTRIBUTE *)malloc(MAXLEAV*sizeof(struct ATTRIBUTE));
 	pds.products=(FILE**)malloc(numproducts*sizeof(FILE *)); 
 	oa.target=(struct TARGET_IDENTIFICATION*)malloc(sizeof(struct TARGET_IDENTIFICATION));
 	/*observing_system.osc=(struct OBSERVING_SYSTEM_COMPONENT*)malloc(2*sizeof(struct OBSERVING_SYSTEM_COMPONENT));*/

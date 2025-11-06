@@ -53,7 +53,7 @@ readraw: readraw.c
 readraw16: readraw16.c
 	$(CC) $< -o $@
 clean:
-	$(RM) *.o readxml readxml2 createxml testWriter pngprog001 temp1 temp2 xmltm2ascii\ 
+	$(RM) *.o readxml readxml2 createxml testWriter pngprog001 temp1 temp2 xmltm2ascii \
 	readraw readraw16 parse1 parse2 sval createlabel write_png read_png archivepds archivepds2 readlabel
 
 
