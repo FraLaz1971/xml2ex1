@@ -16,3 +16,12 @@ Example programs using the libxml2 c library. Contains also programs using the l
 - readxml.c
 - testWriter.c
 - xmltm2ascii.c ---> saves xml file telemetry packets data in ascii hex dump (each row is a packet)
+- archivepds.c ---> create a xml label for the given products files with the metadata given in the configuration file
+###
+`./archivepds <conf.file> <nproducts> <prod1> <prod2> ... <prodn> > outputlabel.xml` 
+###
+## archivepds
+execution example:
+###
+`./archivepds arpds.conf 1 mercury1_500x320.raw > mylabel.xml`
+###
