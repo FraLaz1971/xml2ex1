@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?xml-model href="https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1K00.sch" 
+<?xml-model href="https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1A10.sch" 
  schematypens="http://purl.oclc.org/dsdl/schematron"?>
-<Product_Observational>
+<?xml-model href="https://pds.nasa.gov/pds4/mission/mess/v1/PDS4_MESS_1B00_1020.sch" 
+ schematypens="http://purl.oclc.org/dsdl/schematron"?>
+<Product_Observational xmlns="http://pds.nasa.gov/pds4/pds/v1" xmlns:mess="http://pds.nasa.gov/pds4/mission/mess/v1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pds.nasa.gov/pds4/pds/v1 https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1A10.xsd   http://pds.nasa.gov/pds4/mission/mess/v1 https://pds.nasa.gov/pds4/mission/mess/v1/PDS4_MESS_1B00_1020.xsd">
   <Identification_Area>
-    <logical_identifier>urn:nasa:pds:data:mess-h-mdis-5-dem-elevation-v1.0:msgr_dem_usg_sc_j_v02</logical_identifier>
+    <logical_identifier>urn:nasa:pds:mess_mdis_raw:data_edr:mdis2015091_dat</logical_identifier>
     <version_id>1.0</version_id>
-    <title>mess-h-mdis-5-dem-elevation-v1.0 msgr_dem_usg_sc_j_v02</title>
-    <information_model_version>1.20.0.0</information_model_version>
+    <title>Test to develop BC SIMBIO-SYS STC TDM PDS4 labels</title>
+    <information_model_version>1.10.1.0</information_model_version>
     <product_class>Product_Observational</product_class>
     <Modification_History>
       <Modification_Detail>
@@ -21,11 +23,21 @@
       <start_date_time>2011-03-18T00:00:00Z</start_date_time>
       <stop_date_time>2014-11-01T00:00:00Z</stop_date_time>
     </Time_Coordinates>
+    <Primary_Result_Summary>
+      <purpose>Science</purpose>
+      <processing_level>Raw</processing_level>
+      <description>Summary Of Results</description>
+      <Science_Facets>
+        <wavelength_range>Visible</wavelength_range>
+        <domain>Surface</domain>
+        <discipline_name>Imaging</discipline_name>
+      </Science_Facets>
+    </Primary_Result_Summary>
     <Investigation_Area>
       <name>messenger</name>
-      <type>Spacecraft</type>
+      <type>Mission</type>
       <Internal_Reference>
-        <lid_reference>urn:nasa:pds:investigation.messenger</lid_reference>
+        <lid_reference>urn:nasa:pds:context:investigation:mission.messenger</lid_reference>
         <reference_type>data_to_investigation</reference_type>
       </Internal_Reference>
     </Investigation_Area>
@@ -43,6 +55,16 @@
       <name>mercury</name>
       <type>Planet</type>
     </Target_Identification>
+    <Mission_Area>
+      <mess:MESSENGER>
+        <mess:mission_phase_name>Mercury Orbit Year 5</mess:mission_phase_name>
+        <mess:spacecraft_clock_start_count>2/070170476</mess:spacecraft_clock_start_count>
+        <mess:spacecraft_clock_stop_count>2/070256656</mess:spacecraft_clock_stop_count>
+        <mess:standard_data_product_id>mdisedr</mess:standard_data_product_id>
+        <mess:software_name>pipe-mdis2edr</mess:software_name>
+        <mess:software_version_id>1.1</mess:software_version_id>
+      </mess:MESSENGER>
+    </Mission_Area>
   </Observation_Area>
   <File_Area_Observational>
     <File>
