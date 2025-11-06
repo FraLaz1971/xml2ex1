@@ -380,10 +380,6 @@ int main(int argc, char **argv)
 		free(array2d.leaves[i].leaves);
 	// prodfname freed 
 	free(oa.target);
-	for(i=0;i<2;i++){
-		observing_system.osc[i].name=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
-		observing_system.osc[i].type=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
-	}
 	free(po.attributes); // po.attributes freed 
 	fprintf(stderr,"main() ending program\n");
   return 0;
