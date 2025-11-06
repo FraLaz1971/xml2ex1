@@ -30,7 +30,7 @@ int main(int argc, char **argv)
     int j;
     char buf[1024], key[256];
     FILE *cfp;
-    int i, res, numproducts;
+    int i, res, numproducts, npi, npoattr;
 	struct PDS pds; struct PRODUCT_OBSERVATIONAL po; struct IDENTIFICATION_AREA ia;
 	struct OBSERVATION_AREA oa; struct FILE_AREA_OBSERVATIONAL fao;
 	struct ELEMENT logical_identifier;
@@ -93,22 +93,24 @@ int main(int argc, char **argv)
  }
   sprintf(swidth,"%u",width);
   sprintf(sheight,"%u",height);
-  for(i=0;i<10;i++){
+  res=fscanf(cfp,"NPI %d\n",&npi);
+  fprintf(stderr,"n. of processing instructions: %d\n",npi);
+  for(i=0;i<npi;i++){
 	res=fscanf(cfp,"%5s %s\n",key,pds.xml_model[i]);
 	for(j=0;j<strlen(pds.xml_model[i]);j++)		
 		if(pds.xml_model[i][j]=='>') pds.xml_model[i][j]=' ';
-	if(strcmp(pds.xml_model[i]," ")) fprintf(stderr,"key: %5s  value:%s\n",key,pds.xml_model[i]);
+	fprintf(stderr,"key: %5s  value:%s\n",key,pds.xml_model[i]);
   }
+  res=fscanf(cfp,"NPOATTR %d\n",&npoattr);
+  fprintf(stderr,"n. of prod. obs. attributes: %d\n",npi);
   po.attributes=(struct ATTRIBUTE *)malloc(MAXLEAV*sizeof(struct ATTRIBUTE));
-  for(i=0;i<10;i++){
+  for(i=0;i<npoattr;i++){
 	res=fscanf(cfp,"%15s %s\n",key,po.attributes[i].name);
 	res=fscanf(cfp,"%16s %s\n",key,po.attributes[i].value);
 	for(j=0;j<strlen(po.attributes[i].value);j++)
 		if(po.attributes[i].value[j]=='>') po.attributes[i].value[j]=' ';
-	if(strcmp(po.attributes[i].name,">"))
-		fprintf(stderr,"%16s  %s\n",po.attributes[i].name,po.attributes[i].value);
+	fprintf(stderr,"%16s  %s\n",po.attributes[i].name,po.attributes[i].value);
   }
-  return 0;
   /* printout variables content for debug */
   fprintf(stderr,"BITPIX = %d\n",bitpix);
   fprintf(stderr,"SIGN = %d\n",sign);
@@ -315,20 +317,23 @@ int main(int argc, char **argv)
     root_node = xmlNewNode(NULL, BAD_CAST po.name);    
     xmlDocSetRootElement(doc, root_node);
     attribute = root_node->properties;
-	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[0].name,(const xmlChar *)po.attributes[0].value); /* product observational attribute */
-	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[1].name,(const xmlChar *)po.attributes[1].value); /* product observational attribute */
-	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[2].name,(const xmlChar *)po.attributes[2].value); /* product observational attribute */
-	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[3].name,(const xmlChar *)po.attributes[3].value); /* product observational attribute */
+    for(i=0;i<npoattr;i++)
+	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[i].name,(const xmlChar *)po.attributes[i].value); /* product observational attribute */
+//	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[1].name,(const xmlChar *)po.attributes[1].value); /* product observational attribute */
+//	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[2].name,(const xmlChar *)po.attributes[2].value); /* product observational attribute */
+//	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[3].name,(const xmlChar *)po.attributes[3].value); /* product observational attribute */
 //	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[4].name,(const xmlChar *)po.attributes[4].value); /* product observational attribute */
 //	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[5].name,(const xmlChar *)po.attributes[5].value); /* product observational attribute */
 //	attr = xmlSetProp(root_node, (const xmlChar *)po.attributes[6].name,(const xmlChar *)po.attributes[6].value); /* product observational attribute */
-    	 // Create the xml-model processing instruction
-    pi = xmlNewPI(BAD_CAST "xml-model", BAD_CAST pds.xml_model[0]);
+    for(i=0;i<npi;i++){
+      // Create the xml-model processing instruction
+      pi = xmlNewPI(BAD_CAST "xml-model", BAD_CAST pds.xml_model[0]);
+      // Add it before the root element
+      xmlAddPrevSibling(root_node, pi);
+    }
+//    pi = xmlNewPI(BAD_CAST "xml-model", BAD_CAST pds.xml_model[1]);
     // Add it before the root element
-    xmlAddPrevSibling(root_node, pi);
-    pi = xmlNewPI(BAD_CAST "xml-model", BAD_CAST pds.xml_model[1]);
-    // Add it before the root element
-    xmlAddPrevSibling(root_node, pi);
+//    xmlAddPrevSibling(root_node, pi);
 /*    pi = xmlNewPI(BAD_CAST "xml-model", BAD_CAST pds.xml_model[2]);
     // Add it before the root element
     xmlAddPrevSibling(root_node, pi);
