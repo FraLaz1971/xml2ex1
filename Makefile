@@ -10,7 +10,7 @@ PNG_LIBS=-lpng -lz
 RM=rm -rf
 .PHONY: all clean
 #all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2 xmltm2ascii readraw readraw16 parse1 parse2 sval createlabel write_png read_png
-all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2 xmltm2ascii\ 
+all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2 xmltm2ascii \
 	readraw readraw16  sval createlabel write_png read_png archivepds archivepds2 readlabel
 pds.o: pds.c
 	$(CC) -c $(CFLAGS) $< -o $@

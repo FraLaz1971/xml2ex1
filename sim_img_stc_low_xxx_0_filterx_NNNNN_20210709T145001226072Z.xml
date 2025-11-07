@@ -1,11 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<?xml-model href="http://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1700.sch"
-    href="http://pds.nasa.gov/pds4/pds/geom/v1/PDS4_GEOM_1700_1401.sch"
-    href="http://pds.nasa.gov/pds4/pds/v1/PDS4_IMG_1100.sch"
-    href="http://psa.esa.int/psa/v1/PDS4_PSA_1000.sch"
-    href="http://psa.esa.int/psa/v1/PDS4_PSA_BC_1000.sch"
-    href="http://psa.esa.int/psa/bc/simbio/v1/simbio.sch"
-    schematypens="http://purl.oclc.org/dsdl/schematron"?>
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml-model href="http://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1700.sch"    href="http://pds.nasa.gov/pds4/pds/geom/v1/PDS4_GEOM_1700_1401.sch"    href="http://pds.nasa.gov/pds4/pds/v1/PDS4_IMG_1100.sch"    href="http://psa.esa.int/psa/v1/PDS4_PSA_1000.sch"    href="http://psa.esa.int/psa/v1/PDS4_PSA_BC_1000.sch"    href="http://psa.esa.int/psa/bc/simbio/v1/simbio.sch"    schematypens="http://purl.oclc.org/dsdl/schematron"?>
 <Product_Observational xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:geom="http://pds.nasa.gov/pds4/geom/v1" xmlns:img="http://pds.nasa.gov/pds4/img/v1" xmlns:psa="http://psa.esa.int/psa/v1" xmlns:simbio="http://psa.esa.int/psa/bc/simbio/v1" xmlns:pds4="http://pds.nasa.gov/pds4/pds/v1" xsi:schemaLocation="     http://pds.nasa.gov/pds4/pds/v1 http://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1700.xsd     http://pds.nasa.gov/pds4/geom/v1 http://pds.nasa.gov/pds4/geom/v1/PDS4_GEOM_1700_1401.xsd     http://psa.esa.int/psa/v1 http://psa.esa.int/psa/v1/PDS4_PSA_LDD_1000.xsd     http://psa.esa.int/psa/bc/simbio/v1 http://psa.esa.int/psa/bc/simbio/v1/PDS4_PSA_BC_SIM_LDD_1000.xsd     http://pds.nasa.gov/pds4/img/v1 http://pds.nasa.gov/pds4/img/v1/PDS4_IMG_1100.xsd">
   <Identification_Area>
     <!-- PDS4 rules/recommendation for logical_identifier naming conventions TBD -->
