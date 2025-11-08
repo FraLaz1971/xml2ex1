@@ -44,7 +44,8 @@ int main(int argc, char **argv)
 	char invtype[64];
 	char invlid[256];
 	char reftype[64];
-	
+	char onamval[MAXLEAV][1024];
+	char otypval[MAXLEAV][1024];
     unsigned int width = 0;  /* Sample == n. of columns OO */
     unsigned int height = 0; /* Line == n. of rows */
     const char* confname;
@@ -135,15 +136,16 @@ int main(int argc, char **argv)
   res=fscanf(cfp,"PROD_LID %s\n",prodlid[0]);
   strcpy(logical_identifier.value,prodlid[0]);
   res=fscanf(cfp,"PROD_VID %s\n",prodvid[0]);
-  strcpy(version_id.value,prodvid[0]);
   res=fscanf(cfp,"TITLE %s\n",stitle);
+  for(j=0;j<strlen(stitle);j++)
+		if(stitle[j]=='>') stitle[j]=' ';
   res=fscanf(cfp,"IM_VERS %s\n",imvers);
   res=fscanf(cfp,"PROD_CLASS %s\n",prodclass);
+  res=fscanf(cfp,"MOD_DATE %s\n",moddate);
   res=fscanf(cfp,"VERSID %s\n",svers);
   res=fscanf(cfp,"DESCR %s\n",descr);
 	for(j=0;j<strlen(descr);j++)
 		if(descr[j]=='>') descr[j]=' ';
-  strcpy(modification_history.leaves[0].leaves[2].value,descr);
   res=fscanf(cfp,"TSTART %s\n",tstart);
   res=fscanf(cfp,"TSTOP %s\n",tstop);
   res=fscanf(cfp,"PURP %s\n",purp);
@@ -157,14 +159,16 @@ int main(int argc, char **argv)
   res=fscanf(cfp,"INV_LID %s\n",invlid);
   res=fscanf(cfp,"REFTYPE %s\n",reftype);
   res=fscanf(cfp,"NOSC_COMP %d\n",&nosc);
-  for(i=0;i<nosc;i++){
-	res=fscanf(cfp,"%11s %s\n",key,observing_system.osc[0].name->value);
-	res=fscanf(cfp,"%11s %s\n",key,observing_system.osc[0].type->value);
-	res=fscanf(cfp,"%11s %s\n",key,observing_system.osc[1].name->value);
-	for(j=0;j<strlen(observing_system.osc[1].name->value);j++)
-		if(observing_system.osc[1].name->value[j]=='>') observing_system.osc[1].name->value[j]=' ';
-	res=fscanf(cfp,"%11s %s\n",key,observing_system.osc[1].type->value);
-  }
+  observing_system.osc[i].name=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+  observing_system.osc[i].type=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+  for(i=0;i<nosc;i++){ 
+	res=fscanf(cfp,"%11s %s\n",key,onamval[i]);
+	for(j=0;j<strlen(onamval[i]);j++)
+		if(onamval[i][j]=='>') onamval[i][j]=' ';
+	fprintf(stderr,"OSC[%d] n. value: %s\n",i,onamval[i]);
+	res=fscanf(cfp,"%11s %s\n",key,otypval[i]);
+	fprintf(stderr,"OSC[%d] t. value: %s\n",i,otypval[i]);
+  } 
   /* ended reading configuration file */
   /* printout variables content for debug */
   fprintf(stderr,"BITPIX = %d\n",bitpix);
@@ -183,7 +187,6 @@ int main(int argc, char **argv)
 		prodfnam[i]=(char *)malloc(MAXFNAML);
 	pds.products=(FILE**)malloc(numproducts*sizeof(FILE *)); 
 	oa.target=(struct TARGET_IDENTIFICATION*)malloc(sizeof(struct TARGET_IDENTIFICATION));
-	/*observing_system.osc=(struct OBSERVING_SYSTEM_COMPONENT*)malloc(2*sizeof(struct OBSERVING_SYSTEM_COMPONENT));*/
 	array2d.leaves[0].attributes=(struct ATTRIBUTE *)malloc(sizeof(struct ATTRIBUTE));	
 	modification_history.leaves=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
 	modification_history.leaves[0].leaves=(struct ELEMENT *)malloc(3*sizeof(struct ELEMENT));
@@ -288,14 +291,14 @@ int main(int argc, char **argv)
 	strcpy((char*)observing_system.name,"Observing_System");
 	strcpy((char*)observing_system.osc[0].ename,"Observing_System_Component");
 	strcpy((char*)observing_system.osc[0].name->name,"name");
-//	strcpy((char*)observing_system.osc[0].name->value,"messenger");
+	strcpy((char*)observing_system.osc[0].name->value,onamval[0]); 
 	strcpy((char*)observing_system.osc[0].type->name,"type");
-//	strcpy((char*)observing_system.osc[0].type->value,"Spacecraft");
+	strcpy((char*)observing_system.osc[0].type->value,otypval[0]); 
 	strcpy((char*)observing_system.osc[1].ename,"Observing_System_Component");
 	strcpy((char*)observing_system.osc[1].name->name,"name");
-//	strcpy((char*)observing_system.osc[1].name->value,"mercury dual imaging system narrow angle camera");
+	strcpy((char*)observing_system.osc[1].name->value,onamval[1]); 
 	strcpy((char*)observing_system.osc[1].type->name,"type");
-//	strcpy((char*)observing_system.osc[1].type->value,"Instrument");
+	strcpy((char*)observing_system.osc[1].type->value,otypval[i]); 
     if(verbose)fprintf(stderr,"main() before Target_Identification\n");	
 	strcpy((char*)oa.target[0].ename,"Target_Identification");
 	strcpy((char*)oa.target[0].name.name,"name");
@@ -420,14 +423,14 @@ int main(int argc, char **argv)
 	p1=p1->parent;p1=p1->parent; /* close IA */
     if(verbose)fprintf(stderr,"main() opening <Observing_System> 2.5\n");
 	p1 = xmlNewChild(p1, NULL, BAD_CAST observing_system.name, BAD_CAST NULL); /* <Observing_System>*/
-	p1 = xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[0].ename, BAD_CAST NULL); /*<Observing_System_Component>*/
-	xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[0].name->name, BAD_CAST observing_system.osc[0].name->value);
-	xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[0].type->name, BAD_CAST observing_system.osc[0].type->value);
+	for(i=0;i<nosc;i++){
+	p1 = xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[i].ename, BAD_CAST NULL); //<Observing_System_Component>
+	xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[i].name->name, BAD_CAST observing_system.osc[i].name->value);
+	xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[i].type->name, BAD_CAST observing_system.osc[i].type->value);
 	p1=p1->parent;
-	p1 = xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[1].ename, BAD_CAST NULL);/*<Observing_System_Component>*/
-	xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[1].name->name, BAD_CAST observing_system.osc[1].name->value);
-	xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[1].type->name, BAD_CAST observing_system.osc[1].type->value);
-	p1=p1->parent;p1=p1->parent;
+	} 
+	
+	p1=p1->parent;
     if(verbose)fprintf(stderr,"main() opening <Target_Identification> 3\n");
 	p1 = xmlNewChild(p1, NULL, BAD_CAST oa.target[0].ename, BAD_CAST NULL);
 	xmlNewChild(p1, NULL, BAD_CAST oa.target[0].name.name, BAD_CAST oa.target[0].name.value);
