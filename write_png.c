@@ -1,18 +1,20 @@
-#include <png.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "png.h"
 
 int main(int argc, char **argv) {
-    int width = 300, height = 200;
+    int width = 300, height = 200, y,x;
     png_structp png_ptr;
     png_infop info_ptr;
     char * fname;
+    FILE *fp;
+    png_bytep *row_pointers;
     if(argc<2){
       fprintf(stderr,"usage:%s <file.png>\n",argv[0]);
       return 1;
     }
     fname=argv[1];
-    FILE *fp = fopen(fname, "wb");
+    fp = fopen(fname, "wb");
     if (!fp) { perror(fname); return 1; }
 
     // --- Initialize write structures ---
@@ -47,10 +49,10 @@ int main(int argc, char **argv) {
     png_write_info(png_ptr, info_ptr);
 
     // --- Allocate and fill image rows ---
-    png_bytep *row_pointers = malloc(height * sizeof(png_bytep));
-    for (int y = 0; y < height; y++) {
+    row_pointers = malloc(height * sizeof(png_bytep));
+    for (y = 0; y < height; y++) {
         row_pointers[y] = malloc(3 * width);
-        for (int x = 0; x < width; x++) {
+        for (x = 0; x < width; x++) {
             int idx = x * 3;
             row_pointers[y][idx + 0] = (x * 255) / (width - 1);   // R gradient
             row_pointers[y][idx + 1] = (y * 255) / (height - 1);  // G gradient
@@ -62,7 +64,7 @@ int main(int argc, char **argv) {
     png_write_image(png_ptr, row_pointers);
     png_write_end(png_ptr, NULL);
 
-    for (int y = 0; y < height; y++)
+    for (y = 0; y < height; y++)
         free(row_pointers[y]);
     free(row_pointers);
 

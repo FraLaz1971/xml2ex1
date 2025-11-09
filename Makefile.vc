@@ -1,0 +1,64 @@
+CC=cl
+LD=link
+XML2_HOME=C:\xml2
+ZLIB_HOME=C:\Users\serena\projects\zlib-1.3.1
+PNG_HOME=C:\Users\serena\projects\lpng1650
+CFLAGS=/I$(XML2_HOME)\include\libxml2 /I$(XML2_HOME)\include\libxslt
+PNG_CFLAGS=/I$(PNG_HOME)
+LDFLAGS=/LIBPATH:$(XML2_HOME)
+PNG_LDFLAGS=/LIBPATH:$(PNG_HOME) /LIBPATH:$(ZLIB_HOME) /NODEFAULTLIB:LIBCMT.lib
+LIBS=-lxml2 -lxslt
+PNG_LIBS=libpng.lib libz.lib
+OEXT=.objbj
+EEXT=.exe
+RM=del /Q /F
+all: readxml$(EEXT) readxml2$(EEXT) createxml$(EEXT) testWriter$(EEXT) pngprog001$(EEXT) \
+	temp1$(EEXT) temp2$(EEXT) xmltm2ascii$(EEXT) readraw$(EEXT) readraw16$(EEXT) parse1$(EEXT) parse2$(EEXT) \
+	sval$(EEXT) createlabel$(EEXT) write_png$(EEXT) read_png$(EEXT) read_gs_png$(EEXT) archivepds$(EEXT) archivepds2$(EEXT) readlabel$(EEXT)
+pds.obj: pds.c
+	$(CC) /c $(CFLAGS) $?
+createxml$(EEXT): createxml.c
+	$(CC) $(CFLAGS) $? /link /out:$@ $(LDFLAGS) $(LIBS)
+createlabel$(EEXT): createlabel.c
+	$(CC) $(CFLAGS) $? /link /out:$@ $(LDFLAGS) $(LIBS)
+readlabel$(EEXT): readlabel.c
+	$(CC) $(CFLAGS) $? /link /out:$@ $(LDFLAGS) $(LIBS)
+archivepds$(EEXT): archivepds.c pds.obj
+	$(CC) /link $(CFLAGS) $** /out:$@ $(LDFLAGS) $(LIBS)
+archivepds2$(EEXT): archivepds2.c pds.obj
+	$(CC) /link $(CFLAGS) $** /out:$@ $(LDFLAGS) $(LIBS)
+readxml$(EEXT): readxml.c
+	$(CC) $(CFLAGS) $? /link /out:$@ $(LDFLAGS) $(LIBS)
+readxml2$(EEXT): readxml2.c
+	$(CC) $(CFLAGS) $? /link /out:$@ $(LDFLAGS) $(LIBS)
+parse1$(EEXT): parse1.c
+	$(CC) $(CFLAGS) $? /link /out:$@ $(LDFLAGS) $(LIBS)
+parse2$(EEXT): parse2.c
+	$(CC) $(CFLAGS) $? /link /out:$@ $(LDFLAGS) $(LIBS)
+sval$(EEXT): sval.c
+	$(CC) $(CFLAGS) $? /link /out:$@ $(LDFLAGS) $(LIBS)
+testWriter$(EEXT): testWriter.c
+	$(CC) $(CFLAGS) $? /link /out:$@ $(LDFLAGS) $(LIBS)
+xmltm2ascii$(EEXT): xmltm2ascii.c
+	$(CC) $(CFLAGS) $? /link /out:$@ $(LDFLAGS) $(LIBS)
+pngprog001$(EEXT): pngprog001.c
+	$(CC) $(PNG_CFLAGS) $? /link   /out:$@ $(PNG_LDFLAGS) $(PNG_LIBS)
+write_png$(EEXT): write_png.c
+	$(CC) $(PNG_CFLAGS) $? /link   /out:$@ $(PNG_LDFLAGS) $(PNG_LIBS)
+read_png$(EEXT): read_png.c
+	$(CC) $(PNG_CFLAGS) $? /link   /out:$@ $(PNG_LDFLAGS) $(PNG_LIBS)
+read_gs_png$(EEXT): read_gs_png.c
+	$(CC) $(PNG_CFLAGS) $? /link   /out:$@ $(PNG_LDFLAGS) $(PNG_LIBS)
+temp1$(EEXT): temp1.c
+	$(CC) $(PNG_CFLAGS) $? /link   /out:$@ 
+temp2$(EEXT): temp2.c
+	$(CC) $? 
+readraw$(EEXT): readraw.c
+	$(CC) $? 
+readraw16$(EEXT): readraw16.c
+	$(CC) $? 
+clean:
+	$(RM) *.obj readxml$(EEXT) readxml2$(EEXT) createxml$(EEXT) testWriter$(EEXT) pngprog001$(EEXT) \
+	temp1$(EEXT) temp2$(EEXT) xmltm2ascii$(EEXT) readraw$(EEXT) readraw16$(EEXT) read_gs_png$(EEXT) parse1$(EEXT) \
+	parse2$(EEXT) sval$(EEXT) createlabel$(EEXT) write_png$(EEXT) read_png$(EEXT) archivepds$(EEXT) archivepds2$(EEXT) \
+	readlabel$(EEXT)

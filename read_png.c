@@ -14,6 +14,7 @@ int main(int argc, char **argv) {
     unsigned char **G;
     unsigned char **B;
     png_byte header[8];
+    png_bytep row;
     FILE *fp;
     if (argc<2){
       fprintf(stderr,"usage:%s <file.png>\n",argv[0]);
@@ -81,7 +82,7 @@ int main(int argc, char **argv) {
         R[y] = malloc(width);
         G[y] = malloc(width);
         B[y] = malloc(width);
-        png_bytep row = row_pointers[y];
+        row = row_pointers[y];
         for (x = 0; x < width; x++) {
             idx = x * 3;
             R[y][x] = row[idx + 0];
