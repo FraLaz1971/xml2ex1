@@ -495,7 +495,7 @@ int main(int argc, char **argv)
 	free(modification_history.leaves[0].leaves);
 	free(modification_history.leaves);
 	free(prodfnam);
-	for(i=0;i<2;i++){
+	for(i=0;i<nosc;i++){
 		free(observing_system.osc[i].name);
 		free(observing_system.osc[i].type);
 	}
