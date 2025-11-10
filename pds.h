@@ -14,15 +14,33 @@ struct ATTRIBUTE {
 	char name[MAXFNAML];
 	char value[MAXFNAML];
 };
-
+struct ELEMENT {
+	struct ELEMENT *parent;
+	struct ATTRIBUTE *attributes;
+	int nattr; /* number of attributes */
+	char name[MAXFNAML];
+	char value[MAXFNAML];
+//	struct OBSERVING_SYSTEM_COMPONENT osc[MAXLEAV];
+	struct ELEMENT *leaves;
+	int nleaves; /* number of leaves */
+	struct ELEMENT *prev;
+	struct ELEMENT *succ;
+};
+struct INTERNAL_REFERENCE{
+	char name[MAXFNAML];
+	char value[MAXFNAML];
+	struct ELEMENT lid_reference;
+	struct ELEMENT reference_type;
+};
 struct OBSERVING_SYSTEM_COMPONENT{
 	char ename[MAXFNAML];
 	char value[MAXFNAML];
+	char descr[MAXFNAML];
+	struct INTERNAL_REFERENCE ir;
 	struct ELEMENT *name;
 	struct ELEMENT *type;
 };
-
-struct ELEMENT {
+struct OBSERVING_SYSTEM {
 	struct ELEMENT *parent;
 	struct ATTRIBUTE *attributes;
 	int nattr; /* number of attributes */
@@ -45,12 +63,6 @@ struct TIME_COORDINATES {
 	char value[MAXFNAML];
 	struct ELEMENT tstart;
 	struct ELEMENT tstop;
-};
-struct INTERNAL_REFERENCE{
-	char name[MAXFNAML];
-	char value[MAXFNAML];
-	struct ELEMENT lid_reference;
-	struct ELEMENT reference_type;
 };
 struct INVESTIGATION_AREA {
 	char ename[MAXFNAML];

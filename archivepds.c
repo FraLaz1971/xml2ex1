@@ -50,9 +50,9 @@ int main(int argc, char **argv)
     unsigned int height = 0; /* Line == n. of rows */
     const char* confname;
     int j;
-    char buf[1024], key[256];
+    char buf[1024], key[256], val[1024];
     FILE *cfp;
-    int i, res, numproducts, npi, npoattr, nosc;
+    int i, res, numproducts, npi, npoattr, nosc, nci;
 	struct PDS pds; struct PRODUCT_OBSERVATIONAL po; struct IDENTIFICATION_AREA ia;
 	struct OBSERVATION_AREA oa; struct FILE_AREA_OBSERVATIONAL fao;
 	struct ELEMENT logical_identifier;
@@ -60,10 +60,11 @@ int main(int argc, char **argv)
 	struct ELEMENT title;
 	struct ELEMENT information_model_version;
 	struct ELEMENT product_class;
+	struct ELEMENT citation_information;
 	struct ELEMENT modification_history;
 	struct ELEMENT primary_result_summary;
 	struct ELEMENT mission_area;
-	struct ELEMENT observing_system;
+	struct OBSERVING_SYSTEM observing_system;
 	struct ELEMENT file;	
 	struct TIME_COORDINATES timecoord;
 	struct INTERNAL_REFERENCE iref;
@@ -76,6 +77,41 @@ int main(int argc, char **argv)
 		fprintf(stderr,"e.g: %s arpdf.conf 1 image.raw \n",argv[0]);
 		return 1;
 	}
+	numproducts = atoi(argv[2]); /* number of products pointed by the label */
+	prodfnam=(char **)malloc(numproducts*sizeof(char *));
+	for(i=0;i<numproducts;i++)
+		prodfnam[i]=(char *)malloc(MAXFNAML);
+	pds.products=(FILE**)malloc(numproducts*sizeof(FILE *)); 
+	if(verbose)fprintf(stderr,"main() numproducts = %d\n",numproducts);
+	for(i=0;i<numproducts;i++){
+		pds.products[i] = (FILE*)malloc(2048);
+		if(argv[i+2]!=NULL){
+			strcpy((char*)prodfnam[i],argv[i+3]);
+		} else {
+			perror("ERROR: filename lacking, exiting");
+			exit(1);
+		}
+	}
+/* allocate memory for nodes */
+	oa.target=(struct TARGET_IDENTIFICATION*)malloc(sizeof(struct TARGET_IDENTIFICATION));
+	array2d.leaves[0].attributes=(struct ATTRIBUTE *)malloc(sizeof(struct ATTRIBUTE));	
+	po.attributes=(struct ATTRIBUTE *)malloc(MAXLEAV*sizeof(struct ATTRIBUTE));
+	logical_identifier.leaves=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	logical_identifier.leaves[0].leaves=(struct ELEMENT *)malloc(5*sizeof(struct ELEMENT));
+	modification_history.leaves=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	modification_history.leaves[0].leaves=(struct ELEMENT *)malloc(3*sizeof(struct ELEMENT));
+	primary_result_summary.leaves=(struct ELEMENT *)malloc(4*sizeof(struct ELEMENT));
+	primary_result_summary.leaves[3].leaves=(struct ELEMENT *)malloc(3*sizeof(struct ELEMENT));
+	mission_area.leaves=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	mission_area.leaves->leaves=(struct ELEMENT *)malloc(6*sizeof(struct ELEMENT));
+	for(i=0;i<2;i++){
+		observing_system.osc[i].name=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+		observing_system.osc[i].type=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	}
+	observing_system.leaves=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	file.leaves=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
+	for(i=0;i<6;i++)
+		array2d.leaves[i].leaves=(struct ELEMENT*)malloc(MAXLEAV*sizeof(struct ELEMENT));
 	/*read configutation file */
   confname=argv[1];
   cfp=fopen(confname, "r");
@@ -83,7 +119,7 @@ int main(int argc, char **argv)
      perror("configuration file not present");
      exit(1);
   }
-  /* read configuration file content into variables in memory */
+ /* read configuration file content into variables in memory */
   res=fscanf(cfp, "BITPIX %hu\n",&bitpix);
   res=fscanf(cfp, "SIGN %10s\n",buf);
   if(!(strcmp(buf,"signed"))){
@@ -105,8 +141,7 @@ int main(int argc, char **argv)
     perror("illegal endianness option read");
     exit(1);
   }
-  strcpy(send,buf);
-  res=fscanf(cfp,  "WIDTH %u\n",&width);
+  strcpy(send,buf);  res=fscanf(cfp,  "WIDTH %u\n",&width);
   res=fscanf(cfp, "HEIGHT %u\n",&height);
   if(bitpix>8) {
 	sprintf(dtype,"%s%s%u",ssign,send,(unsigned int)bitpix/8);
@@ -116,38 +151,76 @@ int main(int argc, char **argv)
   sprintf(swidth,"%u",width);
   sprintf(sheight,"%u",height);
   res=fscanf(cfp,"NPI %d\n",&npi);
-  fprintf(stderr,"n. of processing instructions: %d\n",npi);
+  if (verbose) fprintf(stderr,"n. of processing instructions: %d\n",npi);
   for(i=0;i<npi;i++){
 	res=fscanf(cfp,"%5s %s\n",key,pds.xml_model[i]);
 	for(j=0;j<strlen(pds.xml_model[i]);j++)		
 		if(pds.xml_model[i][j]=='>') pds.xml_model[i][j]=' ';
-	fprintf(stderr,"key: %5s  value:%s\n",key,pds.xml_model[i]);
+	if (verbose) fprintf(stderr,"key: %5s  value:%s\n",key,pds.xml_model[i]);
   }
   res=fscanf(cfp,"NPOATTR %d\n",&npoattr);
-  fprintf(stderr,"n. of prod. obs. attributes: %d\n",npi);
-  po.attributes=(struct ATTRIBUTE *)malloc(MAXLEAV*sizeof(struct ATTRIBUTE));
+  if (verbose) fprintf(stderr,"n. of prod. obs. attributes: %d\n",npoattr);
   for(i=0;i<npoattr;i++){
 	res=fscanf(cfp,"%15s %s\n",key,po.attributes[i].name);
 	res=fscanf(cfp,"%16s %s\n",key,po.attributes[i].value);
 	for(j=0;j<strlen(po.attributes[i].value);j++)
 		if(po.attributes[i].value[j]=='>') po.attributes[i].value[j]=' ';
-	fprintf(stderr,"%16s  %s\n",po.attributes[i].name,po.attributes[i].value);
+	if (verbose) fprintf(stderr,"%16s  %s\n",po.attributes[i].name,po.attributes[i].value);
   }
+  if (verbose) fprintf(stderr,"going to read configuration file about Identification_Area\n");
+	/*Identification_Area*/
   res=fscanf(cfp,"PROD_LID %s\n",prodlid[0]);
-  strcpy(logical_identifier.value,prodlid[0]);
+  strcpy(logical_identifier.leaves[0].value,prodlid[0]);
   res=fscanf(cfp,"PROD_VID %s\n",prodvid[0]);
+  strcpy(logical_identifier.leaves[1].value,prodlid[0]);
   res=fscanf(cfp,"TITLE %s\n",stitle);
   for(j=0;j<strlen(stitle);j++)
 		if(stitle[j]=='>') stitle[j]=' ';
+  strcpy(logical_identifier.leaves[2].value,stitle);
   res=fscanf(cfp,"IM_VERS %s\n",imvers);
+  strcpy(logical_identifier.leaves[3].value,imvers);
   res=fscanf(cfp,"PROD_CLASS %s\n",prodclass);
+  strcpy(logical_identifier.leaves[4].value,prodclass);
+  if (verbose) fprintf(stderr,"going to read configuration file about Citation_Information\n");
+	/*Citation_Information*/
+  res=fscanf(cfp,"NCI %d\n",&nci);
+  citation_information.leaves=(struct ELEMENT *)malloc(nci*sizeof(struct ELEMENT));
+  for(i=0;i<nci;i++){
+	citation_information.leaves[i].leaves=(struct ELEMENT *)malloc(8*sizeof(struct ELEMENT));
+	res=fscanf(cfp,"%s %s\n",key,citation_information.leaves[i].leaves[0].value);
+	for(j=0;j<strlen(citation_information.leaves[i].leaves[0].value);j++)
+		if(citation_information.leaves[i].leaves[0].value[j]=='>') citation_information.leaves[i].leaves[0].value[j]=' ';
+	if(verbose)fprintf(stderr,"read author list: %s\n",citation_information.leaves[i].leaves[0].value);
+	res=fscanf(cfp,"%s %s\n",key,citation_information.leaves[i].leaves[1].value);
+	if(verbose)fprintf(stderr,"read publication year %s\n",citation_information.leaves[i].leaves[1].value);
+	res=fscanf(cfp,"%s %s\n",key,citation_information.leaves[i].leaves[2].value);
+	if(verbose)fprintf(stderr,"read doi: %s\n",citation_information.leaves[i].leaves[2].value);
+	res=fscanf(cfp,"%s %s\n",key,citation_information.leaves[i].leaves[3].value);
+	if(verbose)fprintf(stderr,"read key 0: %s\n",citation_information.leaves[i].leaves[3].value);
+	res=fscanf(cfp,"%s %s\n",key,citation_information.leaves[i].leaves[4].value);
+	if(verbose)fprintf(stderr,"read key 1: %s\n",citation_information.leaves[i].leaves[4].value);
+	res=fscanf(cfp,"%s %s\n",key,citation_information.leaves[i].leaves[5].value);
+	if(verbose)fprintf(stderr,"read key 2: %s\n",citation_information.leaves[i].leaves[5].value);
+	res=fscanf(cfp,"%s %s\n",key,citation_information.leaves[i].leaves[6].value);
+	if(verbose)fprintf(stderr,"read key 3: %s\n",citation_information.leaves[i].leaves[6].value);
+	res=fscanf(cfp,"%s %s\n",key,citation_information.leaves[i].leaves[7].value);
+	for(j=0;j<strlen(citation_information.leaves[i].leaves[7].value);j++)
+		if(citation_information.leaves[i].leaves[7].value[j]=='>') citation_information.leaves[i].leaves[7].value[j]=' ';
+		if(verbose)fprintf(stderr,"read description: %s\n",citation_information.leaves[i].leaves[7].value);
+  }
+  if (verbose) fprintf(stderr,"going to read configuration file about Modification_History\n");
+  /* Modification_History*/
   res=fscanf(cfp,"MOD_DATE %s\n",moddate);
   res=fscanf(cfp,"VERSID %s\n",svers);
   res=fscanf(cfp,"DESCR %s\n",descr);
 	for(j=0;j<strlen(descr);j++)
 		if(descr[j]=='>') descr[j]=' ';
+  /* Observation Area */
+  if (verbose) fprintf(stderr,"going to read configuration file about Observation_Area\n");
+  fprintf(stderr,"going to read configuration file about Time_Coordinates\n");
   res=fscanf(cfp,"TSTART %s\n",tstart);
   res=fscanf(cfp,"TSTOP %s\n",tstop);
+  fprintf(stderr,"going to read configuration file about Primary_Result_Summary\n");
   res=fscanf(cfp,"PURP %s\n",purp);
   res=fscanf(cfp,"PROC_LEV %s\n",proclev);
   res=fscanf(cfp,"RES_DESCR %s\n",resdescr);
@@ -156,20 +229,28 @@ int main(int argc, char **argv)
   res=fscanf(cfp,"LAMBDA %s\n",lambda);
   res=fscanf(cfp,"DOMAIN %s\n",domain);
   res=fscanf(cfp,"DISCIPL %s\n",discipl);
+  if (verbose) fprintf(stderr,"going to read configuration file about Investigation_Area\n");
   res=fscanf(cfp,"INVEST_AREA %s\n",invarea);
   res=fscanf(cfp,"INVEST_TYPE %s\n",invtype);
   res=fscanf(cfp,"INV_LID %s\n",invlid);
   res=fscanf(cfp,"REFTYPE %s\n",reftype);
+  res=fscanf(cfp,"OSNAME %s\n",observing_system.value);
   res=fscanf(cfp,"NOSC_COMP %d\n",&nosc);
-  observing_system.osc[i].name=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
-  observing_system.osc[i].type=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
   for(i=0;i<nosc;i++){ 
 	res=fscanf(cfp,"%11s %s\n",key,onamval[i]);
 	for(j=0;j<strlen(onamval[i]);j++)
 		if(onamval[i][j]=='>') onamval[i][j]=' ';
-	fprintf(stderr,"OSC[%d] n. value: %s\n",i,onamval[i]);
-	res=fscanf(cfp,"%11s %s\n",key,otypval[i]);
-	fprintf(stderr,"OSC[%d] t. value: %s\n",i,otypval[i]);
+	if(verbose)fprintf(stderr,"OSC[%d] n. value: %s\n",i,onamval[i]);
+	res=fscanf(cfp,"%s %s\n",key,otypval[i]);
+	if(verbose)fprintf(stderr,"OSC[%d] n. type: %s\n",i,otypval[i]);
+	res=fscanf(cfp,"%s %s\n",key,observing_system.osc[i].descr);
+	for(j=0;j<strlen(observing_system.osc[i].descr);j++)
+		if(observing_system.osc[i].descr[j]=='>') observing_system.osc[i].descr[j]=' ';
+	if(verbose)fprintf(stderr,"OSC[%d] n. description: %s\n",i,observing_system.osc[i].descr);	
+	res=fscanf(cfp,"%s %s\n",key,observing_system.osc[i].ir.lid_reference.value);
+	if(verbose)fprintf(stderr,"OSC[%d] n. lid_reference: %s\n",i,observing_system.osc[i].ir.lid_reference.value);	
+	res=fscanf(cfp,"%s %s\n",key,observing_system.osc[i].ir.reference_type.value);
+	if(verbose)fprintf(stderr,"OSC[%d] n. reference_type: %s\n",i,observing_system.osc[i].ir.reference_type.value);	
   } 
   /* ended reading configuration file */
   /* printout variables content for debug */
@@ -181,38 +262,8 @@ int main(int argc, char **argv)
   fprintf(stderr,"PDS4 <data_type> = %s\n",dtype);
   fclose(cfp);
 
-	numproducts = atoi(argv[2]); /* number of products pointed by the label */
 	/* setup data structures and links */
 	po.ia=&ia; po.oa=&oa; po.fao=&fao; pds.po=&po;
-	prodfnam=(char **)malloc(numproducts*sizeof(char *));
-	for(i=0;i<numproducts;i++)
-		prodfnam[i]=(char *)malloc(MAXFNAML);
-	pds.products=(FILE**)malloc(numproducts*sizeof(FILE *)); 
-	oa.target=(struct TARGET_IDENTIFICATION*)malloc(sizeof(struct TARGET_IDENTIFICATION));
-	array2d.leaves[0].attributes=(struct ATTRIBUTE *)malloc(sizeof(struct ATTRIBUTE));	
-	modification_history.leaves=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
-	modification_history.leaves[0].leaves=(struct ELEMENT *)malloc(3*sizeof(struct ELEMENT));
-	primary_result_summary.leaves=(struct ELEMENT *)malloc(4*sizeof(struct ELEMENT));
-	primary_result_summary.leaves[3].leaves=(struct ELEMENT *)malloc(3*sizeof(struct ELEMENT));
-	mission_area.leaves=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
-	mission_area.leaves->leaves=(struct ELEMENT *)malloc(6*sizeof(struct ELEMENT));
-	for(i=0;i<2;i++){
-		observing_system.osc[i].name=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
-		observing_system.osc[i].type=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
-	}
-	file.leaves=(struct ELEMENT*)malloc(MAXFNAML*sizeof(struct ELEMENT));
-	for(i=0;i<6;i++)
-		array2d.leaves[i].leaves=(struct ELEMENT*)malloc(MAXFNAML*sizeof(struct ELEMENT));
-	if(verbose)fprintf(stderr,"main() numproducts = %d\n",numproducts);
-	for(i=0;i<numproducts;i++){
-		pds.products[i] = (FILE*)malloc(2048);
-		if(argv[i+2]!=NULL){
-			strcpy((char*)prodfnam[i],argv[i+3]);
-		} else {
-			perror("ERROR: filename lacking, exiting");
-			exit(1);
-		}
-	}
 	if(verbose)fprintf(stderr,"main() starting copying strings\n");
 	strcpy((char*)pds.xmlintest,"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
 	strcpy((char*)pds.xml_model[0],"href=\"https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1A10.sch\" \n schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
@@ -224,7 +275,7 @@ int main(int argc, char **argv)
 	strcpy((char*)pds.xml_model[4],"href=\"https://psa.esa.int/psa/em16/tgo/cas/v1/PDS4_EM16_TGO_CAS_1L00_1200.sch\" schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
 	strcpy((char*)pds.xml_model[5],"href=\"https://psa.esa.int/psa/mission/em16/v1/PDS4_EM16_1L00_1300.sch\" schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
 */	strcpy((char*)po.name,"Product_Observational");
-	strcpy((char*)po.attributes[0].name,"xmlns");
+/*	strcpy((char*)po.attributes[0].name,"xmlns");
 	strcpy((char*)po.attributes[0].value,"http://pds.nasa.gov/pds4/pds/v1");
 	strcpy((char*)po.attributes[1].name,"xmlns:mess");
 	strcpy((char*)po.attributes[1].value,"http://pds.nasa.gov/pds4/mission/mess/v1");
@@ -232,7 +283,7 @@ int main(int argc, char **argv)
 	strcpy((char*)po.attributes[2].value,"http://www.w3.org/2001/XMLSchema-instance");
 	strcpy((char*)po.attributes[3].name,"xsi:schemaLocation");
 	strcpy((char*)po.attributes[3].value,"http://pds.nasa.gov/pds4/pds/v1 https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1A10.xsd   http://pds.nasa.gov/pds4/mission/mess/v1 https://pds.nasa.gov/pds4/mission/mess/v1/PDS4_MESS_1B00_1020.xsd");
-/*	strcpy((char*)po.attributes[0].name,"xsi:schemaLocation");
+	strcpy((char*)po.attributes[0].name,"xsi:schemaLocation");
 	strcpy((char*)po.attributes[0].value,"http://pds.nasa.gov/pds4/pds/v1 https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1L00.xsd  http://psa.esa.int/psa/v1  https://psa.esa.int/psa/v1/PDS4_PSA_1L00_1401.xsd  http://pds.nasa.gov/pds4/geom/v1  https://pds.nasa.gov/pds4/geom/v1/PDS4_GEOM_1L00_1970.xsd  http://pds.nasa.gov/pds4/disp/v1  https://pds.nasa.gov/pds4/disp/v1/PDS4_DISP_1L00_1510.xsd  http://psa.esa.int/psa/em16/tgo/cas/v1  https://psa.esa.int/psa/em16/tgo/cas/v1/PDS4_EM16_TGO_CAS_1L00_1200.xsd  http://psa.esa.int/psa/mission/em16/v1  https://psa.esa.int/psa/mission/em16/v1/PDS4_EM16_1L00_1300.xsd");
 	strcpy((char*)po.attributes[1].name,"xmlns");
 	strcpy((char*)po.attributes[1].value,"http://pds.nasa.gov/pds4/pds/v1");
@@ -259,6 +310,19 @@ int main(int argc, char **argv)
 	strcpy((char*)information_model_version.value,imvers);
 	strcpy((char*)product_class.name,"product_class");
 	strcpy((char*)product_class.value,prodclass);
+	/*Citation_Information*/
+	if(verbose)fprintf(stderr,"main() before Citation_Information\n");
+	strcpy((char*)citation_information.name,"Citation_Information");
+	for(i=0;i<nci;i++){ 
+		strcpy((char*)citation_information.leaves[i].leaves[0].name,"author_list"); /* author list */
+		strcpy((char*)citation_information.leaves[i].leaves[1].name,"publication_year"); /* publication year */
+		strcpy((char*)citation_information.leaves[i].leaves[2].name,"doi"); /* doi */
+		strcpy((char*)citation_information.leaves[i].leaves[3].name,"keyword"); /* keyword 0 */
+		strcpy((char*)citation_information.leaves[i].leaves[4].name,"keyword"); /* keyword 1 */
+		strcpy((char*)citation_information.leaves[i].leaves[5].name,"keyword"); /* keyword 2 */
+		strcpy((char*)citation_information.leaves[i].leaves[6].name,"keyword"); /* keyword 3 */
+		strcpy((char*)citation_information.leaves[i].leaves[7].name,"description"); /* cit. inf. description */
+	}
 	if(verbose)fprintf(stderr,"main() before Modification_History\n");
 	strcpy((char*)modification_history.name,"Modification_History");
 	strcpy((char*)modification_history.leaves[0].name,"Modification_Detail");
@@ -289,18 +353,25 @@ int main(int argc, char **argv)
 	strcpy((char*)primary_result_summary.leaves[3].leaves[2].name,"discipline_name");
 	strcpy((char*)primary_result_summary.leaves[3].leaves[2].value,discipl);
     if(verbose)fprintf(stderr,"main() before Observing System\n");	
-	strcpy((char*)oa.leaves[0].name,"Observing System");
+/*	strcpy((char*)oa.name,"Observing System"); */
 	strcpy((char*)observing_system.name,"Observing_System");
+	strcpy((char*)observing_system.leaves[0].name,"name");
 	strcpy((char*)observing_system.osc[0].ename,"Observing_System_Component");
 	strcpy((char*)observing_system.osc[0].name->name,"name");
 	strcpy((char*)observing_system.osc[0].name->value,onamval[0]); 
 	strcpy((char*)observing_system.osc[0].type->name,"type");
-	strcpy((char*)observing_system.osc[0].type->value,otypval[0]); 
+	strcpy((char*)observing_system.osc[0].type->value,otypval[0]);
+	strcpy((char*)observing_system.osc[0].ir.name,"Internal_Reference"); 
+	strcpy((char*)observing_system.osc[0].ir.lid_reference.name,"lid_reference");
+	strcpy((char*)observing_system.osc[0].ir.reference_type.name,"reference_type");
 	strcpy((char*)observing_system.osc[1].ename,"Observing_System_Component");
 	strcpy((char*)observing_system.osc[1].name->name,"name");
 	strcpy((char*)observing_system.osc[1].name->value,onamval[1]); 
 	strcpy((char*)observing_system.osc[1].type->name,"type");
-	strcpy((char*)observing_system.osc[1].type->value,otypval[i]); 
+	strcpy((char*)observing_system.osc[1].type->value,otypval[1]); 
+	strcpy((char*)observing_system.osc[1].ir.name,"Internal_Reference"); 
+	strcpy((char*)observing_system.osc[1].ir.lid_reference.name,"lid_reference");
+	strcpy((char*)observing_system.osc[1].ir.reference_type.name,"reference_type");
     if(verbose)fprintf(stderr,"main() before Target_Identification\n");	
 	strcpy((char*)oa.target[0].ename,"Target_Identification");
 	strcpy((char*)oa.target[0].name.name,"name");
@@ -325,15 +396,15 @@ int main(int argc, char **argv)
     if(verbose)fprintf(stderr,"main() before Investigation Area\n");	
 	strcpy((char*)iaa.ename,"Investigation_Area");
 	strcpy((char*)iaa.name.name,"name");
-	strcpy((char*)iaa.name.value,"messenger");
+	strcpy((char*)iaa.name.value,invarea);
 	strcpy((char*)iaa.type.name,"type");
-	strcpy((char*)iaa.type.value,"Mission");
+	strcpy((char*)iaa.type.value,invtype);
     if(verbose)fprintf(stderr,"main() before Internal_Reference\n");	
 	strcpy((char*)iref.name,"Internal_Reference");
 	strcpy((char*)iref.lid_reference.name,"lid_reference");
-	strcpy((char*)iref.lid_reference.value,"urn:nasa:pds:context:investigation:mission.messenger");
+	strcpy((char*)iref.lid_reference.value,invlid);
 	strcpy((char*)iref.reference_type.name,"reference_type");
-	strcpy((char*)iref.reference_type.value,"data_to_investigation");
+	strcpy((char*)iref.reference_type.value,reftype);
 	strcpy((char*)file.name,"File");
 	strcpy((char*)file.leaves[0].name,"file_name");
 	strcpy((char*)file.leaves[0].value,prodfnam[0]);
@@ -393,6 +464,22 @@ int main(int argc, char **argv)
     xmlNewChild(p1, NULL, BAD_CAST title.name, BAD_CAST title.value);
     xmlNewChild(p1, NULL, BAD_CAST information_model_version.name, BAD_CAST information_model_version.value);
     xmlNewChild(p1, NULL, BAD_CAST product_class.name, BAD_CAST product_class.value);
+    /* Citation Information subtree */
+    if(verbose)fprintf(stderr,"main() opening <Citation_Information> node element 1.15\n");
+    p1=xmlNewChild(p1, NULL, BAD_CAST citation_information.name, BAD_CAST NULL);
+    for(i=0;i<nci;i++){
+	//citation_information.leaves[i].leaves
+	xmlNewChild(p1, NULL, BAD_CAST citation_information.leaves[i].leaves[0].name, BAD_CAST citation_information.leaves[i].leaves[0].value);
+	xmlNewChild(p1, NULL, BAD_CAST citation_information.leaves[i].leaves[1].name, BAD_CAST citation_information.leaves[i].leaves[1].value);
+	xmlNewChild(p1, NULL, BAD_CAST citation_information.leaves[i].leaves[2].name, BAD_CAST citation_information.leaves[i].leaves[2].value);
+	xmlNewChild(p1, NULL, BAD_CAST citation_information.leaves[i].leaves[3].name, BAD_CAST citation_information.leaves[i].leaves[3].value);
+	xmlNewChild(p1, NULL, BAD_CAST citation_information.leaves[i].leaves[4].name, BAD_CAST citation_information.leaves[i].leaves[4].value);
+	xmlNewChild(p1, NULL, BAD_CAST citation_information.leaves[i].leaves[5].name, BAD_CAST citation_information.leaves[i].leaves[5].value);
+	xmlNewChild(p1, NULL, BAD_CAST citation_information.leaves[i].leaves[6].name, BAD_CAST citation_information.leaves[i].leaves[6].value);
+	xmlNewChild(p1, NULL, BAD_CAST citation_information.leaves[i].leaves[7].name, BAD_CAST citation_information.leaves[i].leaves[7].value);
+	}    
+	/* Modification History subtree */
+    if(verbose)fprintf(stderr,"main() opening <Modification_History> node element 1.25\n");
     p1=xmlNewChild(p1, NULL, BAD_CAST modification_history.name, BAD_CAST NULL);
     p1=xmlNewChild(p1, NULL, BAD_CAST modification_history.leaves[0].name, BAD_CAST NULL);
     xmlNewChild(p1, NULL, BAD_CAST modification_history.leaves[0].leaves[0].name, BAD_CAST modification_history.leaves[0].leaves[0].value);
@@ -425,13 +512,17 @@ int main(int argc, char **argv)
 	p1=p1->parent;p1=p1->parent; /* close IA */
     if(verbose)fprintf(stderr,"main() opening <Observing_System> 2.5\n");
 	p1 = xmlNewChild(p1, NULL, BAD_CAST observing_system.name, BAD_CAST NULL); /* <Observing_System>*/
+	p1 = xmlNewChild(p1, NULL, BAD_CAST observing_system.leaves[0].name, BAD_CAST BAD_CAST observing_system.leaves[0].value); //<Observing_System_Component>
 	for(i=0;i<nosc;i++){
-	p1 = xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[i].ename, BAD_CAST NULL); //<Observing_System_Component>
+	xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[i].ename, BAD_CAST NULL); //<Observing_System_Component>
 	xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[i].name->name, BAD_CAST observing_system.osc[i].name->value);
 	xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[i].type->name, BAD_CAST observing_system.osc[i].type->value);
+	xmlNewChild(p1, NULL, BAD_CAST "description", BAD_CAST observing_system.osc[i].descr);	
+	xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[i].ir.name, BAD_CAST NULL); /* IA.Internal_Reference */
+	xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[i].ir.lid_reference.name, BAD_CAST observing_system.osc[i].ir.lid_reference.value);
+	xmlNewChild(p1, NULL, BAD_CAST observing_system.osc[i].ir.reference_type.name, BAD_CAST observing_system.osc[i].ir.reference_type.value);
 	p1=p1->parent;
 	} 
-	
 	p1=p1->parent;
     if(verbose)fprintf(stderr,"main() opening <Target_Identification> 3\n");
 	p1 = xmlNewChild(p1, NULL, BAD_CAST oa.target[0].ename, BAD_CAST NULL);
@@ -494,16 +585,21 @@ int main(int argc, char **argv)
 	free(pds.products);
 	free(primary_result_summary.leaves[3].leaves);
 	free(primary_result_summary.leaves);
+	free(citation_information.leaves[0].leaves);
+	free(citation_information.leaves);
+	free(logical_identifier.leaves[0].leaves);
+	free(logical_identifier.leaves);
 	free(modification_history.leaves[0].leaves);
 	free(modification_history.leaves);
 	free(prodfnam);
+	free(observing_system.leaves);
 	for(i=0;i<nosc;i++){
 		free(observing_system.osc[i].name);
 		free(observing_system.osc[i].type);
 	}
+	free(file.leaves);
 	free(mission_area.leaves->leaves);
 	free(mission_area.leaves);
-	free(file.leaves);
 	for(i=0;i<6;i++)
 		free(array2d.leaves[i].leaves);
 	// prodfname freed 
