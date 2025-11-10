@@ -151,6 +151,8 @@ int main(int argc, char **argv)
   res=fscanf(cfp,"PURP %s\n",purp);
   res=fscanf(cfp,"PROC_LEV %s\n",proclev);
   res=fscanf(cfp,"RES_DESCR %s\n",resdescr);
+  for(j=0;j<strlen(resdescr);j++)
+		if(resdescr[j]=='>') resdescr[j]=' ';
   res=fscanf(cfp,"LAMBDA %s\n",lambda);
   res=fscanf(cfp,"DOMAIN %s\n",domain);
   res=fscanf(cfp,"DISCIPL %s\n",discipl);

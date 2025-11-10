@@ -1,15 +1,15 @@
 CC=gcc -g -O2
 LD=gcc
 XML2_HOME=/usr
+PNG_HOME=/usr
 CFLAGS=-I$(XML2_HOME)/include/libxml2 -I$(XML2_HOME)/include/libxslt
-PNG_CFLAGS=-I$(XML2_HOME)/include/libpng16
+PNG_CFLAGS=-I$(PNG_HOME)/include/libpng16
 LDFLAGS=-L$(XML2_HOME)/lib
-PNG_LDFLAGS=-L$(XML2_HOME)/lib
+PNG_LDFLAGS=-L$(PNG_HOME)/lib/x86_64-linux-gnu
 LIBS=-lxml2 -lxslt
 PNG_LIBS=-lpng -lz
 RM=rm -rf
 .PHONY: all clean
-#all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2 xmltm2ascii readraw readraw16 parse1 parse2 sval createlabel write_png read_png
 all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2 xmltm2ascii \
 	readraw readraw16  sval createlabel write_png read_png archivepds archivepds2 readlabel
 pds.o: pds.c
@@ -39,11 +39,11 @@ testWriter: testWriter.c
 xmltm2ascii: xmltm2ascii.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 pngprog001: pngprog001.c
-	$(CC) $(PNG_CFLAGS) $< -o $@ $(LDFLAGS) $(PNG_LIBS)
+	$(CC) $(PNG_CFLAGS) $< -o $@ $(PNG_LDFLAGS) $(PNG_LIBS)
 write_png: write_png.c
-	$(CC) $(PNG_CFLAGS) $< -o $@ $(LDFLAGS) $(PNG_LIBS)
+	$(CC) $(PNG_CFLAGS) $< -o $@ $(PNG_LDFLAGS) $(PNG_LIBS)
 read_png: read_png.c
-	$(CC) $(PNG_CFLAGS) $< -o $@ $(LDFLAGS) $(PNG_LIBS)
+	$(CC) $(PNG_CFLAGS) $< -o $@ $(PNG_LDFLAGS) $(PNG_LIBS)
 temp1: temp1.c
 	$(CC) $< -o $@
 temp2: temp2.c

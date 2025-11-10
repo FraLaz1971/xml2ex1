@@ -21,7 +21,8 @@ Example programs using the libxml2 c library. Contains also programs using the l
 `./archivepds <conf.file> <nproducts> <prod1> <prod2> ... <prodn> > outputlabel.xml` 
 ###
 ## archivepds
-execution example:
+execution examples:
 ###
 `./archivepds arpds.conf 1 mercury1_500x320.raw > mylabel.xml`
 ###
+`./archivepds messglob.conf 1 MSGR_DEM_USG_SC_J_V02.IMG | tee out.xml`
