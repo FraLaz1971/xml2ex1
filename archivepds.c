@@ -100,6 +100,7 @@ int main(int argc, char **argv)
 	}
 /* allocate memory for nodes */
 	oa.target=(struct TARGET_IDENTIFICATION*)malloc(3*sizeof(struct TARGET_IDENTIFICATION));
+	oa.target->iref=(struct INTERNAL_REFERENCE*)malloc(sizeof(struct INTERNAL_REFERENCE));
 	array2d.leaves[0].attributes=(struct ATTRIBUTE *)malloc(sizeof(struct ATTRIBUTE));	
 	po.attributes=(struct ATTRIBUTE *)malloc(MAXLEAV*sizeof(struct ATTRIBUTE));
 	logical_identifier.leaves=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
@@ -267,16 +268,20 @@ int main(int argc, char **argv)
   /* target identification */
 	res=fscanf(cfp,"TARGET_NAME %s\n",oa.target[0].name.value); /*  */
 	res=fscanf(cfp,"TARGET_TYPE %s\n",oa.target[0].type.value); /*  */
+	res=fscanf(cfp,"%s %s\n",key,oa.target[0].iref->lid_reference.value);
+	if(verbose)fprintf(stderr,"TARGET[%d] n. lid_reference: %s\n",0,oa.target[0].iref->lid_reference.value);	
+	res=fscanf(cfp,"%s %s\n",key,oa.target[0].iref->reference_type.value);
+	if(verbose)fprintf(stderr,"TARGET[%d] n. reference_type: %s\n",0,oa.target[0].iref->reference_type.value);	
   /* read Mission Area configuration */
 	res=fscanf(cfp,"MISSION %s\n",mission); /* MISSION */
 	if(verbose)fprintf(stderr,"MISSION: %s\n",mission);	
 	/* START Mission Information */
 	res=fscanf(cfp,"MISS_ID %s\n",miss_id); /* MISS_ID (element name) */
-	res=fscanf(cfp,"PHASE %s\n",mission_area.leaves[0].leaves[0].value); /* mission phase */
+	res=fscanf(cfp,"PHASE %s\n",mission_area.leaves[0].leaves[2].value); /* mission phase */
 	for(j=0;j<strlen(mission_area.leaves[0].leaves[0].value);j++)
 		if(mission_area.leaves[0].leaves[0].value[j]=='>') mission_area.leaves[0].leaves[0].value[j]=' ';	
-	res=fscanf(cfp,"CLOCK_START %s\n",mission_area.leaves[0].leaves[1].value); /* clock tstart */
-	res=fscanf(cfp,"CLOCK_STOP %s\n",mission_area.leaves[0].leaves[2].value); /* clock tsop */
+	res=fscanf(cfp,"CLOCK_START %s\n",mission_area.leaves[0].leaves[0].value); /* clock tstart */
+	res=fscanf(cfp,"CLOCK_STOP %s\n",mission_area.leaves[0].leaves[1].value); /* clock tsop */
 	res=fscanf(cfp,"PRODID %s\n",mission_area.leaves[0].leaves[3].value); /* product id */
 	res=fscanf(cfp,"SWNAME %s\n",mission_area.leaves[0].leaves[4].value); /* software name */
 	res=fscanf(cfp,"SWVERS %s\n",mission_area.leaves[0].leaves[5].value); /* software version */
@@ -314,7 +319,7 @@ MEAS_RANGE_IDX 4
 MEAS_RANGE 128
 REF_FRAME scf
 SPICE_FRAME MPO_SPACECRAFT
-STATUS_NAME bc_mpo_sim:Instrument_Status
+STATUS_NAME bc_mpo_simbio-sys:Instrument_Status
 SC_STATUS orbit
 
 	*/
@@ -451,6 +456,9 @@ SC_STATUS orbit
 //	strcpy((char*)oa.target[0].name.value,"mercury");
 	strcpy((char*)oa.target[0].type.name,"type");
 //	strcpy((char*)oa.target[0].type.value,"Planet");
+	strcpy((char*)oa.target[0].iref->name,"Internal_Reference"); 
+	strcpy((char*)oa.target[0].iref->lid_reference.name,"lid_reference");
+	strcpy((char*)oa.target[0].iref->reference_type.name,"reference_type");
 	strcpy((char*)mission_area.name,"Mission_Area");
 	if (verbose) fprintf(stderr,"strcmp(mission,\"mess:MESSENGER\"): %d\n",strcmp(mission,"mess:MESSENGER"));
 	if (!strcmp(mission,"mess:MESSENGER") ){
@@ -471,11 +479,11 @@ SC_STATUS orbit
 	 } else {
 	if (verbose) fprintf(stderr,"strcmp(mission,\"BC:BEPICOLOMBO\"): %d\n",strcmp(mission,"BC:BEPICOLOMBO"));
 	 	strcpy((char*)mission_area.leaves[0].name,miss_id);
-		strcpy((char*)mission_area.leaves[0].leaves[0].name,"psa:mission_phase_name");
+		strcpy((char*)mission_area.leaves[0].leaves[2].name,"psa:mission_phase_name");
 //		strcpy((char*)mission_area.leaves[0].leaves[0].value,"Mercury Orbit Year 5");
-		strcpy((char*)mission_area.leaves[0].leaves[1].name,"psa:spacecraft_clock_start_count");
+		strcpy((char*)mission_area.leaves[0].leaves[0].name,"psa:spacecraft_clock_start_count");
 //		strcpy((char*)mission_area.leaves[0].leaves[1].value,"2/070170476");
-		strcpy((char*)mission_area.leaves[0].leaves[2].name,"psa:spacecraft_clock_stop_count");
+		strcpy((char*)mission_area.leaves[0].leaves[1].name,"psa:spacecraft_clock_stop_count");
 //		strcpy((char*)mission_area.leaves[0].leaves[2].value,"2/070256656");
 		strcpy((char*)mission_area.leaves[0].leaves[3].name,"psa:standard_data_product_id");
 //		strcpy((char*)mission_area.leaves[0].leaves[3].value,"mdisedr");
@@ -513,7 +521,7 @@ SC_STATUS orbit
 		strcpy((char*)mission_area.leaves[2].leaves[5].name,"bc_mpo_sim:data_reference_spice_frame");
 //		strcpy((char*)mission_area.leaves[2].leaves[5].value,"");
 	 	strcpy((char*)mission_area.leaves[3].name,istatus);
-		strcpy((char*)mission_area.leaves[3].leaves[0].name,"bc_mpo_sim:mpo_status");
+		strcpy((char*)mission_area.leaves[3].leaves[0].name,"bc_mpo_simbio-sys:mpo_status");
 //		strcpy((char*)mission_area.leaves[3].leaves[0].value,"");
 	 	strcpy((char*)mission_area.leaves[4].name,"psa:Processing_Context");
 		strcpy((char*)mission_area.leaves[4].leaves[0].name,"psa:processing_software_title");
@@ -525,7 +533,7 @@ SC_STATUS orbit
 	strcpy((char*)discipline_area.name,"Discipline_Area");
 	strcpy((char*)discipline_area.leaves[0].name,"geom:Geometry");
 	strcpy((char*)discipline_area.leaves[0].leaves[0].name,"geom:SPICE_Kernel_Files");
-	strcpy((char*)discipline_area.leaves[0].leaves[0].leaves[0].name,"SPICE_Kernel_Identification");
+	strcpy((char*)discipline_area.leaves[0].leaves[0].leaves[0].name,"geom:SPICE_Kernel_Identification");
 	for(i=0;i<251;i++){
 		strcpy((char*)discipline_area.leaves[0].leaves[0].leaves[0].leaves[i].name,"geom:spice_kernel_file_name");
 		strcpy((char*)discipline_area.leaves[0].leaves[0].leaves[0].leaves[i].value,"TBC");
@@ -666,7 +674,10 @@ SC_STATUS orbit
 	p1 = xmlNewChild(p1, NULL, BAD_CAST oa.target[0].ename, BAD_CAST NULL);
 	xmlNewChild(p1, NULL, BAD_CAST oa.target[0].name.name, BAD_CAST oa.target[0].name.value);
 	xmlNewChild(p1, NULL, BAD_CAST oa.target[0].type.name, BAD_CAST oa.target[0].type.value);
-	p1=p1->parent;
+	p1=xmlNewChild(p1, NULL, BAD_CAST oa.target[0].iref->name, BAD_CAST NULL); /* IA.Internal_Reference */
+	xmlNewChild(p1, NULL, BAD_CAST oa.target[0].iref->lid_reference.name, BAD_CAST oa.target[0].iref->lid_reference.value);
+	xmlNewChild(p1, NULL, BAD_CAST oa.target[0].iref->reference_type.name, BAD_CAST oa.target[0].iref->reference_type.value);
+	p1=p1->parent;p1=p1->parent;
     if(verbose)fprintf(stderr,"main() opening <Mission_Area> 3.25\n");
 	p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.name, BAD_CAST NULL); /* mission area */
 	if (!strcmp(mission,"mess:MESSENGER")) {
@@ -678,36 +689,36 @@ SC_STATUS orbit
 	xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].leaves[4].name, BAD_CAST mission_area.leaves[0].leaves[4].value);
 	xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].leaves[5].name, BAD_CAST mission_area.leaves[0].leaves[5].value); 
 	p1=p1->parent;p1=p1->parent;p1=p1->parent;
-//	} else if (!strcmp(mission,"BC:BEPICOLOMBO")) {
-	} else  {
+	} else if (!strcmp(mission,"BC:BEPICOLOMBO")) {
+//	} else  {
 		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].name, BAD_CAST NULL); /* psa:Mission_Information */
 		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].leaves[0].name, BAD_CAST mission_area.leaves[0].leaves[0].value);
 		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].leaves[1].name, BAD_CAST mission_area.leaves[0].leaves[1].value);
 		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].leaves[2].name, BAD_CAST mission_area.leaves[0].leaves[2].value);
 //		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].leaves[6].name, BAD_CAST mission_area.leaves[0].leaves[6].value);
 		xmlNewChild(p1, NULL, BAD_CAST "psa:mission_phase_identifier", BAD_CAST mission_area.leaves[0].leaves[6].value);
-		xmlNewChild(p1, NULL, BAD_CAST "start_orbit_number", BAD_CAST mission_area.leaves[0].leaves[7].value);
-		xmlNewChild(p1, NULL, BAD_CAST "stop_orbit_number", BAD_CAST mission_area.leaves[0].leaves[8].value);
+		xmlNewChild(p1, NULL, BAD_CAST "psa:start_orbit_number", BAD_CAST mission_area.leaves[0].leaves[7].value);
+		xmlNewChild(p1, NULL, BAD_CAST "psa:stop_orbit_number", BAD_CAST mission_area.leaves[0].leaves[8].value);
 		p1=p1->parent;
 		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[1].name, BAD_CAST NULL); /* psa:Sub-Instrument */
 		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[1].leaves[0].name, BAD_CAST mission_area.leaves[1].leaves[0].value);
 		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[1].leaves[1].name, BAD_CAST mission_area.leaves[1].leaves[1].value);
 		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[1].leaves[2].name, BAD_CAST mission_area.leaves[1].leaves[2].value);
 		p1=p1->parent;
-		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].name, BAD_CAST NULL); /* bc_mpo_sim:Data */
-		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].leaves[0].name, BAD_CAST mission_area.leaves[2].leaves[0].value);
-		attr = xmlSetProp(p1, (const xmlChar *)mission_area.leaves[2].leaves[0].attributes[0].name, \
-		(const xmlChar *)mission_area.leaves[2].leaves[0].attributes[0].value); /* unit attribute */		
-		p1=p1->parent;
-		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].leaves[1].name, BAD_CAST mission_area.leaves[2].leaves[1].value);
-		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].leaves[2].name, BAD_CAST mission_area.leaves[2].leaves[2].value);
-		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].leaves[3].name, BAD_CAST mission_area.leaves[2].leaves[3].value);
-		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].leaves[4].name, BAD_CAST mission_area.leaves[2].leaves[4].value);
-		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].leaves[5].name, BAD_CAST mission_area.leaves[2].leaves[5].value);
-		p1=p1->parent;
-		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[3].name, BAD_CAST NULL); /* bc_mpo_sim:Instrument_Status */
-		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[3].leaves[0].name, BAD_CAST mission_area.leaves[3].leaves[0].value);
-		p1=p1->parent;
+		//p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].name, BAD_CAST NULL); /* bc_mpo_sim:Data */
+		//p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].leaves[0].name, BAD_CAST mission_area.leaves[2].leaves[0].value);
+		//attr = xmlSetProp(p1, (const xmlChar *)mission_area.leaves[2].leaves[0].attributes[0].name, \
+		//(const xmlChar *)mission_area.leaves[2].leaves[0].attributes[0].value); /* unit attribute */		
+		//p1=p1->parent;
+		//xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].leaves[1].name, BAD_CAST mission_area.leaves[2].leaves[1].value);
+		//xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].leaves[2].name, BAD_CAST mission_area.leaves[2].leaves[2].value);
+		//xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].leaves[3].name, BAD_CAST mission_area.leaves[2].leaves[3].value);
+		//xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].leaves[4].name, BAD_CAST mission_area.leaves[2].leaves[4].value);
+		//xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].leaves[5].name, BAD_CAST mission_area.leaves[2].leaves[5].value);
+		//p1=p1->parent;
+		//p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[3].name, BAD_CAST NULL); /* bc_mpo_sim:Instrument_Status */
+		//xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[3].leaves[0].name, BAD_CAST mission_area.leaves[3].leaves[0].value);
+		//p1=p1->parent;
 		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].name, BAD_CAST NULL); /* Processing Context */
 		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[0].name, BAD_CAST mission_area.leaves[4].leaves[0].value);
 		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[1].name, BAD_CAST mission_area.leaves[4].leaves[1].value);
@@ -795,6 +806,7 @@ SC_STATUS orbit
 	for(i=0;i<6;i++)
 		free(array2d.leaves[i].leaves);
 	// prodfname freed 
+	free(oa.target->iref);
 	free(oa.target);
 	free(po.attributes); // po.attributes freed 
 	fprintf(stderr,"main() ending program\n");

@@ -85,6 +85,7 @@ struct IDENTIFICATION_AREA {
 struct TARGET_IDENTIFICATION{
 	char ename[MAXFNAML];
 	char value[MAXFNAML];
+	struct INTERNAL_REFERENCE *iref;
 	struct ELEMENT name;
 	struct ELEMENT type;
 };
