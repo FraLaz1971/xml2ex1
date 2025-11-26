@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include "pds.h"
-int main(void){
-  unsigned short bitpix = 0; /* size of a pixel in bits */
+int main(int argc, char **argv){
+  short bitpix = 0; /* size of a pixel in bits */
   unsigned char sign = 0; /* 0=unsigned  1=signed */
   int end=0; /* 0=LSB 1=MSB */
   char ssign[16];
@@ -12,16 +12,21 @@ int main(void){
   unsigned int width = 0;  /* Sample == n. of columns OO */
   unsigned int height = 0; /* Line == n. of rows */
   int cnt,res;
-  const char* confname="arpds.conf";
+  char* confname;
   char buf[1024];
   FILE *cfp;
+  if(argc<2){
+	  fprintf(stderr,"usage:%s <file.conf>\n",argv[0]);
+	  return 1;
+  }
+  confname = argv[1];
   cfp=fopen(confname, "r");
   if(cfp==NULL){
      perror("configuration file not present");
      exit(1);
   }
   /* read configuration file content into variables in memory */
-  res=fscanf(cfp, "BITPIX %hu\n",&bitpix);
+  res=fscanf(cfp, "BITPIX %hd\n",&bitpix);
   res=fscanf(cfp, "SIGN %s\n",buf);
   if(!(strcmp(buf,"signed"))){
   	sign = 1;
@@ -45,7 +50,8 @@ int main(void){
   strcpy(send,buf);
   res=fscanf(cfp,  "WIDTH %d\n",&width);
   res=fscanf(cfp, "HEIGHT %d\n",&height);
-  sprintf(dtype,"%s%s%u",ssign,send,bitpix/8);
+  if((sign==1)&&(end==0)&&(bitpix==-32)) strcpy(dtype,"IEEE754LSBSingle");
+/*  sprintf(dtype,"%s%s%u",ssign,send,bitpix/8);*/
   /* printout variables content for debug */
   fprintf(stderr,"BITPIX = %d\n",bitpix);
   fprintf(stderr,"SIGN = %d\n",sign);

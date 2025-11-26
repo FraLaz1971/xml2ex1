@@ -521,7 +521,7 @@ SC_STATUS orbit
 		strcpy((char*)mission_area.leaves[2].leaves[5].name,"bc_mpo_sim:data_reference_spice_frame");
 //		strcpy((char*)mission_area.leaves[2].leaves[5].value,"");
 	 	strcpy((char*)mission_area.leaves[3].name,istatus);
-		strcpy((char*)mission_area.leaves[3].leaves[0].name,"bc_mpo_simbio-sys:mpo_status");
+		strcpy((char*)mission_area.leaves[3].leaves[0].name,"bc_mpo_sim:mpo_status");
 //		strcpy((char*)mission_area.leaves[3].leaves[0].value,"");
 	 	strcpy((char*)mission_area.leaves[4].name,"psa:Processing_Context");
 		strcpy((char*)mission_area.leaves[4].leaves[0].name,"psa:processing_software_title");
