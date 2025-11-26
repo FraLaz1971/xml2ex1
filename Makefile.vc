@@ -14,7 +14,8 @@ EEXT=.exe
 RM=del /Q /F
 all: readxml$(EEXT) readxml2$(EEXT) createxml$(EEXT) testWriter$(EEXT) pngprog001$(EEXT) \
 	temp1$(EEXT) temp2$(EEXT) xmltm2ascii$(EEXT) readraw$(EEXT) readraw16$(EEXT) parse1$(EEXT) parse2$(EEXT) \
-	sval$(EEXT) createlabel$(EEXT) write_png$(EEXT) read_png$(EEXT) read_gs_png$(EEXT) archivepds$(EEXT) archivepds2$(EEXT) readlabel$(EEXT)
+	sval$(EEXT) createlabel$(EEXT) write_png$(EEXT) read_png$(EEXT) read_gs_png$(EEXT) archivepds$(EEXT) \
+	archivepds2$(EEXT) write_gs_png$(EEXT) readlabel$(EEXT)
 pds.obj: pds.c
 	$(CC) /c $(CFLAGS) $?
 createxml$(EEXT): createxml.c
@@ -61,4 +62,4 @@ clean:
 	$(RM) *.obj readxml$(EEXT) readxml2$(EEXT) createxml$(EEXT) testWriter$(EEXT) pngprog001$(EEXT) \
 	temp1$(EEXT) temp2$(EEXT) xmltm2ascii$(EEXT) readraw$(EEXT) readraw16$(EEXT) read_gs_png$(EEXT) parse1$(EEXT) \
 	parse2$(EEXT) sval$(EEXT) createlabel$(EEXT) write_png$(EEXT) read_png$(EEXT) archivepds$(EEXT) archivepds2$(EEXT) \
-	readlabel$(EEXT)
+	write_gs_png$(EEXT) read_gs_png$(EEXT) readlabel$(EEXT)
