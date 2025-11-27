@@ -4,8 +4,9 @@
 #include <png.h>
 
 int main(int argc, char**argv) {
-    int y,pos;
+    int y,x,pos;
     FILE *fp;
+    FILE *ofp;
     png_structp png;
     png_infop info;
     char ifname[256];
@@ -18,7 +19,7 @@ int main(int argc, char**argv) {
     png_byte bit_depth;
     png_bytep *rows;
     if(argc<2){
-      fprintf(stderr,"user:%s <file.png>",argv[0]);
+      fprintf(stderr,"user:%s <file.png>\n",argv[0]);
       return 1;
     }
     strcpy(ifname,argv[1]);
@@ -50,7 +51,7 @@ int main(int argc, char**argv) {
     }
 
     png_read_image(png, rows);
-
+    fclose(fp);
     printf("Read grayscale image %dx%d\n", width, height);
     printf("Example pixels:\n");
     printf("  Top-left (0,0): %3d\n", rows[0][0]);
@@ -60,11 +61,22 @@ int main(int argc, char**argv) {
     pos=result_ptr-ifname;
     strncpy(base,ifname,pos);
     base[pos]='\0';
-    snprintf(ofname,255,"%s%s",base,".asc");
+    snprintf(ofname,255,"%s%4s",base,".asc");
     fprintf(stderr,"output file name: %s\n",ofname);
+    ofp = fopen(ofname, "w");
+    if(!ofp) {
+        perror("error in opening output file\n");
+        return 1;
+    }
+
+    for(y = height-1; y >= 0; y--) {
+        for(x = 0; x < width; x++)
+            fprintf(ofp,"%3d ",(unsigned char)rows[y][x]);
+        fprintf(ofp,"\n");
+    }
+    fclose(ofp);
     for(y = 0; y < height; y++) free(rows[y]);
     free(rows);
-    fclose(fp);
     png_destroy_read_struct(&png, &info, NULL);
     return 0;
 }

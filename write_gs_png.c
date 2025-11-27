@@ -4,20 +4,25 @@
 
 int main(int argc, char** argv) {
     int width = 300, height = 200;
-    png_byte color_type = PNG_COLOR_TYPE_GRAY;  // ← only 1 channel
+    png_byte color_type = PNG_COLOR_TYPE_GRAY;  // <- only 1 channel
     png_byte bit_depth = 8;
+    png_structp png;
+    png_infop info;
+    png_bytep *row_pointers;
+    char *fname;
+    FILE *fp;
     if(argc<2){
-      fprintf(stderr,"usage:%s <file.png>",argv[0]);
+      fprintf(stderr,"usage:%s <file.png>\n",argv[0]);
       return 1;
     }
-    char *fname=argv[1];
-    FILE *fp = fopen(fname, "wb");
+    fname=argv[1];
+    fp = fopen(fname, "wb");
     if(!fp) { perror("fopen"); return 1; }
 
-    png_structp png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+    png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
     if(!png) return 1;
 
-    png_infop info = png_create_info_struct(png);
+    info = png_create_info_struct(png);
     if(!info) return 1;
 
     if(setjmp(png_jmpbuf(png))) return 1;
