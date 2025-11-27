@@ -135,10 +135,11 @@ int main(int argc, char **argv)
  /* read configuration file content into variables in memory */
   res=fscanf(cfp, "BITPIX %hu\n",&bitpix);
   res=fscanf(cfp, "SIGN %10s\n",buf);
+  fprintf(stderr, "read SIGN: %s\n",buf);
   if(!(strcmp(buf,"signed"))){
   	sign = 1;
 	strcpy(ssign,"Signed");
-  } else if(strcmp(buf,"unsigned")) {
+  } else if(!strcmp(buf,"unsigned")) {
 	sign = 0;
 	strcpy(ssign,"Unsigned");
   } else{

@@ -5,7 +5,7 @@ int main(int argc, char **argv) {
     const char *fname;
     png_structp png_ptr;
     int width,x,idx,debug=0;
-    int height,y;
+    int height,y, res;
     png_byte color_type;
     png_byte bit_depth;
     png_bytep *row_pointers;
@@ -26,7 +26,7 @@ int main(int argc, char **argv) {
     if (debug) fprintf(stderr,"open file for reading\n");
 
     // --- Read header and verify PNG signature ---
-    fread(header, 1, 8, fp);
+    res = fread(header, 1, 8, fp);
     if (png_sig_cmp(header, 0, 8)) {
         fprintf(stderr, "%s is not a PNG file\n", fname);
         fclose(fp);

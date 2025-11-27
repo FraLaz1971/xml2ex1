@@ -38,7 +38,7 @@ int main(int argc, char** argv) {
     png_write_info(png, info);
 
     // Allocate grayscale data (height × width)
-    png_bytep *row_pointers = malloc(sizeof(png_bytep) * height);
+    row_pointers = malloc(sizeof(png_bytep) * height);
     for(int y = 0; y < height; y++) {
         row_pointers[y] = malloc(width);  // 1 byte per pixel
         for(int x = 0; x < width; x++) {
