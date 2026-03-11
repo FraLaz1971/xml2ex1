@@ -10,6 +10,40 @@
 
 enum endian{LSB,MSB};
 
+struct DESCR{ /* product_id descriptor field in details */
+ 	char obs_id[MAXFNAML]; /* observation id  */
+ 	char obs_type[MAXFNAML]; /* observation type */
+ 	char meas_type[MAXFNAML]; /* measurement type */
+    char start_date[24]; /* UTC time of the first (and last) measurement in the data product */
+    char stop_date[24]; /* UTC time of the first last measurement in the data product */
+    char start_orb[6]; /* orbit number of the first measurement in the data product, padded with zeroes) */
+    char stop_orb[6]; /* orbit number of the last measurement in the data product, padded with zeroes) */
+};
+struct PROD_ID{
+ 	char instr_acr[4]; /* instrument acronym */
+ 	char proclev_acr[4]; /* processing level acronym */
+ 	char type[6]; /* for primary products: hk | sc
+						  for supplementary products calib | thumb | qla | geo | doc | misc */
+	char subinstr_id[4]; /* or sub-unit id e.g. (srn_)eln o (sim_)stc ... */
+	char descriptor[64]; /*
+	dditional information e.g.
+  - observation id
+  - observation type
+  - measurement type
+  - start / stop date (<YYYYMMDDThhmmss> or
+    <YYYYMMDDThhmmss>_<YYYYMMDDThhmmss>; UTC time of the first (and last) measurement in the data product
+  - orbit number (<NNNNN> or <NNNNN>_<MMMMM>; orbit number of the first (and
+    last) measurement in the data product, padded with zeroes)
+	*/
+};
+
+struct LID{
+	char bundle_id[MAXFNAML]; /* bundle identifier */
+	char collect_id[MAXFNAML]; /* collection identifier */
+	char prod_id[MAXFNAML]; /* product identifier */
+	char vid[MAXFNAML]; /* version ID */
+};
+
 struct ATTRIBUTE {
 	char name[MAXFNAML];
 	char value[MAXFNAML];
