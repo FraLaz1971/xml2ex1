@@ -81,6 +81,9 @@ execution examples:
 ###
 `./archivepds messglob.conf 1 MSGR_DEM_USG_SC_J_V02.IMG | tee out.xml`
 ###
+nudm1_gs_i.xml is a PDS4 label compatible with Bepicolombo mission images, with an example image
+	pds4_viewer nudm1_gs_i.xml &
+###
 - png2ascii.c
 - read_pds4_lbl.c
 - readraw16.c

@@ -149,8 +149,8 @@ int print(FILE *ofp, struct PROD_ID *pdid){
   fprintf(stderr, "data type = %s\n", pdid->instr_acr);
   fprintf(stderr, "instrument_subunit = %s\n", pdid->subinstr_id);
   fprintf(stderr, "descriptor = %s\n", pdid->descriptor);
-  snprintf(totprodid, 35, "%s_%s_%s_%s_%s",pdid->instr_acr, pdid->proclev_acr, pdid->subinstr_id,pdid->descriptor);
-  fprintf(ofp, "%35s\n",totprodid);
+  snprintf(totprodid, 36, "%3s_%s_%s_%s_%s",pdid->instr_acr, pdid->proclev_acr, pdid->subinstr_id,pdid->descriptor);
+  fprintf(ofp, "%36s\n",totprodid);
   return 0;
 }
 
@@ -181,5 +181,24 @@ o <descriptor>: additional information e.g.
   - orbit number (<NNNNN> or <NNNNN>_<MMMMM>; orbit number of the first (and
     last) measurement in the data product, padded with zeroes)
 
-
+BC SIMBIO-SYS data files (HK)
+sim_raw_hk_hric_cruise_ico11_2024-04-08.csv
+sim_raw_hk_hric_cruise_ico11_2024-04-08.xml
+sim_raw_hk_me_cruise_ico11_2024-04-08.csv
+sim_raw_hk_me_cruise_ico11_2024-04-08.xml
+sim_raw_hk_stc_cruise_ico11_2024-04-08.csv
+sim_raw_hk_stc_cruise_ico11_2024-04-08.xml
+sim_raw_hk_vihi_cruise_ico11_2024-04-08.csv
+sim_raw_hk_vihi_cruise_ico11_2024-04-08.xml
+* 
+* 
+* e.g.:
+* instrument_acronym = sim
+* processing_level_acronym = raw
+* type = hk
+* sub-instrument_id = stc
+* descriptor = cruise_ico11_2024-04-08
+* mission-phase = cruise
+* measurement-type = ico11
+* date = 2024-04-08
  */

@@ -14,6 +14,7 @@ struct DESCR{ /* product_id descriptor field in details */
  	char obs_id[MAXFNAML]; /* observation id  */
  	char obs_type[MAXFNAML]; /* observation type */
  	char meas_type[MAXFNAML]; /* measurement type */
+ 	char mission_phase[10]; /* mission phase */
     char start_date[24]; /* UTC time of the first (and last) measurement in the data product */
     char stop_date[24]; /* UTC time of the first last measurement in the data product */
     char start_orb[6]; /* orbit number of the first measurement in the data product, padded with zeroes) */
