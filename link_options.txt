@@ -1,0 +1,13 @@
+/LIBPATH:C:\libxml2vc\lib 
+/LIBPATH:C:\buildzlib 
+/LIBPATH:C:\GnuWin32\lib 
+libcmt.lib 
+libcpmt.lib 
+oldnames.lib 
+bcrypt.lib 
+libxml2d.lib 
+zlibstaticd.lib 
+libiconv.lib 
+/MANIFEST
+/NODEFAULTLIB:MSVCRT
+/NODEFAULTLIB:MSVCRTD

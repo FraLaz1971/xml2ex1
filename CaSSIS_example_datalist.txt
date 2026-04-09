@@ -1,0 +1,10 @@
+-rw-rw-r-- 1 francesco francesco 2.6M Nov 17 08:47 cas_raw_sc_20250416T233856-20250416T233900-33001-50-PAN-1409764716-27-0__4_0.asc
+-rw-rw-r-- 1 francesco francesco  28K Nov 17 08:47 cas_raw_sc_20250416T233856-20250416T233900-33001-50-PAN-1409764716-27-0__4_0.xml
+-rw-rw-r-- 1 francesco francesco  591 Nov 17 08:47 cas_raw_sc_20250416T233856-20250416T233900-33001-50-PAN-1409764716-27-0__4_0.tab
+-rw-rw-r-- 1 francesco francesco 910K Nov 17 08:47 cas_raw_sc_20250416T233856-20250416T233900-33001-50-PAN-1409764716-27-0__4_0.dat
+-rw-rw-r-- 1 francesco francesco  314 Nov 17 08:47 cas_raw_sc_20250416T233856-20250416T233900-33001-50-PAN-1409764716-29-0__4_0_tab.csv
+-rw-rw-r-- 1 francesco francesco  28K Nov 17 08:47 cas_raw_sc_20250416T233856-20250416T233900-33001-50-PAN-1409764716-29-0__4_0.xml
+-rw-rw-r-- 1 francesco francesco  591 Nov 17 08:47 cas_raw_sc_20250416T233856-20250416T233900-33001-50-PAN-1409764716-29-0__4_0.tab
+-rw-rw-r-- 1 francesco francesco 910K Nov 17 08:47 cas_raw_sc_20250416T233856-20250416T233900-33001-50-PAN-1409764716-29-0__4_0.dat
+-rw-rw-r-- 1 francesco francesco  607 Mar 13 08:53 cas_raw_sc_20250416T233856-20250416T233900-33001-50-PAN-1409764716-27-0__4_0.tab.save
+-rw-rw-r-- 1 francesco francesco 1.7K Mar 13 08:53 cas2lines.txt

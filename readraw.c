@@ -16,7 +16,7 @@ int main(int argc, char **argv){
   fname=argv[3];
   arr=(unsigned char**)malloc(nrows*sizeof(unsigned char*));
   for(i=0; i<nrows; i++)
-	arr[i]=(unsigned char*)malloc(ncols*sizeof(unsigned char))
+	arr[i]=(unsigned char*)malloc(ncols*sizeof(unsigned char));
   ifp=fopen(fname,"rb");
   for(i=0;i<nrows;i++){
     for(j=0;j<ncols;j++){
