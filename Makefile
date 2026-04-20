@@ -12,7 +12,7 @@ RM=rm -rf
 .PHONY: all clean
 all: createxml readxml readxml2 testWriter pngprog001 temp1 temp2 xmltm2ascii \
 	readraw readraw16 readrawf sval createlabel write_png read_png write_gs_png read_gs_png \
-	archivepds archivepds2 readlabel png2ascii png_rgb_to_gs ascii2raw ascii2raw_i png_gs_2ascii
+	archivepds archivepds_cas readlabel png2ascii png_rgb_to_gs ascii2raw ascii2raw_i png_gs_2ascii
 pds.o: pds.c
 	$(CC) -c $(CFLAGS) $< -o $@
 createxml: createxml.c
@@ -23,9 +23,9 @@ readlabel: readlabel.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 archivepds: archivepds.c pds.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
-prodid: prodid.c pds.o
+archivepds_cas: archivepds_cas.c pds.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
-archivepds2: archivepds2.c pds.o
+prodid: prodid.c pds.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
 readxml: readxml.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
@@ -74,7 +74,7 @@ readraw16: readraw16.c
 clean:
 	$(RM) *.o readxml readxml2 createxml testWriter pngprog001 temp1 temp2 xmltm2ascii \
 	readraw readraw16 parse1 parse2 sval createlabel write_png read_png archivepds \
-	write_gs_png read_gs_png archivepds2 readlabel readrawf png2ascii png_rgb_to_gs \
+	write_gs_png read_gs_png readlabel readrawf png2ascii png_rgb_to_gs \
 	ascii2raw ascii2raw_i png_gs_2ascii
 
 

@@ -89,7 +89,7 @@ nudm1_gs_i.xml is a PDS4 label compatible with Bepicolombo mission images, with 
 - readraw16.c
 - sval.c
 - write_gs_png.c
-- archivepds2.c
+- archivepds_cas.c --> process EXOMARS 2016 TGO CaSSIS image data and create a PDS4 xml label
 - createxml.c
 - png_gs_2ascii.c
 - read_png.c

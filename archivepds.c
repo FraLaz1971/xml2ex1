@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 	char **prodfnam;
 	if(argc<3){
 		fprintf(stderr,"usage:%s <file.conf> <nproducts> <prodname1> <prodname2> ... <prodnamen>\n",argv[0]);
-		fprintf(stderr,"e.g: %s arpdf.conf 1 image.raw \n",argv[0]);
+		fprintf(stderr,"e.g: %s arpds.conf 1 image.raw \n",argv[0]);
 		return 1;
 	}
 	numproducts = atoi(argv[2]); /* number of products pointed by the label */
