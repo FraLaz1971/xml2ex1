@@ -1,0 +1,117 @@
+EXOMARS 2016 EIDB
+Il termine EIDB nel contesto della missione ExoMars 2016 si riferisce generalmente all'Experiment Interface Data Base (o Experiment Interface Document - Part B). Si tratta di un documento tecnico fondamentale che definisce le specifiche, i requisiti di interfaccia (meccanici, elettrici, termici) e i vincoli operativi tra i singoli strumenti scientifici e il modulo che li ospita.
+Ecco i dettagli principali della missione ExoMars 2016:
+
+    Composizione: Composta dal Trace Gas Orbiter (TGO) e dal modulo dimostratore di ingresso, discesa e atterraggio Schiaparelli (EDM).
+    Obiettivo Scientifico: Ricerca di metano e altri gas rari nell'atmosfera marziana, possibili indicatori di attività biologica o geologica.
+    Stato della Missione: Lanciata il 14 marzo 2016. Il TGO è arrivato con successo nell'orbita di Marte il 19 ottobre 2016 ed è tuttora operativo.
+    Schiaparelli (EDM): È atterrato il 19 ottobre 2016, ma a causa di un'anomalia del software durante la discesa, l'impatto al suolo è stato troppo violento, portando alla perdita del lander.
+    Ruolo del TGO: Oltre alla ricerca scientifica, funge da fondamentale ripetitore di dati per le missioni sulla superficie marziana, inclusa la futura missione ExoMars 2028 con il rover Rosalind Franklin.
+
+Se stavi cercando un documento specifico o un set di dati dell'archivio, puoi consultare il Planetary Science Archive (PSA) dell'ESA per i dati grezzi e calibrati della missione.
+Ti servono dettagli su uno strumento specifico (come NOMAD o CaSSIS) o cercavi informazioni sulla struttura dei dati archiviati?
+Le risposte dell'AI potrebbero contenere errori. Scopri di più
+
+    ESA - ExoMars - European Space Agency
+    The ExoMars programme comprises two missions: the first ? the Trace Gas Orbiter ? launched in 2016 while the second, carrying the ...
+    European Space Agency
+    ExoMars: missione su Marte - Agenzia Spaziale Italiana
+    23 gen 2026 ? L'Italia, attraverso l'ASI, è il principale sostenitore della doppia missione EXOMARS con il 40% dell'investimento totale. La miss...
+    Agenzia Spaziale Italiana
+    ExoMars 2016 (TGO and EDM) - PSA - ESA Cosmos
+    It is the first mission of the ExoMars programme and has the objective of searching for evidence of methane and other trace gases ...
+    European Space Agency
+
+Mostra tutto
+mi serve la descrizione tecnica dei dati di CaSSIS, sia come telemetria che come prodotti PDS4
+La descrizione tecnica dei dati di CaSSIS (Colour and Stereo Surface Imaging System) riflette la sua natura di fotocamera "push-frame" ad alta risoluzione. Di seguito sono riportati i dettagli tecnici relativi alla telemetria e alla struttura dei prodotti nel formato standard PDS4 utilizzato per l'archiviazione presso il Planetary Science Archive (PSA) dell'ESA.
+1. Telemetria e Dati Raw (Livello 0/Raw)
+La telemetria grezza di CaSSIS viene acquisita sotto forma di singoli "framelet" per ciascuno dei quattro filtri (BLU, NIR, RED, PAN).
+
+    Struttura del pacchetto: I dati grezzi prodotti dall'Università di Berna (UBE) consistono in un file di dati immagine binari accoppiato a un'intestazione XML proprietaria (non direttamente compatibile con PDS4).
+    Conversione: Presso l'ESAC, un parser converte queste intestazioni XML originali in etichette PDS4 valide per l'ingestione nell'archivio.
+    Contenuto di un prodotto Raw: Ogni prodotto scientifico grezzo include:
+        Un file XML di definizione (label).
+        Un file di contenuto in formato ASCII (.tab).
+        Un file di dati immagine binari (.dat).
+
+2. Prodotti PDS4 (Livelli Raw e Calibrated)
+La missione ExoMars 2016 è stata la prima missione operativa ESA ad adottare integralmente lo standard PDS4.
+Formato dei File
+Ogni prodotto CaSSIS nel PSA è composto da almeno due file:
+
+    Etichetta XML (.xml): Contiene i metadati descrittivi (tempo di esposizione, geometria, target) e la mappatura delle strutture dati.
+    File Dati (.dat o .img): Contiene l'array di pixel dell'immagine. Per i prodotti calibrati, i dati sono solitamente memorizzati come array binari o cubi di dati.
+
+Livelli di Elaborazione
+
+    Raw (EDR): Dati convertiti dalla telemetria originale senza correzioni scientifiche, organizzati per singola osservazione.
+    Calibrated (RDR): Immagini a cui sono state applicate correzioni radiometriche (rimozione del dark current, flat-fielding).
+    Derived: Prodotti di livello superiore, come mosaici co-registrati e proiezioni cartografiche, gestiti dalla pipeline geometrica di CaSSIS.
+
+3. Nomenclatura dei File
+I file seguono una convenzione rigida basata sulla data e sul sequenziamento:
+cas_raw_sc_YYYYMMDDTHHMISS-YYYYMMDDTHHMISS-CCC-NN-FFF-UID-SEQ-WIN.xml
+Dove:
+
+    cas: Identificativo dello strumento CaSSIS.
+    raw_sc: Livello del prodotto (scienza grezza).
+    YYYYMMDDTHHMISS: Timestamp di inizio e fine osservazione.
+
+Documentazione Tecnica di Riferimento
+Per approfondire la struttura specifica dei campi nei label PDS4, è essenziale consultare l'EAICD (Experiment to Archive Interface Control Document):
+
+    CaSSIS EAICD Annex: Dettaglia la mappatura tra le etichette CaSSIS e le etichette PDS4.
+    PSA PDS4 Archiving Guide: Guida generale ESA all'archiviazione PDS4 per ExoMars.
+
+Se ti occorre, posso fornirti un esempio della struttura XML di un'etichetta PDS4 specifica per CaSSIS o i dettagli sui bit-depth delle immagini.
+Le risposte dell'AI potrebbero contenere errori. Scopri di più
+
+    PDS4 Standards - PSA - ESA Cosmos
+    INTRODUCTION TO PDS. The Planetary Data System (PDS) Standard provides guidelines on how a data producer should construct a data s...
+    European Space Agency
+    ESDC-PSA-TN-0009 PSA Archiving Guide for External Data ...
+    10 gen 2020 ? PDS4 SPECIFIC GUIDELINES Producers of PDS4 data must read the [AD4] PSA PDS4 Archiving Guide. This document gives an introduction ...
+    European Space Agency
+    PSA PDS4 ARCHIVING GUIDE | ESA Cosmos
+    21 dic 2022 ? This document is both aimed at data providers to the PSA and PSA users who wish to gain an insight into PDS4 data in the archive. ...
+    European Space Agency
+
+Mostra tutto
+>struttura del pacchetto: I dati grezzi prodotti dall'Università di Berna (UBE) consistono in un file di dati immagine binari accoppiato a un'intestazione XML proprietaria (non direttamente compatibile con PDS4).
+
+Credo che questo succedesse prima del lancio, dal lancio in poi la gestione della telemetria passa per ESA (ESOC per le operazioni e ESAC per il ground segment scientifico) quindi presumo che ci sia la definizione di un formato standard aperto CCSDS/ECSS per la telemetria e PDS4 per i dati preprocessati (formati RAW, CALIBRATED, DERIVED, ...)
+Hai perfettamente ragione: la mia descrizione precedente mescolava le fasi di sviluppo con l'attuale pipeline operativa. Una volta in fase di volo, il flusso dati segue rigorosamente gli standard CCSDS/ECSS per la telemetria e PDS4 per l'archiviazione.
+Ecco la scomposizione tecnica precisa del flusso dati attuale:
+1. Telemetria (Space-to-Ground)
+Il TGO comunica con le stazioni di terra (ESTRACK) seguendo gli standard CCSDS per i pacchetti di telemetria (TM).
+
+    Pacchetti PUS (Packet Utilization Standard): CaSSIS genera pacchetti TM conformi allo standard ECSS-E-70-41A (PUS). I dati scientifici sono incapsulati in pacchetti Service 20 (per il trasferimento di dati di massa).
+    Frammentazione: Poiché un'immagine di CaSSIS è molto pesante, viene frammentata in numerosi pacchetti TM a bordo. Ogni pacchetto ha un Source Sequence Count che permette a terra di ricostruire l'integrità del trasferimento.
+    Compressione: I dati in telemetria sono spesso compressi (solitamente tramite algoritmi lossy o lossless come il rice-coding adattivo) per ottimizzare la larghezza di banda verso la Terra.
+
+2. Dati Raw (PDS4 - Livello EDR)
+Una volta che i pacchetti TM arrivano all'ESOC e vengono passati all'ESAC, la pipeline trasforma la telemetria grezza in prodotti PDS4 RAW.
+
+    Formato: Non sono più file binari "proprietari", ma file conformi allo standard PDS4.
+    Componenti:
+        Label XML: Contiene i metadati estratti dalle intestazioni dei pacchetti CCSDS (es. tempi SCLK convertiti in UTC, parametri di puntamento estratti dai kernel SPICE).
+        Data Object: Un file binario (.dat o .img) che contiene l'array di pixel (solitamente 12 o 14 bit memorizzati in 16 bit). In questa fase, i dati sono ancora "uncalibrated counts" (DN - Digital Numbers).
+
+3. Prodotti Calibrati e Derivati (PDS4 - Livelli RDR/REFDR)
+L'ESAC, in collaborazione con il team scientifico di Berna, processa i RAW per generare i livelli successivi:
+
+    CALIBRATED (RDR): I pixel vengono corretti per bias, dark current e flat-field, e convertiti in unità fisiche di radianza o riflettanza (
+    ).
+    GEOMETRICALLY PROJECTED: Dati proiettati su un sistema di coordinate marziane (IAU_MARS).
+    PDS4 Structure: In questi file, l'etichetta XML include le classi <Observational_Product>, <File_Area_Observational> e, cruciale per CaSSIS, la classe <Special_Constants> per gestire i pixel mancanti o saturi.
+
+Riassunto della gerarchia PDS4 per CaSSIS
+Livello PDS4	Tipo Prodotto	Descrizione
+Telemetry	CCSDS/PUS	Pacchetti grezzi ricevuti dalle antenne.
+Raw (EDR)	Array_2D_Image	Immagine ricostruita, unità DN, geometria non applicata.
+Calibrated (RDR)	Array_2D_Image	Unità di radianza/riflettanza, correzioni strumentali.
+Derived	Map Projected	Prodotti mosaicati o proiettati cartograficamente.
+Un dettaglio tecnico importante: CaSSIS usa una tecnica di acquisizione push-frame (non push-broom lineare). Questo significa che un "prodotto" PDS4 di CaSSIS è composto da una sequenza di framelets sovrapposti, che devono essere assemblati via software per formare l'immagine lunga finale.
+Ti interessa approfondire come vengono gestiti i kernel SPICE all'interno dei label PDS4 per il calcolo della geometria di CaSSIS?
+Le risposte dell'AI potrebbero contenere errori. Scopri di più
