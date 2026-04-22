@@ -61,12 +61,32 @@ struct ELEMENT {
 	struct ELEMENT *prev;
 	struct ELEMENT *succ;
 };
+
+struct SOURCE_PRODUCT_EXTERNAL{
+	char name[MAXFNAML];
+	char value[MAXFNAML];
+	struct ELEMENT external_source_product_identifier;
+	struct ELEMENT reference_type;
+	struct ELEMENT curating_facility;
+};
+
 struct INTERNAL_REFERENCE{
 	char name[MAXFNAML];
 	char value[MAXFNAML];
 	struct ELEMENT lid_reference;
 	struct ELEMENT reference_type;
 };
+
+struct REFERENCE_LIST{
+	char ename[MAXFNAML];
+	char value[MAXFNAML];
+	char descr[MAXFNAML];
+	struct INTERNAL_REFERENCE *irefs;
+	struct SOURCE_PRODUCT_EXTERNAL spe; /* Source_Product_External*/
+	struct ELEMENT *name;
+	struct ELEMENT *type;
+};
+
 struct OBSERVING_SYSTEM_COMPONENT{
 	char ename[MAXFNAML];
 	char value[MAXFNAML];
@@ -75,6 +95,7 @@ struct OBSERVING_SYSTEM_COMPONENT{
 	struct ELEMENT *name;
 	struct ELEMENT *type;
 };
+
 struct OBSERVING_SYSTEM {
 	struct ELEMENT *parent;
 	struct ATTRIBUTE *attributes;
