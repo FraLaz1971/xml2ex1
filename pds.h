@@ -5,7 +5,7 @@
 #include <libxml/parser.h>
 #include <libxml/xmlwriter.h>
 #include <libxml/tree.h>
-#define MAXFNAML 1024 /* maximum file name[MAXFNAML] allowed (conventional) may include path */
+#define MAXFNAML 2048 /* maximum file name[MAXFNAML] allowed (conventional) may include path */
 #define MAXLEAV 16
 
 enum endian{LSB,MSB};

@@ -123,6 +123,9 @@ int main(int argc, char **argv)
 																											 psa:id   */
 	mission_area.leaves[2].leaves[0].attributes=(struct ATTRIBUTE *)malloc(MAXLEAV*sizeof(struct ATTRIBUTE));
 
+	for(i=0;i<MAXLEAV;i++)
+		mission_area.leaves[4].leaves[i].leaves=(struct ELEMENT *)malloc(MAXLEAV*sizeof(struct ELEMENT)); /* */
+
 	for(i=0;i<MAXLEAV;i++){
 		observing_system.osc[i].name=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
 		observing_system.osc[i].type=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
@@ -211,7 +214,7 @@ int main(int argc, char **argv)
   sprintf(sheight,"%u",height);
     /* Observation Area */
 	  res=fscanf(cfp,"NPI %d\n",&npi);
-  if (verbose) fprintf(stderr,"n. of processing instructions: %d\n",npi);
+  if (verbose) fprintf(stderr,"n. of Processing Instructions: %d\n",npi);
   for(i=0;i<npi;i++){
 	res=fscanf(cfp,"%5s %s\n",key,pds.xml_model[i]);
 	for(j=0;j<strlen(pds.xml_model[i]);j++)
@@ -219,7 +222,7 @@ int main(int argc, char **argv)
 	if (verbose) fprintf(stderr,"key: %5s  value:%s\n",key,pds.xml_model[i]);
   }
   res=fscanf(cfp,"NPOATTR %d\n",&npoattr);
-  if (verbose) fprintf(stderr,"n. of prod. obs. attributes: %d\n",npoattr);
+  if (verbose) fprintf(stderr,"n. of <Product_Observational> attributes: %d\n",npoattr);
   for(i=0;i<npoattr;i++){
 	res=fscanf(cfp,"%15s %s\n",key,po.attributes[i].name);
 	res=fscanf(cfp,"%16s %s\n",key,po.attributes[i].value);
@@ -286,15 +289,15 @@ int main(int argc, char **argv)
   res=fscanf(cfp,"TSTOP %s\n",tstop);
   /* printout variables content for debug */
   if (verbose) fprintf(stderr,"Now printing variables content for debug\n");
-  fprintf(stderr,"BITPIX = %d\n",bitpix);
-  fprintf(stderr,"SIGN = %d\n",sign);
-  fprintf(stderr,"ENDIAN = %d\n",end);
-  fprintf(stderr,"WIDTH = %u\n",width);/* Sample == n. of columns */
-  fprintf(stderr,"HEIGHT = %u\n",height); /* Line == n. of rows */
-  fprintf(stderr,"PDS4 <data_type> = %s\n",dtype);
-  fprintf(stderr,"TSTART = %s\n",tstart);/* Sample == n. of columns */
-  fprintf(stderr,"TSTOP = %s\n",tstop);/* Sample == n. of columns */
-    fprintf(stderr,"going to read configuration file about Primary_Result_Summary\n");
+  if (verbose) fprintf(stderr,"BITPIX = %d\n",bitpix);
+  if (verbose) fprintf(stderr,"SIGN = %d\n",sign);
+  if (verbose) fprintf(stderr,"ENDIAN = %d\n",end);
+  if (verbose) fprintf(stderr,"WIDTH = %u\n",width);/* Sample == n. of columns */
+  if (verbose) fprintf(stderr,"HEIGHT = %u\n",height); /* Line == n. of rows */
+  if (verbose) fprintf(stderr,"PDS4 <data_type> = %s\n",dtype);
+  if (verbose) fprintf(stderr,"TSTART = %s\n",tstart);/* Sample == n. of columns */
+  if (verbose) fprintf(stderr,"TSTOP = %s\n",tstop);/* Sample == n. of columns */
+  if (verbose) fprintf(stderr,"going to read configuration file about Primary_Result_Summary\n");
   res=fscanf(cfp,"PURP %s\n",purp);
   res=fscanf(cfp,"PROC_LEV %s\n",proclev);
   res=fscanf(cfp,"RES_DESCR %s\n",resdescr);
@@ -341,40 +344,174 @@ int main(int argc, char **argv)
   /* read Mission Area configuration */
 	res=fscanf(cfp,"MISSION %s\n",mission); /* MISSION */
 	if(verbose)fprintf(stderr,"MISSION: %s\n",mission);
-	/* START Mission Information */
-	res=fscanf(cfp,"MISS_ID %s\n",miss_id); /* MISS_ID (element name) */
+	/* START reading Mission Information
+	 * res=fscanf(cfp,"MISS_ID %s\n",miss_id); /* MISS_ID (element name)
+	psa:Mission_Information
+*/
+	strcpy((char*)miss_id, "psa:Mission_Information");
 	if(verbose)fprintf(stderr,"Before PHASE\n");
-	res=fscanf(cfp,"PHASE %s\n",mission_area.leaves[0].leaves[2].value); /* mission phase */
-	for(j=0;j<strlen(mission_area.leaves[0].leaves[0].value);j++)
-		if(mission_area.leaves[0].leaves[0].value[j]=='>') mission_area.leaves[0].leaves[0].value[j]=' ';
+	/* <psa:Mission_Information>  ---> mission_area.leaves[0] */
+												  /* MissInf.MissPhase.PhaseName */
+	res=fscanf(cfp,"PHASE_NAME %s\n",mission_area.leaves[0].leaves[0].leaves[0].value); /* mission phase name */
+	for(j=0;j<strlen(mission_area.leaves[0].leaves[0].leaves[0].value);j++)
+		if(mission_area.leaves[0].leaves[0].leaves[0].value[j]=='>') mission_area.leaves[0].leaves[0].leaves[0].value[j]=' ';
+	if (verbose) fprintf(stderr, "read PHASE_NAME res = %d value = %s\n", res, mission_area.leaves[0].leaves[0].leaves[0].value);
+												/* MissInf.MissPhase.PhaseID */
+	res=fscanf(cfp,"PHASE_ID %s\n",mission_area.leaves[0].leaves[0].leaves[1].value); /* mission phase id */
+	for(j=0;j<strlen(mission_area.leaves[0].leaves[0].leaves[1].value);j++)
+		if(mission_area.leaves[0].leaves[0].leaves[1].value[j]=='>') mission_area.leaves[0].leaves[0].leaves[1].value[j]=' ';
+	if (verbose) fprintf(stderr, "read PHASE_ID res = %d value = %s\n", res, mission_area.leaves[0].leaves[0].leaves[1].value);
 	res=fscanf(cfp,"CLOCK_START %s\n",mission_area.leaves[0].leaves[0].value); /* clock tstart */
+	if (verbose) fprintf(stderr, "read CLOCK_START res = %d value = %s\n", res, mission_area.leaves[0].leaves[0].value);
 	res=fscanf(cfp,"CLOCK_STOP %s\n",mission_area.leaves[0].leaves[1].value); /* clock tsop */
-	res=fscanf(cfp,"PRODID %s\n",mission_area.leaves[0].leaves[3].value); /* product id */
-	res=fscanf(cfp,"SWNAME %s\n",mission_area.leaves[0].leaves[4].value); /* software name */
-	res=fscanf(cfp,"SWVERS %s\n",mission_area.leaves[0].leaves[5].value); /* software version */
-	res=fscanf(cfp,"PHASE_ID %s\n",mission_area.leaves[0].leaves[6].value);/* mission phase id */
-	res=fscanf(cfp,"START_ORB %s\n",mission_area.leaves[0].leaves[7].value); /* start orbit */
-	res=fscanf(cfp,"STOP_ORB %s\n",mission_area.leaves[0].leaves[8].value); /* stop orbit */
-	/* END Mission Information */
-	/* START Sub Instrument */
-	res=fscanf(cfp,"SU %s\n",su); /* SUB INSTRUMENT (element name) */
-	res=fscanf(cfp,"SU_ID %s\n",mission_area.leaves[1].leaves[0].value); /*  */
-	res=fscanf(cfp,"SU_NAME %s\n",mission_area.leaves[1].leaves[1].value); /*  */
+	if (verbose) fprintf(stderr, "read CLOCK_STOP res = %d value = %s\n", res, mission_area.leaves[0].leaves[1].value);
+												/* MissInf.StartOrbit */
+	res=fscanf(cfp,"START_ORB %s\n",mission_area.leaves[0].leaves[1].value); /* start orbit */
+	if (verbose) fprintf(stderr, "read START_ORB res = %d value = %s\n", res, mission_area.leaves[0].leaves[1].value);
+												/* MissInf.StopOrbit */
+	res=fscanf(cfp,"STOP_ORB %s\n",mission_area.leaves[0].leaves[2].value); /* stop orbit */
+	if (verbose) fprintf(stderr, "read STOP_ORB res = %d value = %s\n", res, mission_area.leaves[0].leaves[2].value);
+	/* END reading Mission Information */
+
+	/* START reading Sub Instrument */
+//	res=fscanf(cfp,"SU %s\n",su); /* SUB INSTRUMENT (element name) */
+	strcpy((char*)su, "psa:Sub-Instrument");
+										/* Sub-Instrument.Identifier */
+	res=fscanf(cfp,"SU_ID %s\n",mission_area.leaves[1].leaves[0].value); /* <psa:identifier>  */
+	if (verbose) fprintf(stderr, "read SU_ID res = %d value = %s\n", res, mission_area.leaves[1].leaves[0].value);
+											/* Sub-Instrument.Name */
+	res=fscanf(cfp,"SU_NAME %s\n",mission_area.leaves[1].leaves[1].value); /* <psa:name>  */
 	for(j=0;j<strlen(mission_area.leaves[1].leaves[1].value);j++)
 		if(mission_area.leaves[1].leaves[1].value[j]=='>') mission_area.leaves[1].leaves[1].value[j]=' ';
-	res=fscanf(cfp,"SU_TYPE %s\n",mission_area.leaves[1].leaves[2].value); /*  */
-		/* END Sub Instrument */
+	if (verbose) fprintf(stderr, "read SU_NAME res = %d value = %s\n", res, mission_area.leaves[1].leaves[1].value);
+												/* Sub-Instrument.Type */
+	res=fscanf(cfp,"SU_TYPE %s\n",mission_area.leaves[1].leaves[2].value); /* <psa:type>  */
+	if (verbose) fprintf(stderr, "read SU_TYPE res = %d value = %s\n", res, mission_area.leaves[1].leaves[2].value);
+		/* END reading Sub Instrument */
+/*
+OBSCON_IPM Surface
+OBSCON_IPD TARGETED
+OBSCON_OID 1409764716
+OBSCON_OTYPE INDIVIDUAL
+ */
+	/* START reading <psa:Observation_Context> */
+	res=fscanf(cfp,"OBSCON_IPM %s\n",mission_area.leaves[2].leaves[0].value);   /* <psa:instrument_pointing_mode>  */
+	if (verbose) fprintf(stderr, "read OBSCON_IPM res = %d value = %s\n", res, mission_area.leaves[2].leaves[0].value);
+	res=fscanf(cfp,"OBSCON_IPD %s\n",mission_area.leaves[2].leaves[1].value);   /* <psa:instrument_pointing_description> */
+	if (verbose) fprintf(stderr, "read OBSCON_IPD res = %d value = %s\n", res, mission_area.leaves[2].leaves[1].value);
+	res=fscanf(cfp,"OBSCON_OID %s\n",mission_area.leaves[2].leaves[2].value);   /* <psa:observation_identifier> */
+	if (verbose) fprintf(stderr, "read OBSCON_OID res = %d value = %s\n", res, mission_area.leaves[2].leaves[2].value);
+	res=fscanf(cfp,"OBSCON_OTYPE %s\n",mission_area.leaves[2].leaves[3].value); /* <psa:observation_type> */
+	if (verbose) fprintf(stderr, "read OBSCON_OTYPE res = %d value = %s\n", res, mission_area.leaves[2].leaves[3].value);
+/* END reading <psa:Observation_Context> */
 
-	/* START Data */
-	res=fscanf(cfp,"DATA_NAME %s\n",dname); /* instrument:DATA (element name) */
-	/* Data siblings */
+	/* START reading <psa:Processing_Context> */
+//	res=fscanf(cfp,"PRODID %s\n",mission_area.leaves[3].leaves[0].value); /* product id */
+//	if (verbose) fprintf(stderr, "read PRODID res = %d value = %s\n", res, mission_area.leaves[3].leaves[0].value);
+	res=fscanf(cfp,"SWNAME %s\n",mission_area.leaves[3].leaves[0].value); /* <psa:psa:processing_software_title> (software name) */
+	for(j=0;j<strlen(mission_area.leaves[3].leaves[0].value);j++)
+		if(mission_area.leaves[3].leaves[0].value[j]=='>') mission_area.leaves[3].leaves[0].value[j]=' ';
+	if (verbose) fprintf(stderr, "read SWNAME res = %d value = %s\n", res, mission_area.leaves[3].leaves[1].value);
+	res=fscanf(cfp,"SWVERS %s\n",mission_area.leaves[3].leaves[2].value); /* <psa:processing_software_version>  */
+	if (verbose) fprintf(stderr, "read SWVERS res = %d value = %s\n", res, mission_area.leaves[3].leaves[2].value);
+
+/* END reading <psa:Processing_Context> */
+
+	/* START reading Cassis_Data */
+//	res=fscanf(cfp,"DATA_NAME %s\n",dname); /* instrument:DATA (element name) */
+	strcpy((char*)dname, "em16_tgo_cas:Cassis_Data");
+/*
+ * <em16_tgo_cas:Cassis_Data> --> mission_area.leaves[4]
+ *
+INSTR_IFOV 1.142E-5
+IFOV_DESCR rad/px
+FILTERS BLU>RED>NIR>PAN
+HK_FILTER PAN
+FOCAL_LENGTH 0.876
+FOCAL_DESCR M
+F_NUMBER 6.49
+TELESCOPE Three-mirror>anastigmat>with>powered>fold>mirror
+CAS_DESCR 2D>Array
+PIX_HEIGHT 10.0
+PIX_HE_UNIT MICRON
+PIX_WIDTH 10.0
+PIX_WI_UNIT MICRON
+DET_DESCR SI>CMOS>HYBRID>(OSPREY>2K)
+NOISE 61.0
+NOISE_UNIT ELECTRON
+
+ */
+			/*                 <em16_tgo_cas:Instrument_Information> */
+			                                            /* CassisData.InstrumentInformation.instrument_ifov */
+	res=fscanf(cfp,"INSTR_IFOV %s\n",mission_area.leaves[4].leaves[0].leaves[0].value); /* <em16_tgo_cas:instrument_ifov>  */
+	if (verbose) fprintf(stderr, "read INSTR_IFOV res = %d value = %s\n", res, mission_area.leaves[4].leaves[0].leaves[0].value);
+			                                            /* CassisData.InstrumentInformation.ifov_unit */
+	res=fscanf(cfp,"IFOV_UNIT %s\n",mission_area.leaves[4].leaves[0].leaves[1].value); /* instrument_ifov_unit_description>  */
+	if (verbose) fprintf(stderr, "read IFOV_UNIT res = %d value = %s\n", res, mission_area.leaves[4].leaves[0].leaves[1].value);
+			                                            /* CassisData.InstrumentInformation.filters_available */
+	res=fscanf(cfp,"FILTERS %s\n",mission_area.leaves[4].leaves[0].leaves[2].value); /* <em16_tgo_cas:filters_available>  */
+	for(j=0;j<strlen(mission_area.leaves[4].leaves[0].leaves[2].value);j++)
+		if(mission_area.leaves[4].leaves[0].leaves[2].value[j]=='>') mission_area.leaves[4].leaves[0].leaves[2].value[j]=' ';
+	if (verbose) fprintf(stderr, "read FILTERS res = %d value = %s\n", res, mission_area.leaves[4].leaves[0].leaves[2].value);
+							/*	<em16_tgo_cas:HK_Derived_Data> */
+			                                            /* CassisData.HK_Derived_Data.filter */
+	res=fscanf(cfp,"HK_FILTER %s\n",mission_area.leaves[4].leaves[1].leaves[0].value); /* <em16_tgo_cas:filter>  */
+	if (verbose) fprintf(stderr, "read HK_FILTER res = %d value = %s\n", res, mission_area.leaves[4].leaves[1].leaves[0].value);
+							/*	<em16_tgo_cas:HK_Derived_Data> */
+
+							/* <em16_tgo_cas:Telescope_Information> */
+												/* CassisData.Telescope_Information.focal_length */
+	res=fscanf(cfp,"FOCAL_LENGTH %s\n",mission_area.leaves[4].leaves[2].leaves[0].value); /* <em16_tgo_cas:focal_length>  */
+	if (verbose) fprintf(stderr, "read FOCAL_LENGTH res = %d value = %s\n", res, mission_area.leaves[4].leaves[2].leaves[0].value);
+												/* CassisData.Telescope_Information.focal_unit */
+	res=fscanf(cfp,"FOCAL_UNIT %s\n",mission_area.leaves[4].leaves[2].leaves[1].value); /* <em16_tgo_cas:focal_length_unit_description>  */
+	if (verbose) fprintf(stderr, "read FOCAL_UNIT res = %d value = %s\n", res, mission_area.leaves[4].leaves[2].leaves[1].value);
+												/* CassisData.Telescope_Information.focal_number */
+	res=fscanf(cfp,"F_NUMBER %s\n",mission_area.leaves[4].leaves[2].leaves[2].value); /* <em16_tgo_cas:focal_length_unit_description>  */
+	if (verbose) fprintf(stderr, "read F_NUMBER res = %d value = %s\n", res, mission_area.leaves[4].leaves[2].leaves[2].value);
+												/* CassisData.Telescope_Information.telescope_description */
+	res=fscanf(cfp,"TELESCOPE %s\n",mission_area.leaves[4].leaves[2].leaves[3].value); /* <em16_tgo_cas:telescope_description>  */
+	for(j=0;j<strlen(mission_area.leaves[4].leaves[2].leaves[3].value);j++)
+		if(mission_area.leaves[4].leaves[2].leaves[3].value[j]=='>') mission_area.leaves[4].leaves[2].leaves[3].value[j]=' ';
+	if (verbose) fprintf(stderr, "read TELESCOPE res = %d value = %s\n", res, mission_area.leaves[4].leaves[2].leaves[3].value);
+	 							/* <em16_tgo_cas:Detector_Information> */
+												/* CassisData.Detector_Information.cassis_description */
+	res=fscanf(cfp,"CAS_DESCR %s\n",mission_area.leaves[4].leaves[3].leaves[0].value); /* <em16_tgo_cas:cassis_description>  */
+	for(j=0;j<strlen(mission_area.leaves[4].leaves[3].leaves[0].value);j++)
+		if(mission_area.leaves[4].leaves[3].leaves[0].value[j]=='>') mission_area.leaves[4].leaves[3].leaves[0].value[j]=' ';
+	if (verbose) fprintf(stderr, "read CAS_DESCR res = %d value = %s\n", res, mission_area.leaves[4].leaves[3].leaves[0].value);
+												/* CassisData.Detector_Information.pixel_height */
+	res=fscanf(cfp,"PIX_HEIGHT %s\n",mission_area.leaves[4].leaves[3].leaves[1].value); /* <em16_tgo_cas:pixel_height>  */
+	if (verbose) fprintf(stderr, "read PIX_HEIGHT res = %d value = %s\n", res, mission_area.leaves[4].leaves[3].leaves[1].value);
+												/* CassisData.Detector_Information.pixel_height_unit */
+	res=fscanf(cfp,"PIX_HE_UNIT %s\n",mission_area.leaves[4].leaves[3].leaves[2].value); /* <em16_tgo_cas:pixel_height_unit_description>  */
+	if (verbose) fprintf(stderr, "read PIX_HE_UNIT res = %d value = %s\n", res, mission_area.leaves[4].leaves[3].leaves[2].value);
+												/* CassisData.Detector_Information.pixel_width */
+	res=fscanf(cfp,"PIX_WIDTH %s\n",mission_area.leaves[4].leaves[3].leaves[3].value); /* <em16_tgo_cas:pixel_width>  */
+	if (verbose) fprintf(stderr, "read PIX_WIDTH res = %d value = %s\n", res, mission_area.leaves[4].leaves[3].leaves[3].value);
+												/* CassisData.Detector_Information.pixel_width_unit */
+	res=fscanf(cfp,"PIX_WI_UNIT %s\n",mission_area.leaves[4].leaves[3].leaves[4].value); /* <em16_tgo_cas:pixel_width_unit_description>  */
+	if (verbose) fprintf(stderr, "read PIX_WI_UNIT res = %d value = %s\n", res, mission_area.leaves[4].leaves[3].leaves[4].value);
+												/* CassisData.Detector_Information.detector_description */
+	res=fscanf(cfp,"DET_DESCR %s\n",mission_area.leaves[4].leaves[3].leaves[5].value); /* <em16_tgo_cas:detector_description>  */
+	for(j=0;j<strlen(mission_area.leaves[4].leaves[3].leaves[5].value);j++)
+		if(mission_area.leaves[4].leaves[3].leaves[5].value[j]=='>') mission_area.leaves[4].leaves[3].leaves[5].value[j]=' ';
+	if (verbose) fprintf(stderr, "read DET_DESCR res = %d value = %s\n", res, mission_area.leaves[4].leaves[3].leaves[5].value);
+												/* CassisData.Detector_Information.read_noise */
+	res=fscanf(cfp,"NOISE %s\n",mission_area.leaves[4].leaves[3].leaves[6].value); /* <em16_tgo_cas:read_noise>  */
+	if (verbose) fprintf(stderr, "read NOISE res = %d value = %s\n", res, mission_area.leaves[4].leaves[3].leaves[6].value);
+												/* CassisData.Detector_Information.read_noise_unit */
+	res=fscanf(cfp,"NOISE_UNIT %s\n",mission_area.leaves[4].leaves[3].leaves[7].value); /* <em16_tgo_cas:read_noise_unit_description>  */
+	if (verbose) fprintf(stderr, "read NOISE_UNIT res = %d value = %s\n", res, mission_area.leaves[4].leaves[3].leaves[7].value);
+	/* STOP reading Cassis_Data */
+	/*  */
 	res=fscanf(cfp,"AV_INT %s\n",mission_area.leaves[2].leaves[0].value); /*  */
 	res=fscanf(cfp,"CAL_TYPE %s\n",mission_area.leaves[2].leaves[0].value); /*  */
 	res=fscanf(cfp,"MEAS_RANGE_IDX %s\n",mission_area.leaves[2].leaves[1].value); /* */
 	res=fscanf(cfp,"MEAS_RANGE %s\n",mission_area.leaves[2].leaves[2].value); /*  */
 	res=fscanf(cfp,"REF_FRAME %s\n",mission_area.leaves[2].leaves[3].value);/*  */
 	res=fscanf(cfp,"SPICE_FRAME %s\n",mission_area.leaves[2].leaves[4].value); /*  */
-	/* STOP Data */
+
 	/*START Instrument Status*/
 	res=fscanf(cfp,"STATUS_NAME %s\n",istatus); /*  */
 	res=fscanf(cfp,"SC_STATUS %s\n",mission_area.leaves[3].leaves[0].value); /*  */
@@ -401,12 +538,16 @@ int main(int argc, char **argv)
 	SPE_CURFAC ExoMars>16>Science>Operations>Center
    */
   res=fscanf(cfp,"SPE_PRODID %s\n",reference_list.spe.external_source_product_identifier.value);
+  if (verbose) fprintf(stderr, "read SPE_PRODID res = %d value = %s\n", res, reference_list.spe.external_source_product_identifier.value);
   res=fscanf(cfp,"SPE_REFTYPE %s\n",reference_list.spe.reference_type.value);
+  if (verbose) fprintf(stderr, "read SPE_REFTYPE res = %d value = %s\n", res, reference_list.spe.reference_type.value);
   res=fscanf(cfp,"SPE_CURFAC %s\n",reference_list.spe.curating_facility.value);
-  fprintf(stderr, "read SPE_CURFAC res = %d value = %s\n", res, reference_list.spe.curating_facility.value);
+	for(j=0;j<strlen(reference_list.spe.curating_facility.value);j++)
+		if(reference_list.spe.curating_facility.value[j]=='>') reference_list.spe.curating_facility.value[j]=' ';
+  if (verbose) fprintf(stderr, "read SPE_CURFAC res = %d value = %s\n", res, reference_list.spe.curating_facility.value);
   for(j=0;j<strlen(reference_list.spe.curating_facility.value);j++)
 		if(reference_list.spe.curating_facility.value[j]=='>') reference_list.spe.curating_facility.value[j]=' ';
-  fprintf(stderr, "now value = %s\n", reference_list.spe.curating_facility.value);
+  if (verbose)   fprintf(stderr, "now value = %s\n", reference_list.spe.curating_facility.value);
 /*
          <File>
             <file_name>cas_raw_sc_20250416T233856-20250416T233900-33001-50-PAN-1409764716-29-0__4_0.dat</file_name>
@@ -428,10 +569,28 @@ for(i=0;i<numproducts;i++){
   res=fscanf(cfp,"%12s %s\n",key,file.leaves[4].value); /* <md5_checksum> MD5_CHECK_NN */
   fprintf(stderr, "read MD5_CHECK key = %s res = %d value = %s\n",key, res, file.leaves[4].value);
   res=fscanf(cfp,"%10s %s\n",key,file.leaves[5].value); /* <comment> COMMENT_NN */
-  fprintf(stderr, "read COMMENT key = %s res = %d value = %s\n",key, res, file.leaves[5].value);
   for(j=0;j<strlen(file.leaves[5].value);j++)
 		if(file.leaves[5].value[j]=='>') file.leaves[5].value[j]=' ';
-  fprintf(stderr, "now value = %s\n", file.leaves[5].value);
+  fprintf(stderr, "read COMMENT key = %s res = %d value = %s\n",key, res, file.leaves[5].value);
+	/*
+			<psa:Sub-Instrument>
+                <psa:identifier>SCI</psa:identifier>
+                <psa:name>CASSIS Science</psa:name>
+                <psa:type>Imager</psa:type>
+            </psa:Sub-Instrument>
+SI_ID SCI
+SI_NAME CASSIS>Science
+SI_TYPE Imager
+
+	 */
+//   res=fscanf(cfp,"SI_ID %s\n",file.leaves[].value); /* <psa:identifier> SI_ID */
+//   fprintf(stderr, "read SI_ID res = %d value = %s\n", res, file.leaves[].value);
+//   res=fscanf(cfp,"SI_NAME %s\n",file.leaves[].value); /* <psa:name> SI_NAME */
+//   fprintf(stderr, "read SI_NAME res = %d value = %s\n", res, file.leaves[].value);
+//   for(j=0;j<strlen(file.leaves[].value);j++)
+// 		if(file.leaves[].value[j]=='>') file.leaves[].value[j]=' ';
+//   res=fscanf(cfp,"SI_TYPE %s\n",file.leaves[1].value); /* <psa:type> SI_TYPE */
+//   fprintf(stderr, "read SI_TYPE res = %d value = %s\n", res, file.leaves[].value);
   }
 /* close input configuration file */
   fclose(cfp);
@@ -440,7 +599,7 @@ for(i=0;i<numproducts;i++){
 	po.ia=&ia; po.oa=&oa; po.fao=&fao; pds.po=&po;
 	if(verbose)fprintf(stderr,"main() numproducts = %d\n",numproducts);
 	for(i=0;i<numproducts;i++){
-		pds.products[i] = (FILE*)malloc(2048);
+		pds.products[i] = (FILE*)malloc(MAXFNAML);
 		if(argv[i+2]!=NULL){
 			strcpy((char*)prodfnam[i],argv[i+3]);
 		} else {
@@ -448,6 +607,7 @@ for(i=0;i<numproducts;i++){
 			exit(1);
 		}
 	}
+
 	if(verbose)fprintf(stderr,"main() starting copying strings\n");
 /*	strcpy((char*)pds.xmlintest,"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>");
 	strcpy((char*)pds.xml_model[0],"href=\"https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1L00.sch\" schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
@@ -457,21 +617,7 @@ for(i=0;i<numproducts;i++){
 	strcpy((char*)pds.xml_model[4],"href=\"https://psa.esa.int/psa/em16/tgo/cas/v1/PDS4_EM16_TGO_CAS_1L00_1200.sch\" schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
 	strcpy((char*)pds.xml_model[5],"href=\"https://psa.esa.int/psa/mission/em16/v1/PDS4_EM16_1L00_1300.sch\" schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
 */	strcpy((char*)po.name,"Product_Observational");
-	strcpy((char*)po.attributes[0].name,"xsi:schemaLocation");
-	strcpy((char*)po.attributes[0].value,"http://pds.nasa.gov/pds4/pds/v1 https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1L00.xsd  http://psa.esa.int/psa/v1  https://psa.esa.int/psa/v1/PDS4_PSA_1L00_1401.xsd  http://pds.nasa.gov/pds4/geom/v1  https://pds.nasa.gov/pds4/geom/v1/PDS4_GEOM_1L00_1970.xsd  http://pds.nasa.gov/pds4/disp/v1  https://pds.nasa.gov/pds4/disp/v1/PDS4_DISP_1L00_1510.xsd  http://psa.esa.int/psa/em16/tgo/cas/v1  https://psa.esa.int/psa/em16/tgo/cas/v1/PDS4_EM16_TGO_CAS_1L00_1200.xsd  http://psa.esa.int/psa/mission/em16/v1  https://psa.esa.int/psa/mission/em16/v1/PDS4_EM16_1L00_1300.xsd");
-/*	strcpy((char*)po.attributes[1].name,"xmlns");
-	strcpy((char*)po.attributes[1].value,"http://pds.nasa.gov/pds4/pds/v1");
-	strcpy((char*)po.attributes[2].name,"xmlns:em16_tgo_cas");
-	strcpy((char*)po.attributes[2].value,"http://psa.esa.int/psa/em16/tgo/cas/v1");
-	strcpy((char*)po.attributes[3].name,"xmlns:geom");
-	strcpy((char*)po.attributes[3].value,"http://pds.nasa.gov/pds4/geom/v1");
-	strcpy((char*)po.attributes[4].name,"xmlns:disp");
-	strcpy((char*)po.attributes[4].value,"http://pds.nasa.gov/pds4/disp/v1");
-	strcpy((char*)po.attributes[5].name,"xmlns:psa");
-	strcpy((char*)po.attributes[5].value,"http://psa.esa.int/psa/v1");
-	strcpy((char*)po.attributes[6].name,"xmlns:xsi");
-	strcpy((char*)po.attributes[6].value,"http://www.w3.org/2001/XMLSchema-instance");
-*/	strcpy((char*)ia.name,"Identification_Area");
+	strcpy((char*)ia.name,"Identification_Area");
 	strcpy((char*)oa.name,"Observation_Area");
 	strcpy((char*)fao.name,"File_Area_Observational");
 	strcpy((char*)logical_identifier.name,"logical_identifier");
@@ -589,17 +735,46 @@ for(i=0;i<numproducts;i++){
 	strcpy((char*)mission_area.leaves[0].name,"psa:Mission_Information");
 	strcpy((char*)mission_area.leaves[0].leaves[0].name,"psa:Mission_Phase");
 	strcpy((char*)mission_area.leaves[0].leaves[0].leaves[0].name,"psa:name");
-	strcpy((char*)mission_area.leaves[0].leaves[0].leaves[0].value,"Science Phase");
+//	strcpy((char*)mission_area.leaves[0].leaves[0].leaves[0].value,"Science Phase");
 	strcpy((char*)mission_area.leaves[0].leaves[0].leaves[1].name,"psa:id");
-	strcpy((char*)mission_area.leaves[0].leaves[0].leaves[1].value,"psp");
+//	strcpy((char*)mission_area.leaves[0].leaves[0].leaves[1].value,"psp");
 	strcpy((char*)mission_area.leaves[0].leaves[1].name,"psa:start_orbit_number");
 	strcpy((char*)mission_area.leaves[0].leaves[2].name,"psa:stop_orbit_number");
-	strcpy((char*)mission_area.leaves[1].name,"psa:Mission_Information");
-	strcpy((char*)mission_area.leaves[2].name,"psa:Sub-Instrument");
-	strcpy((char*)mission_area.leaves[3].name,"psa:Observation_Context");
-	strcpy((char*)mission_area.leaves[4].name,"psa:Processing_Context");
-	strcpy((char*)mission_area.leaves[5].name,"em16_tgo_cas:Cassis_Data");
-    if(verbose)fprintf(stderr,"main() before Investigation Area\n");
+	strcpy((char*)mission_area.leaves[1].name,"psa:Sub-Instrument");
+	strcpy((char*)mission_area.leaves[1].leaves[0].name,"psa:identifier");
+	strcpy((char*)mission_area.leaves[1].leaves[1].name,"psa:name");
+	strcpy((char*)mission_area.leaves[1].leaves[2].name,"psa:type");
+	strcpy((char*)mission_area.leaves[2].name,"psa:Observation_Context");
+	strcpy((char*)mission_area.leaves[2].leaves[0].name,"psa:instrument_pointing_mode");
+	strcpy((char*)mission_area.leaves[2].leaves[1].name,"psa:instrument_pointing_description");
+	strcpy((char*)mission_area.leaves[2].leaves[2].name,"psa:observation_identifier");
+	strcpy((char*)mission_area.leaves[2].leaves[3].name,"psa:observation_type");
+	strcpy((char*)mission_area.leaves[3].name,"psa:Processing_Context");
+	strcpy((char*)mission_area.leaves[3].leaves[0].name,"psa:processing_software_title");
+	strcpy((char*)mission_area.leaves[3].leaves[1].name,"psa:processing_software_version");
+	strcpy((char*)mission_area.leaves[4].name,"em16_tgo_cas:Cassis_Data");
+	strcpy((char*)mission_area.leaves[4].leaves[0].name,"em16_tgo_cas:Instrument_Information");
+	strcpy((char*)mission_area.leaves[4].leaves[0].leaves[0].name,"em16_tgo_cas:instrument_ifov");
+	strcpy((char*)mission_area.leaves[4].leaves[0].leaves[1].name,"em16_tgo_cas:instrument_ifov_unit_description");
+	strcpy((char*)mission_area.leaves[4].leaves[0].leaves[2].name,"em16_tgo_cas:filters_available");
+	strcpy((char*)mission_area.leaves[4].leaves[1].name,"em16_tgo_cas:HK_Derived_Data");
+	strcpy((char*)mission_area.leaves[4].leaves[1].leaves[0].name,"em16_tgo_cas:filter");
+	strcpy((char*)mission_area.leaves[4].leaves[2].name,"em16_tgo_cas:Telescope_Information");
+	strcpy((char*)mission_area.leaves[4].leaves[2].leaves[0].name,"em16_tgo_cas:focal_length_unit_description");
+	strcpy((char*)mission_area.leaves[4].leaves[2].leaves[1].name,"em16_tgo_cas:f_number");
+	strcpy((char*)mission_area.leaves[4].leaves[2].leaves[2].name,"em16_tgo_cas:filter");
+	strcpy((char*)mission_area.leaves[4].leaves[2].leaves[3].name,"em16_tgo_cas:telescope_description");
+	strcpy((char*)mission_area.leaves[4].leaves[3].name,"em16_tgo_cas:Detector_Information");
+	strcpy((char*)mission_area.leaves[4].leaves[3].leaves[0].name,"em16_tgo_cas:cassis_description");
+	strcpy((char*)mission_area.leaves[4].leaves[3].leaves[1].name,"em16_tgo_cas:pixel_height");
+	strcpy((char*)mission_area.leaves[4].leaves[3].leaves[2].name,"em16_tgo_cas:pixel_height_unit_description");
+	strcpy((char*)mission_area.leaves[4].leaves[3].leaves[3].name,"em16_tgo_cas:pixel_width");
+	strcpy((char*)mission_area.leaves[4].leaves[3].leaves[4].name,"em16_tgo_cas:pixel_width_unit_description");
+	strcpy((char*)mission_area.leaves[4].leaves[3].leaves[5].name,"em16_tgo_cas:detector_description");
+	strcpy((char*)mission_area.leaves[4].leaves[3].leaves[6].name,"em16_tgo_cas:read_noise");
+	strcpy((char*)mission_area.leaves[4].leaves[3].leaves[7].name,"em16_tgo_cas:read_noise_unit_description");
+
+	if(verbose)fprintf(stderr,"main() before Investigation Area\n");
 	strcpy((char*)iaa.ename,"Investigation_Area");
 	strcpy((char*)iaa.name.name,"name");
 //	strcpy((char*)iaa.name.value,"ExoMars 2016");
@@ -623,6 +798,7 @@ for(i=0;i<numproducts;i++){
 	strcpy((char*)reference_list.irefs[2].name,"Internal_Reference");
 	strcpy((char*)reference_list.irefs[2].lid_reference.name,"lid_reference");
 	strcpy((char*)reference_list.irefs[2].reference_type.name,"reference_type");
+	/* Source_Product_External (SPE)*/
 	strcpy((char*)reference_list.spe.name, "Source_Product_External");
 	strcpy((char*)reference_list.spe.external_source_product_identifier.name, "external_source_product_identifier");
 	strcpy((char*)reference_list.spe.reference_type.name, "reference_type");
@@ -812,33 +988,55 @@ for(i=0;i<numproducts;i++){
 
 
 */
-	     p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.name, BAD_CAST NULL); /* mission area */
-		 p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].name, BAD_CAST NULL); /* psa:Mission_Information */
-		 p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].leaves[0].name, BAD_CAST NULL); /* psa:Mission_Phase */
-		 xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].leaves[0].leaves[0].name, BAD_CAST mission_area.leaves[0].leaves[0].leaves[0].value); /* psa:name */
-		 xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].leaves[0].leaves[1].name, BAD_CAST mission_area.leaves[0].leaves[0].leaves[1].value); /* psa:id */
-
+		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.name, BAD_CAST NULL); /* mission area */
+		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].name, BAD_CAST NULL); /* psa:Mission_Information */
+		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].leaves[0].name, BAD_CAST NULL); /* psa:Mission_Phase */
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].leaves[0].leaves[0].name, BAD_CAST mission_area.leaves[0].leaves[0].leaves[0].value); /* psa:name */
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].leaves[0].leaves[1].name, BAD_CAST mission_area.leaves[0].leaves[0].leaves[1].value); /* psa:id */
 		p1=p1->parent;
-		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].leaves[1].name, BAD_CAST mission_area.leaves[0].leaves[7].value); /* start_orbit_number */
-		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].leaves[2].name, BAD_CAST mission_area.leaves[0].leaves[8].value); /* stop_orbit_number */
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].leaves[1].name, BAD_CAST mission_area.leaves[0].leaves[1].value); /* start_orbit_number */
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[0].leaves[2].name, BAD_CAST mission_area.leaves[0].leaves[2].value); /* stop_orbit_number */
 		p1=p1->parent;
-		p1 = xmlNewChild(p1, NULL, BAD_CAST "psa:Sub-Instrument", BAD_CAST NULL); // psa:Sub-Instrument
+		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[1].name, BAD_CAST NULL); // psa:Sub-Instrument
 		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[1].leaves[0].name, BAD_CAST mission_area.leaves[1].leaves[0].value);
 		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[1].leaves[1].name, BAD_CAST mission_area.leaves[1].leaves[1].value);
 		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[1].leaves[2].name, BAD_CAST mission_area.leaves[1].leaves[2].value);
 		p1=p1->parent;
-		p1 = xmlNewChild(p1, NULL, BAD_CAST "psa:Observation_Context", BAD_CAST NULL); // psa:Observation_Context
+		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].name, BAD_CAST NULL); // psa:Observation_Context
 		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].leaves[0].name, BAD_CAST mission_area.leaves[2].leaves[0].value);
 		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].leaves[1].name, BAD_CAST mission_area.leaves[2].leaves[1].value);
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].leaves[2].name, BAD_CAST mission_area.leaves[2].leaves[2].value);
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[2].leaves[3].name, BAD_CAST mission_area.leaves[2].leaves[3].value);
 		p1=p1->parent;
-		p1 = xmlNewChild(p1, NULL, BAD_CAST "psa:Processing_Context", BAD_CAST NULL); // psa:Processing_Context
+		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[3].name, BAD_CAST NULL); // psa:Processing_Context
 		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[3].leaves[0].name, BAD_CAST mission_area.leaves[3].leaves[0].value);
 		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[3].leaves[1].name, BAD_CAST mission_area.leaves[3].leaves[1].value);
 		p1=p1->parent;
-		p1 = xmlNewChild(p1, NULL, BAD_CAST "em16_tgo_cas:Cassis_Data", BAD_CAST NULL); // em16_tgo_cas:Cassis_Data
-		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[0].name, BAD_CAST mission_area.leaves[4].leaves[0].value);
-		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[1].name, BAD_CAST mission_area.leaves[4].leaves[1].value);
-		p1=p1->parent;p1=p1->parent;
+		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].name, BAD_CAST NULL); // em16_tgo_cas:Cassis_Data
+		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[0].name, BAD_CAST NULL); /* psa:Instrument_Information */
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[0].leaves[0].name, BAD_CAST mission_area.leaves[4].leaves[0].leaves[0].value);
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[0].leaves[1].name, BAD_CAST mission_area.leaves[4].leaves[0].leaves[1].value);
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[0].leaves[2].name, BAD_CAST mission_area.leaves[4].leaves[0].leaves[2].value);
+		p1=p1->parent;
+		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[1].name, BAD_CAST NULL); /* psa:HK_Derived_Data */
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[1].leaves[0].name, BAD_CAST mission_area.leaves[4].leaves[1].leaves[0].value);
+		p1=p1->parent;
+		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[2].name, BAD_CAST NULL); /* psa:Telescope_Information */
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[2].leaves[0].name, BAD_CAST mission_area.leaves[4].leaves[2].leaves[0].value);
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[2].leaves[1].name, BAD_CAST mission_area.leaves[4].leaves[2].leaves[1].value);
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[2].leaves[2].name, BAD_CAST mission_area.leaves[4].leaves[2].leaves[2].value);
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[2].leaves[3].name, BAD_CAST mission_area.leaves[4].leaves[2].leaves[3].value);
+		p1=p1->parent;
+		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[3].name, BAD_CAST NULL); /* psa:Telescope_Information */
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[3].leaves[0].name, BAD_CAST mission_area.leaves[4].leaves[3].leaves[0].value);
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[3].leaves[1].name, BAD_CAST mission_area.leaves[4].leaves[3].leaves[1].value);
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[3].leaves[2].name, BAD_CAST mission_area.leaves[4].leaves[3].leaves[2].value);
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[3].leaves[3].name, BAD_CAST mission_area.leaves[4].leaves[3].leaves[3].value);
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[3].leaves[4].name, BAD_CAST mission_area.leaves[4].leaves[3].leaves[4].value);
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[3].leaves[5].name, BAD_CAST mission_area.leaves[4].leaves[3].leaves[5].value);
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[3].leaves[6].name, BAD_CAST mission_area.leaves[4].leaves[3].leaves[6].value);
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[3].leaves[7].name, BAD_CAST mission_area.leaves[4].leaves[3].leaves[7].value);
+		p1=p1->parent;p1=p1->parent;p1=p1->parent;p1=p1->parent;
 
 		if(verbose)fprintf(stderr,"main() opening <Reference_List> node element step 3.3\n");
 		p1 = xmlNewChild(p1, NULL, BAD_CAST reference_list.ename, BAD_CAST NULL); /*  <Reference_List> */
