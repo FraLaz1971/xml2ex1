@@ -2,7 +2,8 @@
 #include <libxml/parser.h>
 #include <libxml/tree.h>
 
-/* Funzione per estrarre i metadati dai nodi <MDI> */
+/* Funzione per estrarre i metadati dai nodi <MDI>
+  Function to extract cassis DTM metadata from <MDI> nodes */
 void print_metadata(xmlNode * a_node) {
     xmlNode *cur_node = NULL;
 
@@ -23,7 +24,7 @@ void print_metadata(xmlNode * a_node) {
                 xmlFree(value);
             }
         }
-        // Ricorsione sui figli del nodo corrente
+        // Ricorsione sui figli del nodo corrente / recursion on siblings of the current node
         print_metadata(cur_node->children);
     }
 }
@@ -33,11 +34,12 @@ int main(int argc, char **argv) {
     xmlNode *root_element = NULL;
 
     if (argc != 2) {
-        printf("Utilizzo: %s <file_xml_pam>\n", argv[0]);
+        printf("Usage: %s <file_xml_pam>\n", argv[0]);
         return 1;
     }
 
     // Inizializza la libreria e leggi il file
+    // Initialize the libxml2 library and read the file
     LIBXML_TEST_VERSION
     doc = xmlReadFile(argv[1], NULL, 0);
 
@@ -50,8 +52,8 @@ int main(int argc, char **argv) {
     root_element = xmlDocGetRootElement(doc);
 
     if (root_element != NULL) {
-        printf("Extracting Metadata from: %s\n", argv[1]);
-        printf("----------------------------------------\n");
+        fprintf(stderr,"Extracting Metadata from: %s\n", argv[1]);
+        fprintf(stderr,"----------------------------------------\n");
         print_metadata(root_element);
     }
 

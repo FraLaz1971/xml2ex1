@@ -35,6 +35,8 @@ parse1: parse1.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 parse2: parse2.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
+read_pam: read_pam.c
+	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 sval: sval.c
 	$(CC) $(CFLAGS) $< -o $@ $(LDFLAGS) $(LIBS)
 testWriter: testWriter.c

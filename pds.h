@@ -5,7 +5,7 @@
 #include <libxml/parser.h>
 #include <libxml/xmlwriter.h>
 #include <libxml/tree.h>
-#define MAXFNAML 2048 /* maximum file name[MAXFNAML] allowed (conventional) may include path */
+#define MAXFNAML 2048 /* maximum string length allowed (conventional), for file names may include path */
 #define MAXLEAV 16
 
 enum endian{LSB,MSB};
@@ -179,11 +179,13 @@ struct ARRAY_2D_IMAGE{
 	struct ELEMENT *prev;
 	struct ELEMENT *succ;
 };
+
 struct PRODUCT_OBSERVATIONAL {
 	struct ATTRIBUTE *attributes;
 	struct IDENTIFICATION_AREA *ia;
 	struct OBSERVATION_AREA *oa;
 	struct FILE_AREA_OBSERVATIONAL *fao;
+	struct REFERENCE_LIST *rl;
 	struct ELEMENT oleaves[MAXLEAV]; /* other elements, in case */
 	char name[MAXFNAML];
 	char value[MAXFNAML];

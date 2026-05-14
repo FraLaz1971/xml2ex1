@@ -1,10 +1,11 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <libxml/parser.h>
 #include <libxml/xmlwriter.h>
 #include <libxml/tree.h>
 #include "pds.h"
-#include <stdlib.h>
+#include "cassis.h"
 
 int main(int argc, char **argv)
 {	int verbose = 1;
@@ -54,7 +55,7 @@ int main(int argc, char **argv)
     unsigned int height = 0; /* Line == n. of rows */
     const char* confname;
     int j;
-    char buf[1024], key[256], val[1024];
+    char buf[MAXFNAML], key[256], val[MAXFNAML];
     FILE *cfp;
     int i, res, numproducts, npi, npoattr, nosc, nci, nrlir;
 	/* npi = n. of processing instructions
@@ -84,7 +85,7 @@ int main(int argc, char **argv)
 	struct INTERNAL_REFERENCE iref;
 	struct INVESTIGATION_AREA iaa;
 	struct ARRAY_2D_IMAGE array2d;
-
+	struct PAMDATASET pam_ds;
 	FILE *lp; /* pds4 label file handler */
 	char **prodfnam;
 	if(argc<3){
@@ -168,6 +169,7 @@ int main(int argc, char **argv)
 	reference_list.spe.curating_facility.name;
 	reference_list.spe.curating_facility.value;
 	NRL_IR = number of REFERENCE_LIST Internal Reference items */
+
 	/*set default values */
    strcpy(moddate,"def1" );
    strcpy(svers, "def2");
@@ -175,12 +177,48 @@ int main(int argc, char **argv)
    strcpy(tstart, "1970-01-01T00:00:00Z");
    strcpy(tstop, "1970-01-01T00:00:00Z");
 	/*read configutation file */
+
+/*	res=create_conf("cas_raw_001.conf", "cas_raw_002.conf");
+
+	return res;
+*/
+
   cfp=fopen(confname, "r");
   if(cfp==NULL){
      perror("configuration file not present");
      exit(1);
   }
   /* read configuration file content into variables in memory */
+
+  /* read main dataset metadata */
+/*
+   res=fscanf(cfp, " %hu\n",&var);
+   res=fscanf(cfp, "SIGN %10s\n",buf);
+*/
+
+   /* string buf has dimension MAXFNAML, currently 2048 */
+
+
+   /* read configuration file keywords and values */
+
+   res=fscanf(cfp, "MISSION_NAME %s\n",pam_ds.mission);
+   for(j=0;j<strlen(pam_ds.mission);j++)
+		if(pam_ds.mission[j]=='>') pam_ds.mission[j]=' ';
+   res=fscanf(cfp, "SPACECRAFT_NAME %s\n",pam_ds.spacecraft);
+   res=fscanf(cfp, "TARGET_NAME %s\n",pam_ds.target);
+   res=fscanf(cfp, "INSTRUMENT_ID %s\n",pam_ds.instrid);
+   res=fscanf(cfp, "PRODUCT_TYPE %s\n",pam_ds.prodtype);
+
+/*
+    MISSION_NAME    (string)
+	SPACECRAFT_NAME (string)
+	TARGET_NAME     (string)
+	INSTRUMENT_ID   (string)
+	PRODUCT_TYPE    (string)
+*/
+
+  /* read array metadata */
+
   res=fscanf(cfp, "BITPIX %hu\n",&bitpix);
   res=fscanf(cfp, "SIGN %10s\n",buf);
   if(!(strcmp(buf,"signed"))){
@@ -232,10 +270,26 @@ int main(int argc, char **argv)
   }
   if (verbose) fprintf(stderr,"going to read configuration file about Identification_Area\n");
 	/*Identification_Area*/
+
+
+/*
+
+ 	strcpy((char*)logical_identifier.name,"logical_identifier");
+//	strcpy((char*)logical_identifier.value,"urn:esa:psa:em16_tgo_cas:data_derived:cas_der_sc_20250416t233856-20250416t233900-33001-50-pan-1409764716-29-0");
+	strcpy((char*)version_id.name,"version_id");
+//	strcpy((char*)version_id.value,"1.0");
+	strcpy((char*)title.name,"title");
+//	strcpy((char*)title.value,"Test to develop EXOMARS 2016 CaSSIS TDM PDS4 labels");
+	strcpy((char*)information_model_version.name,"information_model_version");
+//	strcpy((char*)information_model_version.value,"1.21.0.0");
+	strcpy((char*)product_class.name,"product_class");
+//	strcpy((char*)product_class.value,"Product_Observational");
+
+ */
   res=fscanf(cfp,"PROD_LID %s\n",prodlid[0]);
   strcpy(logical_identifier.leaves[0].value,prodlid[0]);
   res=fscanf(cfp,"PROD_VID %s\n",prodvid[0]);
-  strcpy(logical_identifier.leaves[1].value,prodlid[0]);
+  strcpy(logical_identifier.leaves[1].value,prodvid[0]);
   res=fscanf(cfp,"TITLE %s\n",stitle);
   for(j=0;j<strlen(stitle);j++)
 		if(stitle[j]=='>') stitle[j]=' ';
@@ -244,6 +298,7 @@ int main(int argc, char **argv)
   strcpy(logical_identifier.leaves[3].value,imvers);
   res=fscanf(cfp,"PROD_CLASS %s\n",prodclass);
   strcpy(logical_identifier.leaves[4].value,prodclass);
+
   if (verbose) fprintf(stderr,"going to read configuration file about Citation_Information\n");
 	/*Citation_Information*/
   res=fscanf(cfp,"NCI %d\n",&nci);
@@ -287,8 +342,24 @@ int main(int argc, char **argv)
   fprintf(stderr,"going to read configuration file about Time_Coordinates\n");
   res=fscanf(cfp,"TSTART %s\n",tstart);
   res=fscanf(cfp,"TSTOP %s\n",tstop);
+  /****************************************/
   /* printout variables content for debug */
+  /****************************************/
+  /*
+	MISSION_NAME ExoMars>2016
+	SPACECRAFT_NAME TGO
+	TARGET_NAME MARS
+	INSTRUMENT_ID CaSSIS
+	PRODUCT_TYPE DTM
+   */
+
+  /* new keys 2026-05-14 */
   if (verbose) fprintf(stderr,"Now printing variables content for debug\n");
+  if (verbose) fprintf(stderr,"MISSION_NAME = %s\n",pam_ds.mission);
+  if (verbose) fprintf(stderr,"SPACECRAFT_NAME = %s\n",pam_ds.spacecraft);
+  if (verbose) fprintf(stderr,"TARGET_NAME = %s\n",pam_ds.target);
+  if (verbose) fprintf(stderr,"INSTRUMENT_ID = %s\n",pam_ds.instrid);
+  if (verbose) fprintf(stderr,"PRODUCT_TYPE = %s\n",pam_ds.prodtype);
   if (verbose) fprintf(stderr,"BITPIX = %d\n",bitpix);
   if (verbose) fprintf(stderr,"SIGN = %d\n",sign);
   if (verbose) fprintf(stderr,"ENDIAN = %d\n",end);
@@ -307,8 +378,12 @@ int main(int argc, char **argv)
   res=fscanf(cfp,"DOMAIN %s\n",domain);
   res=fscanf(cfp,"DISCIPL %s\n",discipl);
   if (verbose) fprintf(stderr,"going to read configuration file about Investigation_Area\n");
-  res=fscanf(cfp,"INVEST_AREA %s\n",invarea);
-  res=fscanf(cfp,"INVEST_TYPE %s\n",invtype);
+  res=fscanf(cfp,"INVEST_AREA %s\n",iaa.name.value);
+  for(j=0;j<strlen(iaa.name.value);j++)
+		if(iaa.name.value[j]=='>') iaa.name.value[j]=' ';
+  if (verbose) fprintf(stderr, "read INVEST_AREA res = %d value = %s\n", res, iaa.name.value);
+  res=fscanf(cfp,"INVEST_TYPE %s\n",iaa.type.value);
+  if (verbose) fprintf(stderr, "read INVEST_TYPE res = %d value = %s\n", res, iaa.type.value);
   res=fscanf(cfp,"INV_LID %s\n",invlid);
   res=fscanf(cfp,"REFTYPE %s\n",reftype);
   if (verbose) fprintf(stderr,"going to read configuration file about Observing_System\n");
@@ -412,8 +487,8 @@ OBSCON_OTYPE INDIVIDUAL
 	for(j=0;j<strlen(mission_area.leaves[3].leaves[0].value);j++)
 		if(mission_area.leaves[3].leaves[0].value[j]=='>') mission_area.leaves[3].leaves[0].value[j]=' ';
 	if (verbose) fprintf(stderr, "read SWNAME res = %d value = %s\n", res, mission_area.leaves[3].leaves[1].value);
-	res=fscanf(cfp,"SWVERS %s\n",mission_area.leaves[3].leaves[2].value); /* <psa:processing_software_version>  */
-	if (verbose) fprintf(stderr, "read SWVERS res = %d value = %s\n", res, mission_area.leaves[3].leaves[2].value);
+	res=fscanf(cfp,"SWVERS %s\n",mission_area.leaves[3].leaves[1].value); /* <psa:processing_software_version>  */
+	if (verbose) fprintf(stderr, "read SWVERS res = %d value = %s\n", res, mission_area.leaves[3].leaves[1].value);
 
 /* END reading <psa:Processing_Context> */
 
@@ -617,19 +692,33 @@ SI_TYPE Imager
 	strcpy((char*)pds.xml_model[4],"href=\"https://psa.esa.int/psa/em16/tgo/cas/v1/PDS4_EM16_TGO_CAS_1L00_1200.sch\" schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
 	strcpy((char*)pds.xml_model[5],"href=\"https://psa.esa.int/psa/mission/em16/v1/PDS4_EM16_1L00_1300.sch\" schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
 */	strcpy((char*)po.name,"Product_Observational");
+
 	strcpy((char*)ia.name,"Identification_Area");
-	strcpy((char*)oa.name,"Observation_Area");
-	strcpy((char*)fao.name,"File_Area_Observational");
 	strcpy((char*)logical_identifier.name,"logical_identifier");
-	strcpy((char*)logical_identifier.value,"urn:esa:psa:em16_tgo_cas:data_derived:cas_der_sc_20250416t233856-20250416t233900-33001-50-pan-1409764716-29-0");
+//	strcpy((char*)logical_identifier.value,"urn:esa:psa:em16_tgo_cas:data_derived:cas_der_sc_20250416t233856-20250416t233900-33001-50-pan-1409764716-29-0");
 	strcpy((char*)version_id.name,"version_id");
-	strcpy((char*)version_id.value,"1.0");
+//	strcpy((char*)version_id.value,"1.0");
 	strcpy((char*)title.name,"title");
-	strcpy((char*)title.value,"Test to develop EXOMARS 2016 CaSSIS TDM PDS4 labels");
+//	strcpy((char*)title.value,"Test to develop EXOMARS 2016 CaSSIS TDM PDS4 labels");
 	strcpy((char*)information_model_version.name,"information_model_version");
-	strcpy((char*)information_model_version.value,"1.21.0.0");
+//	strcpy((char*)information_model_version.value,"1.21.0.0");
 	strcpy((char*)product_class.name,"product_class");
-	strcpy((char*)product_class.value,"Product_Observational");
+//	strcpy((char*)product_class.value,"Product_Observational");
+
+	if(verbose)fprintf(stderr,"main() before Investigation Area\n");
+	strcpy((char*)iaa.ename,"Investigation_Area");
+	strcpy((char*)iaa.name.name,"name");
+//	strcpy((char*)iaa.name.value,"ExoMars 2016");
+	strcpy((char*)iaa.type.name,"type");
+//	strcpy((char*)iaa.type.value,"Mission");
+    if(verbose)fprintf(stderr,"main() before Internal_Reference\n");
+	strcpy((char*)iref.name,"Internal_Reference");
+	strcpy((char*)iref.lid_reference.name,"lid_reference");
+	strcpy((char*)iref.lid_reference.value,invlid);
+	strcpy((char*)iref.reference_type.name,"reference_type");
+	strcpy((char*)iref.reference_type.value,"data_to_investigation");
+	if(verbose)fprintf(stderr,"main() after Investigation Area\n");
+
 	if(verbose)fprintf(stderr,"main() before Modification_History\n");
 	strcpy((char*)modification_history.name,"Modification_History");
 	strcpy((char*)modification_history.leaves[0].name,"Modification_Detail");
@@ -640,7 +729,9 @@ SI_TYPE Imager
 	strcpy((char*)modification_history.leaves[0].leaves[2].name,"description");
 	strcpy((char*)modification_history.leaves[0].leaves[2].value,descr);
     if(verbose)fprintf(stderr,"main() after modification_history\n");
+
 	if(verbose)fprintf(stderr,"main() before Observation_Area\n");
+	strcpy((char*)oa.name,"Observation_Area");
 	strcpy((char*)timecoord.name,"Time_Coordinates");
 	strcpy((char*)timecoord.tstart.name,"start_date_time");
 	strcpy((char*)timecoord.tstart.value,tstart);
@@ -660,10 +751,13 @@ SI_TYPE Imager
 	strcpy((char*)primary_result_summary.leaves[3].leaves[1].value,"Surface");
 	strcpy((char*)primary_result_summary.leaves[3].leaves[2].name,"discipline_name");
 	strcpy((char*)primary_result_summary.leaves[3].leaves[2].value,"Geosciences");
+
+
     if(verbose)fprintf(stderr,"main() before Observing System\n");	
 	strcpy((char*)observing_system.name,"Observing_System");
 	strcpy((char*)observing_system.leaves[0].name,"name");
-	strcpy((char*)observing_system.osc[0].ename,"Observing_System_Component");
+
+	strcpy((char*)observing_system.osc[0].ename,"Observing_System_Component"); /* OSC 1: spacecraft */
 	strcpy((char*)observing_system.osc[0].name->name,"name");
 	strcpy((char*)observing_system.osc[0].name->value,onamval[0]);
 	strcpy((char*)observing_system.osc[0].type->name,"type");
@@ -673,16 +767,17 @@ SI_TYPE Imager
 	strcpy((char*)observing_system.osc[0].ir.lid_reference.value,observing_system.osc[0].ir.lid_reference.value);
 	strcpy((char*)observing_system.osc[0].ir.reference_type.name,"reference_type");
 	strcpy((char*)observing_system.osc[0].ir.reference_type.value,observing_system.osc[0].ir.reference_type.value);
-	strcpy((char*)observing_system.osc[1].ename,"Observing_System_Component");
+
+	strcpy((char*)observing_system.osc[1].ename,"Observing_System_Component"); /* OSC 2: instrument */
 	strcpy((char*)observing_system.osc[1].name->name,"name");
 	strcpy((char*)observing_system.osc[1].name->value,onamval[1]);
 	strcpy((char*)observing_system.osc[1].type->name,"type");
 	strcpy((char*)observing_system.osc[1].type->value,otypval[1]);
 	strcpy((char*)observing_system.osc[1].ir.name,"Internal_Reference");
 	strcpy((char*)observing_system.osc[1].ir.lid_reference.name,"lid_reference");
-	strcpy((char*)observing_system.osc[1].ir.lid_reference.value,observing_system.osc[1].ir.lid_reference.value);
+//	strcpy((char*)observing_system.osc[1].ir.lid_reference.value,observing_system.osc[1].ir.lid_reference.value);
 	strcpy((char*)observing_system.osc[1].ir.reference_type.name,"reference_type");
-	strcpy((char*)observing_system.osc[1].ir.reference_type.name,observing_system.osc[1].ir.reference_type.value);
+//	strcpy((char*)observing_system.osc[1].ir.reference_type.value,observing_system.osc[1].ir.reference_type.value);
     if(verbose)fprintf(stderr,"main() before Target_Identification\n");
 
 	strcpy((char*)oa.target[0].ename,"Target_Identification");
@@ -760,9 +855,9 @@ SI_TYPE Imager
 	strcpy((char*)mission_area.leaves[4].leaves[1].name,"em16_tgo_cas:HK_Derived_Data");
 	strcpy((char*)mission_area.leaves[4].leaves[1].leaves[0].name,"em16_tgo_cas:filter");
 	strcpy((char*)mission_area.leaves[4].leaves[2].name,"em16_tgo_cas:Telescope_Information");
-	strcpy((char*)mission_area.leaves[4].leaves[2].leaves[0].name,"em16_tgo_cas:focal_length_unit_description");
-	strcpy((char*)mission_area.leaves[4].leaves[2].leaves[1].name,"em16_tgo_cas:f_number");
-	strcpy((char*)mission_area.leaves[4].leaves[2].leaves[2].name,"em16_tgo_cas:filter");
+	strcpy((char*)mission_area.leaves[4].leaves[2].leaves[0].name,"em16_tgo_cas:focal_length");
+	strcpy((char*)mission_area.leaves[4].leaves[2].leaves[1].name,"em16_tgo_cas:focal_length_unit_description");
+	strcpy((char*)mission_area.leaves[4].leaves[2].leaves[2].name,"em16_tgo_cas:f_number");
 	strcpy((char*)mission_area.leaves[4].leaves[2].leaves[3].name,"em16_tgo_cas:telescope_description");
 	strcpy((char*)mission_area.leaves[4].leaves[3].name,"em16_tgo_cas:Detector_Information");
 	strcpy((char*)mission_area.leaves[4].leaves[3].leaves[0].name,"em16_tgo_cas:cassis_description");
@@ -774,30 +869,23 @@ SI_TYPE Imager
 	strcpy((char*)mission_area.leaves[4].leaves[3].leaves[6].name,"em16_tgo_cas:read_noise");
 	strcpy((char*)mission_area.leaves[4].leaves[3].leaves[7].name,"em16_tgo_cas:read_noise_unit_description");
 
-	if(verbose)fprintf(stderr,"main() before Investigation Area\n");
-	strcpy((char*)iaa.ename,"Investigation_Area");
-	strcpy((char*)iaa.name.name,"name");
-//	strcpy((char*)iaa.name.value,"ExoMars 2016");
-	strcpy((char*)iaa.type.name,"type");
-	strcpy((char*)iaa.type.value,"Mission");
-    if(verbose)fprintf(stderr,"main() before Internal_Reference\n");	
-	strcpy((char*)iref.name,"Internal_Reference");
-	strcpy((char*)iref.lid_reference.name,"lid_reference");
-	strcpy((char*)iref.lid_reference.value,invlid);
-	strcpy((char*)iref.reference_type.name,"reference_type");
-	strcpy((char*)iref.reference_type.value,"data_to_investigation");
 	/* Reference_List */
     if(verbose)fprintf(stderr,"main() before Reference List\n");
-	strcpy((char*)reference_list.ename,"Reference_List");
+	strcpy((char*)reference_list.ename,"Reference_List"); /* 3 references */
+    /* Reference List Internal Reference (RLIR) */
+
 	strcpy((char*)reference_list.irefs[0].name,"Internal_Reference");
 	strcpy((char*)reference_list.irefs[0].lid_reference.name,"lid_reference");
-	strcpy((char*)reference_list.irefs[0].reference_type.name,"reference_type");
+	strcpy((char*)reference_list.irefs[0].reference_type.name,"reference_type"); /* data_to_document */
+
 	strcpy((char*)reference_list.irefs[1].name,"Internal_Reference");
 	strcpy((char*)reference_list.irefs[1].lid_reference.name,"lid_reference");
-	strcpy((char*)reference_list.irefs[1].reference_type.name,"reference_type");
+	strcpy((char*)reference_list.irefs[1].reference_type.name,"reference_type"); /* data_to_spice_kernel */
+
 	strcpy((char*)reference_list.irefs[2].name,"Internal_Reference");
-	strcpy((char*)reference_list.irefs[2].lid_reference.name,"lid_reference");
-	strcpy((char*)reference_list.irefs[2].reference_type.name,"reference_type");
+	strcpy((char*)reference_list.irefs[2].lid_reference.name,"lidvid_reference");
+	strcpy((char*)reference_list.irefs[2].reference_type.name,"reference_type"); /* data_to_browse */
+
 	/* Source_Product_External (SPE)*/
 	strcpy((char*)reference_list.spe.name, "Source_Product_External");
 	strcpy((char*)reference_list.spe.external_source_product_identifier.name, "external_source_product_identifier");
@@ -815,6 +903,8 @@ SI_TYPE Imager
             <comment>Image Data File</comment>
         </File>
 */
+	strcpy((char*)fao.name,"File_Area_Observational");
+
     if(verbose)fprintf(stderr,"main() before File \n");
 	strcpy((char*)file.name,"File");
 	strcpy((char*)file.leaves[0].name,"file_name");
@@ -898,20 +988,38 @@ SI_TYPE Imager
     // Add it before the root element
     xmlAddPrevSibling(root_node, pi);
 
+	/*
+  res=fscanf(cfp,"PROD_LID %s\n",prodlid[0]);
+  strcpy(logical_identifier.leaves[0].value,prodlid[0]);
+  res=fscanf(cfp,"PROD_VID %s\n",prodvid[0]);
+  strcpy(logical_identifier.leaves[1].value,prodlid[0]);
+  res=fscanf(cfp,"TITLE %s\n",stitle);
+  for(j=0;j<strlen(stitle);j++)
+		if(stitle[j]=='>') stitle[j]=' ';
+  strcpy(logical_identifier.leaves[2].value,stitle);
+  res=fscanf(cfp,"IM_VERS %s\n",imvers);
+  strcpy(logical_identifier.leaves[3].value,imvers);
+  res=fscanf(cfp,"PROD_CLASS %s\n",prodclass);
+  strcpy(logical_identifier.leaves[4].value,prodclass);
+
+	 */
+
     if(verbose)fprintf(stderr,"main() opening <Identification_Area> node element step 1 \n");
     xmlNewChild(root_node, NULL, BAD_CAST pds.po->ia->name, BAD_CAST NULL); /* Identification_Area node element */
     p1=root_node->children;
-    xmlNewChild(p1, NULL, BAD_CAST logical_identifier.name, BAD_CAST logical_identifier.value);
-    xmlNewChild(p1, NULL, BAD_CAST version_id.name, BAD_CAST version_id.value);
-    xmlNewChild(p1, NULL, BAD_CAST title.name, BAD_CAST title.value);
-    xmlNewChild(p1, NULL, BAD_CAST information_model_version.name, BAD_CAST information_model_version.value);
-    xmlNewChild(p1, NULL, BAD_CAST product_class.name, BAD_CAST product_class.value);
-    p1=xmlNewChild(p1, NULL, BAD_CAST modification_history.name, BAD_CAST NULL);
-    p1=xmlNewChild(p1, NULL, BAD_CAST modification_history.leaves[0].name, BAD_CAST NULL);
-    xmlNewChild(p1, NULL, BAD_CAST modification_history.leaves[0].leaves[0].name, BAD_CAST modification_history.leaves[0].leaves[0].value);
-    xmlNewChild(p1, NULL, BAD_CAST modification_history.leaves[0].leaves[1].name, BAD_CAST modification_history.leaves[0].leaves[1].value);
-    xmlNewChild(p1, NULL, BAD_CAST modification_history.leaves[0].leaves[2].name, BAD_CAST modification_history.leaves[0].leaves[2].value);
-    p1=p1->parent;p1=p1->parent;p1=p1->parent;
+    xmlNewChild(p1, NULL, BAD_CAST logical_identifier.name, BAD_CAST logical_identifier.leaves[0].value); /* PROD_LID */
+    xmlNewChild(p1, NULL, BAD_CAST version_id.name, BAD_CAST logical_identifier.leaves[1].value); /* PROD_VID */
+    xmlNewChild(p1, NULL, BAD_CAST title.name, BAD_CAST logical_identifier.leaves[2].value); /* (mission) TITLE */
+    xmlNewChild(p1, NULL, BAD_CAST information_model_version.name, BAD_CAST logical_identifier.leaves[3].value); /* IM_VERS */
+    xmlNewChild(p1, NULL, BAD_CAST product_class.name, BAD_CAST logical_identifier.leaves[4].value); /* PROD_CLASS */
+
+    p1=xmlNewChild(p1, NULL, BAD_CAST modification_history.name, BAD_CAST NULL); /* <Modification_History>*/
+    p1=xmlNewChild(p1, NULL, BAD_CAST modification_history.leaves[0].name, BAD_CAST NULL); /* <Modification_Detail>*/
+    xmlNewChild(p1, NULL, BAD_CAST modification_history.leaves[0].leaves[0].name, BAD_CAST modification_history.leaves[0].leaves[0].value); /* <modification_date> */
+    xmlNewChild(p1, NULL, BAD_CAST modification_history.leaves[0].leaves[1].name, BAD_CAST modification_history.leaves[0].leaves[1].value); /* <version_id> */
+    xmlNewChild(p1, NULL, BAD_CAST modification_history.leaves[0].leaves[2].name, BAD_CAST modification_history.leaves[0].leaves[2].value); /* <description> */
+    p1=p1->parent;p1=p1->parent;p1=p1->parent; /* back under <Product_Observational> (document root)*/
+
     if(verbose)fprintf(stderr,"main() opening <Observation_Area> node element 1.5\n");
     p1 = xmlNewChild(p1, NULL, BAD_CAST pds.po->oa->name, BAD_CAST NULL); /* Observation_Area node element */
 	p1 = xmlNewChild(p1, NULL, BAD_CAST oa.leaves[1].name, BAD_CAST oa.leaves[1].value); /* comment */
@@ -1022,10 +1130,10 @@ SI_TYPE Imager
 		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[1].leaves[0].name, BAD_CAST mission_area.leaves[4].leaves[1].leaves[0].value);
 		p1=p1->parent;
 		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[2].name, BAD_CAST NULL); /* psa:Telescope_Information */
-		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[2].leaves[0].name, BAD_CAST mission_area.leaves[4].leaves[2].leaves[0].value);
-		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[2].leaves[1].name, BAD_CAST mission_area.leaves[4].leaves[2].leaves[1].value);
-		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[2].leaves[2].name, BAD_CAST mission_area.leaves[4].leaves[2].leaves[2].value);
-		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[2].leaves[3].name, BAD_CAST mission_area.leaves[4].leaves[2].leaves[3].value);
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[2].leaves[0].name, BAD_CAST mission_area.leaves[4].leaves[2].leaves[0].value); /* <em16_tgo_cas:focal_length> */
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[2].leaves[1].name, BAD_CAST mission_area.leaves[4].leaves[2].leaves[1].value); /* <em16_tgo_cas:focal_length_unit_description> */
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[2].leaves[2].name, BAD_CAST mission_area.leaves[4].leaves[2].leaves[2].value); /* <em16_tgo_cas:f_number> */
+		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[2].leaves[3].name, BAD_CAST mission_area.leaves[4].leaves[2].leaves[3].value); /* <wm\6_tgo_cas:telescope_description> */
 		p1=p1->parent;
 		p1 = xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[3].name, BAD_CAST NULL); /* psa:Telescope_Information */
 		xmlNewChild(p1, NULL, BAD_CAST mission_area.leaves[4].leaves[3].leaves[0].name, BAD_CAST mission_area.leaves[4].leaves[3].leaves[0].value);
@@ -1153,4 +1261,884 @@ SI_TYPE Imager
 	free(po.attributes); // po.attributes freed
 	fprintf(stderr,"main() ending program\n");
   return 0;
+}
+
+/**
+
+ struct PRODUCT_OBSERVATIONAL {
+	struct ATTRIBUTE *attributes;
+	struct IDENTIFICATION_AREA *ia;
+	struct OBSERVATION_AREA *oa;
+	struct REFERENCE_LIST *rl;
+	struct FILE_AREA_OBSERVATIONAL *fao;
+	struct ELEMENT oleaves[MAXLEAV]; // other elements, in case
+	char name[MAXFNAML];
+	char value[MAXFNAML];
+};
+
+struct PDS {
+	int version;
+	char xmlintest[MAXFNAML];
+	char xml_model[10][MAXFNAML];
+	char ifname[MAXFNAML];
+	char ofname[MAXFNAML];
+	char **pfnames; // names of the product files referred by the label
+	FILE **products; // product files pointed by the pds label
+	int numproducts;
+	struct PRODUCT_OBSERVATIONAL *po;
+};
+
+ */
+
+/* function to create a new input configuration file */
+
+int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
+	int verbose = 1;
+	/* struct containing the PamDataset metadata */
+	struct PAMDATASET mypam;
+
+	/* struct containing the PDS(4) metadata */
+	struct PDS mypds;
+	/* current value of KEY and VALUE */
+    char key[256];
+    char value[MAXFNAML];
+    FILE *icfp, *ocfp;
+/*
+ 	oa.target->iref=(struct INTERNAL_REFERENCE*)malloc(sizeof(struct INTERNAL_REFERENCE));
+ */
+	mypds.po = (struct PRODUCT_OBSERVATIONAL*)malloc(sizeof(struct PRODUCT_OBSERVATIONAL));
+	mypds.po->ia = (struct IDENTIFICATION_AREA*)malloc(sizeof(struct IDENTIFICATION_AREA));
+	mypds.po->oa = (struct OBSERVATION_AREA*)malloc(sizeof(struct OBSERVATION_AREA));
+	mypds.po->rl = (struct REFERENCE_LIST*)malloc(sizeof(struct REFERENCE_LIST));
+	mypds.po->fao = (struct FILE_AREA_OBSERVATIONAL*)malloc(sizeof(struct FILE_AREA_OBSERVATIONAL));
+	/* allocate memory */
+
+
+/*
+Product_Observational
+	Identification_Area
+		Alias_List
+		Citation_Information
+		Modification_History
+	Observation_Area
+		Time_Coordinates
+		Primary_Result_Summary
+		Investigation_Area
+		Observing_System
+		Target_Identification
+		Mission_Area
+		Discipline_Area
+	Reference_List
+		Internal_Reference
+		External_Reference
+		Source_Product_Internal
+		Source_Product_External
+	File_Area_Observational
+		File
+		Data_Object_Definition
+*/
+
+
+	/* open  input configuration file */
+  icfp=fopen(iconf, "r");
+  if(icfp==NULL){
+     perror("cannot open input configuration file for reading");
+     exit(1);
+  }
+
+  	/* open  output configuration file */
+  ocfp=fopen(oconf, "w");
+  if(ocfp==NULL){
+     perror("cannot open output configuration file for writing");
+     exit(1);
+  }
+
+
+
+
+  /* read input configuration file content into variables in memory */
+
+//    res=fscanf(cfp, "MISSION_NAME %s\n",mypam.mission);
+//    for(j=0;j<strlen(mypam.mission);j++)
+// 		if(mypam.mission[j]=='>') mypam.mission[j]=' ';
+//    res=fscanf(cfp, "SPACECRAFT_NAME %s\n",mypam.spacecraft);
+//    res=fscanf(cfp, "TARGET_NAME %s\n",mypam.target);
+//    res=fscanf(cfp, "INSTRUMENT_ID %s\n",mypam.instrid);
+//    res=fscanf(cfp, "PRODUCT_TYPE %s\n",mypam.prodtype);
+//
+//     res=fscanf(cfp, "BITPIX %hu\n",&bitpix);
+//   res=fscanf(cfp, "SIGN %10s\n",buf);
+//   if(!(strcmp(buf,"signed"))){
+//   	sign = 1;
+// 	strcpy(ssign,"Signed");
+//   } else if(!strcmp(buf,"unsigned")) {
+// 	sign = 0;
+// 	strcpy(ssign,"Unsigned");
+//   } else{
+//     perror("illegal sign option read");
+//     exit(1);
+//   }
+//   res=fscanf(cfp, "ENDIAN %3s\n",buf);
+//   if(!(strcmp(buf,"LSB"))){
+//   	end = 0;
+//   } else if(strcmp(buf,"MSB")) {
+// 	end = 1;
+//   } else{
+//     perror("illegal endianness option read");
+//     exit(1);
+//   }
+//   strcpy(send,buf);
+//   res=fscanf(cfp,  "WIDTH %u\n",&width);
+//   res=fscanf(cfp, "HEIGHT %u\n",&height);
+//   if(bitpix>8) {
+// 	sprintf(dtype,"%s%s%u",ssign,send,(unsigned int)bitpix/8);
+//  } else if (bitpix==8){
+// 	 (sign==1)?strcpy(dtype,"SignedByte"):strcpy(dtype,"UnsignedByte");
+//  }
+//   sprintf(swidth,"%u",width);
+//   sprintf(sheight,"%u",height);
+//     /* Observation Area */
+// 	  res=fscanf(cfp,"NPI %d\n",&npi);
+//   if (verbose) fprintf(stderr,"n. of Processing Instructions: %d\n",npi);
+//   for(i=0;i<npi;i++){
+// 	res=fscanf(cfp,"%5s %s\n",key,pds.xml_model[i]);
+// 	for(j=0;j<strlen(pds.xml_model[i]);j++)
+// 		if(pds.xml_model[i][j]=='>') pds.xml_model[i][j]=' ';
+// 	if (verbose) fprintf(stderr,"key: %5s  value:%s\n",key,pds.xml_model[i]);
+//   }
+//   res=fscanf(cfp,"NPOATTR %d\n",&npoattr);
+//   if (verbose) fprintf(stderr,"n. of <Product_Observational> attributes: %d\n",npoattr);
+//   for(i=0;i<npoattr;i++){
+// 	res=fscanf(cfp,"%15s %s\n",key,po.attributes[i].name);
+// 	res=fscanf(cfp,"%16s %s\n",key,po.attributes[i].value);
+// 	for(j=0;j<strlen(po.attributes[i].value);j++)
+// 		if(po.attributes[i].value[j]=='>') po.attributes[i].value[j]=' ';
+// 	if (verbose) fprintf(stderr,"%16s  %s\n",po.attributes[i].name,po.attributes[i].value);
+//   }
+//   if (verbose) fprintf(stderr,"going to read configuration file about Identification_Area\n");
+// 	/*Identification_Area*/
+//
+//
+// /*
+//
+//  	strcpy((char*)logical_identifier.name,"logical_identifier");
+// //	strcpy((char*)logical_identifier.value,"urn:esa:psa:em16_tgo_cas:data_derived:cas_der_sc_20250416t233856-20250416t233900-33001-50-pan-1409764716-29-0");
+// 	strcpy((char*)version_id.name,"version_id");
+// //	strcpy((char*)version_id.value,"1.0");
+// 	strcpy((char*)title.name,"title");
+// //	strcpy((char*)title.value,"Test to develop EXOMARS 2016 CaSSIS TDM PDS4 labels");
+// 	strcpy((char*)information_model_version.name,"information_model_version");
+// //	strcpy((char*)information_model_version.value,"1.21.0.0");
+// 	strcpy((char*)product_class.name,"product_class");
+// //	strcpy((char*)product_class.value,"Product_Observational");
+//
+//  */
+//   res=fscanf(cfp,"PROD_LID %s\n",prodlid[0]);
+//   strcpy(logical_identifier.leaves[0].value,prodlid[0]);
+//   res=fscanf(cfp,"PROD_VID %s\n",prodvid[0]);
+//   strcpy(logical_identifier.leaves[1].value,prodvid[0]);
+//   res=fscanf(cfp,"TITLE %s\n",stitle);
+//   for(j=0;j<strlen(stitle);j++)
+// 		if(stitle[j]=='>') stitle[j]=' ';
+//   strcpy(logical_identifier.leaves[2].value,stitle);
+//   res=fscanf(cfp,"IM_VERS %s\n",imvers);
+//   strcpy(logical_identifier.leaves[3].value,imvers);
+//   res=fscanf(cfp,"PROD_CLASS %s\n",prodclass);
+//   strcpy(logical_identifier.leaves[4].value,prodclass);
+//
+//   if (verbose) fprintf(stderr,"going to read configuration file about Citation_Information\n");
+// 	/*Citation_Information*/
+//   res=fscanf(cfp,"NCI %d\n",&nci);
+//   if (verbose) fprintf(stderr,"Number of Citation Information = %d\n", nci);
+//   citation_information.leaves=(struct ELEMENT *)malloc(nci*sizeof(struct ELEMENT));
+//   for(i=0;i<nci;i++){
+// 	citation_information.leaves[i].leaves=(struct ELEMENT *)malloc(8*sizeof(struct ELEMENT));
+// 	res=fscanf(cfp,"%s %s\n",key,citation_information.leaves[i].leaves[0].value);
+// 	for(j=0;j<strlen(citation_information.leaves[i].leaves[0].value);j++)
+// 		if(citation_information.leaves[i].leaves[0].value[j]=='>') citation_information.leaves[i].leaves[0].value[j]=' ';
+// 	if(verbose)fprintf(stderr,"read author list: %s\n",citation_information.leaves[i].leaves[0].value);
+// 	res=fscanf(cfp,"%s %s\n",key,citation_information.leaves[i].leaves[1].value);
+// 	if(verbose)fprintf(stderr,"read publication year %s\n",citation_information.leaves[i].leaves[1].value);
+// 	res=fscanf(cfp,"%s %s\n",key,citation_information.leaves[i].leaves[2].value);
+// 	if(verbose)fprintf(stderr,"read doi: %s\n",citation_information.leaves[i].leaves[2].value);
+// 	res=fscanf(cfp,"%s %s\n",key,citation_information.leaves[i].leaves[3].value);
+// 	if(verbose)fprintf(stderr,"read key 0: %s\n",citation_information.leaves[i].leaves[3].value);
+// 	res=fscanf(cfp,"%s %s\n",key,citation_information.leaves[i].leaves[4].value);
+// 	if(verbose)fprintf(stderr,"read key 1: %s\n",citation_information.leaves[i].leaves[4].value);
+// 	res=fscanf(cfp,"%s %s\n",key,citation_information.leaves[i].leaves[5].value);
+// 	if(verbose)fprintf(stderr,"read key 2: %s\n",citation_information.leaves[i].leaves[5].value);
+// 	res=fscanf(cfp,"%s %s\n",key,citation_information.leaves[i].leaves[6].value);
+// 	if(verbose)fprintf(stderr,"read key 3: %s\n",citation_information.leaves[i].leaves[6].value);
+// 	res=fscanf(cfp,"%s %s\n",key,citation_information.leaves[i].leaves[7].value);
+// 	for(j=0;j<strlen(citation_information.leaves[i].leaves[7].value);j++)
+// 		if(citation_information.leaves[i].leaves[7].value[j]=='>') citation_information.leaves[i].leaves[7].value[j]=' ';
+// 		if(verbose)fprintf(stderr,"read description: %s\n",citation_information.leaves[i].leaves[7].value);
+//   }
+//   if (verbose) fprintf(stderr,"going to read configuration file about Modification_History\n");
+//   /* Modification_History*/
+//   res=fscanf(cfp,"MOD_DATE %s\n",moddate);
+//   res=fscanf(cfp,"VERSID %s\n",svers);
+//   res=fscanf(cfp,"DESCR %s\n",descr);
+// 	for(j=0;j<strlen(descr);j++)
+// 		if(descr[j]=='>') descr[j]=' ';
+//   if (verbose) fprintf(stderr,"read MOD_DATE = %s\n", moddate);
+//   if (verbose) fprintf(stderr,"read VERSID = %s\n", svers);
+//   if (verbose) fprintf(stderr,"read DESCR = %s\n", descr);
+//   /* Observation Area */
+//   if (verbose) fprintf(stderr,"going to read configuration file about Observation_Area\n");
+//   fprintf(stderr,"going to read configuration file about Time_Coordinates\n");
+//   res=fscanf(cfp,"TSTART %s\n",tstart);
+//   res=fscanf(cfp,"TSTOP %s\n",tstop);
+//   /****************************************/
+//   /* printout variables content for debug */
+//   /****************************************/
+//   /*
+// 	MISSION_NAME ExoMars>2016
+// 	SPACECRAFT_NAME TGO
+// 	TARGET_NAME MARS
+// 	INSTRUMENT_ID CaSSIS
+// 	PRODUCT_TYPE DTM
+//    */
+//
+//   /* new keys 2026-05-14 */
+//   if (verbose) fprintf(stderr,"Now printing variables content for debug\n");
+//   if (verbose) fprintf(stderr,"MISSION_NAME = %s\n",mypam.mission);
+//   if (verbose) fprintf(stderr,"SPACECRAFT_NAME = %s\n",mypam.spacecraft);
+//   if (verbose) fprintf(stderr,"TARGET_NAME = %s\n",mypam.target);
+//   if (verbose) fprintf(stderr,"INSTRUMENT_ID = %s\n",mypam.instrid);
+//   if (verbose) fprintf(stderr,"PRODUCT_TYPE = %s\n",mypam.prodtype);
+//   if (verbose) fprintf(stderr,"BITPIX = %d\n",bitpix);
+//   if (verbose) fprintf(stderr,"SIGN = %d\n",sign);
+//   if (verbose) fprintf(stderr,"ENDIAN = %d\n",end);
+//   if (verbose) fprintf(stderr,"WIDTH = %u\n",width);/* Sample == n. of columns */
+//   if (verbose) fprintf(stderr,"HEIGHT = %u\n",height); /* Line == n. of rows */
+//   if (verbose) fprintf(stderr,"PDS4 <data_type> = %s\n",dtype);
+//   if (verbose) fprintf(stderr,"TSTART = %s\n",tstart);/* Sample == n. of columns */
+//   if (verbose) fprintf(stderr,"TSTOP = %s\n",tstop);/* Sample == n. of columns */
+//   if (verbose) fprintf(stderr,"going to read configuration file about Primary_Result_Summary\n");
+//   res=fscanf(cfp,"PURP %s\n",purp);
+//   res=fscanf(cfp,"PROC_LEV %s\n",proclev);
+//   res=fscanf(cfp,"RES_DESCR %s\n",resdescr);
+//   for(j=0;j<strlen(resdescr);j++)
+// 		if(resdescr[j]=='>') resdescr[j]=' ';
+//   res=fscanf(cfp,"LAMBDA %s\n",lambda);
+//   res=fscanf(cfp,"DOMAIN %s\n",domain);
+//   res=fscanf(cfp,"DISCIPL %s\n",discipl);
+//   if (verbose) fprintf(stderr,"going to read configuration file about Investigation_Area\n");
+//   res=fscanf(cfp,"INVEST_AREA %s\n",iaa.name.value);
+//   for(j=0;j<strlen(iaa.name.value);j++)
+// 		if(iaa.name.value[j]=='>') iaa.name.value[j]=' ';
+//   if (verbose) fprintf(stderr, "read INVEST_AREA res = %d value = %s\n", res, iaa.name.value);
+//   res=fscanf(cfp,"INVEST_TYPE %s\n",iaa.type.value);
+//   if (verbose) fprintf(stderr, "read INVEST_TYPE res = %d value = %s\n", res, iaa.type.value);
+//   res=fscanf(cfp,"INV_LID %s\n",invlid);
+//   res=fscanf(cfp,"REFTYPE %s\n",reftype);
+//   if (verbose) fprintf(stderr,"going to read configuration file about Observing_System\n");
+//   res=fscanf(cfp,"OSNAME %s\n",observing_system.value);
+//   res=fscanf(cfp,"NOSC_COMP %d\n",&nosc);
+//   for(i=0;i<nosc;i++){
+// 	res=fscanf(cfp,"%11s %s\n",key,onamval[i]);
+// 	for(j=0;j<strlen(onamval[i]);j++)
+// 		if(onamval[i][j]=='>') onamval[i][j]=' ';
+// 	if(verbose)fprintf(stderr,"OSC[%d] n. value: %s\n",i,onamval[i]);
+// 	res=fscanf(cfp,"%s %s\n",key,otypval[i]);
+// 	if(verbose)fprintf(stderr,"OSC[%d] n. type: %s\n",i,otypval[i]);
+// 	res=fscanf(cfp,"%s %s\n",key,observing_system.osc[i].descr);
+// 	for(j=0;j<strlen(observing_system.osc[i].descr);j++)
+// 		if(observing_system.osc[i].descr[j]=='>') observing_system.osc[i].descr[j]=' ';
+// 	if(verbose)fprintf(stderr,"OSC[%d] n. description: %s\n",i,observing_system.osc[i].descr);
+// 	res=fscanf(cfp,"%s %s\n",key,observing_system.osc[i].ir.lid_reference.value);
+// 	if(verbose)fprintf(stderr,"OSC[%d] n. lid_reference: %s\n",i,observing_system.osc[i].ir.lid_reference.value);
+// 	res=fscanf(cfp,"%s %s\n",key,observing_system.osc[i].ir.reference_type.value);
+// 	if(verbose)fprintf(stderr,"OSC[%d] n. reference_type: %s\n",i,observing_system.osc[i].ir.reference_type.value);
+//   }
+//   /* target identification */
+// 	oa.target[0].iref[0].lid_reference.value[0] = 'A';
+// 	oa.target[0].iref[0].reference_type.value[0] = 'B';
+// 	oa.target[0].iref[0].lid_reference.name[0] = 'C';
+// 	oa.target[0].iref[0].reference_type.name[0] = 'D';
+// 	res=fscanf(cfp,"TARGET_NAME %s\n",oa.target[0].name.value); /*  */
+// 	res=fscanf(cfp,"TARGET_TYPE %s\n",oa.target[0].type.value); /*  */
+// 	res=fscanf(cfp,"%s %s\n",key,oa.target[0].iref[0].lid_reference.value);
+// 	if(verbose)fprintf(stderr,"TARGET[%d] n. lid_reference: %s\n",0,oa.target[0].iref[0].lid_reference.value);
+// 	res=fscanf(cfp,"%s %s\n",key,oa.target[0].iref[0].reference_type.value);
+// 	if(verbose)fprintf(stderr,"TARGET[%d] n. reference_type: %s\n",0,oa.target[0].iref[0].reference_type.value);
+//   /* read Mission Area configuration */
+// 	res=fscanf(cfp,"MISSION %s\n",mission); /* MISSION */
+// 	if(verbose)fprintf(stderr,"MISSION: %s\n",mission);
+// 	/* START reading Mission Information
+// 	 * res=fscanf(cfp,"MISS_ID %s\n",miss_id); /* MISS_ID (element name)
+// 	psa:Mission_Information
+// */
+// 	strcpy((char*)miss_id, "psa:Mission_Information");
+// 	if(verbose)fprintf(stderr,"Before PHASE\n");
+// 	/* <psa:Mission_Information>  ---> mission_area.leaves[0] */
+// 												  /* MissInf.MissPhase.PhaseName */
+// 	res=fscanf(cfp,"PHASE_NAME %s\n",mission_area.leaves[0].leaves[0].leaves[0].value); /* mission phase name */
+// 	for(j=0;j<strlen(mission_area.leaves[0].leaves[0].leaves[0].value);j++)
+// 		if(mission_area.leaves[0].leaves[0].leaves[0].value[j]=='>') mission_area.leaves[0].leaves[0].leaves[0].value[j]=' ';
+// 	if (verbose) fprintf(stderr, "read PHASE_NAME res = %d value = %s\n", res, mission_area.leaves[0].leaves[0].leaves[0].value);
+// 												/* MissInf.MissPhase.PhaseID */
+// 	res=fscanf(cfp,"PHASE_ID %s\n",mission_area.leaves[0].leaves[0].leaves[1].value); /* mission phase id */
+// 	for(j=0;j<strlen(mission_area.leaves[0].leaves[0].leaves[1].value);j++)
+// 		if(mission_area.leaves[0].leaves[0].leaves[1].value[j]=='>') mission_area.leaves[0].leaves[0].leaves[1].value[j]=' ';
+// 	if (verbose) fprintf(stderr, "read PHASE_ID res = %d value = %s\n", res, mission_area.leaves[0].leaves[0].leaves[1].value);
+// 	res=fscanf(cfp,"CLOCK_START %s\n",mission_area.leaves[0].leaves[0].value); /* clock tstart */
+// 	if (verbose) fprintf(stderr, "read CLOCK_START res = %d value = %s\n", res, mission_area.leaves[0].leaves[0].value);
+// 	res=fscanf(cfp,"CLOCK_STOP %s\n",mission_area.leaves[0].leaves[1].value); /* clock tsop */
+// 	if (verbose) fprintf(stderr, "read CLOCK_STOP res = %d value = %s\n", res, mission_area.leaves[0].leaves[1].value);
+// 												/* MissInf.StartOrbit */
+// 	res=fscanf(cfp,"START_ORB %s\n",mission_area.leaves[0].leaves[1].value); /* start orbit */
+// 	if (verbose) fprintf(stderr, "read START_ORB res = %d value = %s\n", res, mission_area.leaves[0].leaves[1].value);
+// 												/* MissInf.StopOrbit */
+// 	res=fscanf(cfp,"STOP_ORB %s\n",mission_area.leaves[0].leaves[2].value); /* stop orbit */
+// 	if (verbose) fprintf(stderr, "read STOP_ORB res = %d value = %s\n", res, mission_area.leaves[0].leaves[2].value);
+// 	/* END reading Mission Information */
+//
+// 	/* START reading Sub Instrument */
+// //	res=fscanf(cfp,"SU %s\n",su); /* SUB INSTRUMENT (element name) */
+// 	strcpy((char*)su, "psa:Sub-Instrument");
+// 										/* Sub-Instrument.Identifier */
+// 	res=fscanf(cfp,"SU_ID %s\n",mission_area.leaves[1].leaves[0].value); /* <psa:identifier>  */
+// 	if (verbose) fprintf(stderr, "read SU_ID res = %d value = %s\n", res, mission_area.leaves[1].leaves[0].value);
+// 											/* Sub-Instrument.Name */
+// 	res=fscanf(cfp,"SU_NAME %s\n",mission_area.leaves[1].leaves[1].value); /* <psa:name>  */
+// 	for(j=0;j<strlen(mission_area.leaves[1].leaves[1].value);j++)
+// 		if(mission_area.leaves[1].leaves[1].value[j]=='>') mission_area.leaves[1].leaves[1].value[j]=' ';
+// 	if (verbose) fprintf(stderr, "read SU_NAME res = %d value = %s\n", res, mission_area.leaves[1].leaves[1].value);
+// 												/* Sub-Instrument.Type */
+// 	res=fscanf(cfp,"SU_TYPE %s\n",mission_area.leaves[1].leaves[2].value); /* <psa:type>  */
+// 	if (verbose) fprintf(stderr, "read SU_TYPE res = %d value = %s\n", res, mission_area.leaves[1].leaves[2].value);
+// 		/* END reading Sub Instrument */
+// /*
+// OBSCON_IPM Surface
+// OBSCON_IPD TARGETED
+// OBSCON_OID 1409764716
+// OBSCON_OTYPE INDIVIDUAL
+//  */
+// 	/* START reading <psa:Observation_Context> */
+// 	res=fscanf(cfp,"OBSCON_IPM %s\n",mission_area.leaves[2].leaves[0].value);   /* <psa:instrument_pointing_mode>  */
+// 	if (verbose) fprintf(stderr, "read OBSCON_IPM res = %d value = %s\n", res, mission_area.leaves[2].leaves[0].value);
+// 	res=fscanf(cfp,"OBSCON_IPD %s\n",mission_area.leaves[2].leaves[1].value);   /* <psa:instrument_pointing_description> */
+// 	if (verbose) fprintf(stderr, "read OBSCON_IPD res = %d value = %s\n", res, mission_area.leaves[2].leaves[1].value);
+// 	res=fscanf(cfp,"OBSCON_OID %s\n",mission_area.leaves[2].leaves[2].value);   /* <psa:observation_identifier> */
+// 	if (verbose) fprintf(stderr, "read OBSCON_OID res = %d value = %s\n", res, mission_area.leaves[2].leaves[2].value);
+// 	res=fscanf(cfp,"OBSCON_OTYPE %s\n",mission_area.leaves[2].leaves[3].value); /* <psa:observation_type> */
+// 	if (verbose) fprintf(stderr, "read OBSCON_OTYPE res = %d value = %s\n", res, mission_area.leaves[2].leaves[3].value);
+// /* END reading <psa:Observation_Context> */
+//
+// 	/* START reading <psa:Processing_Context> */
+// //	res=fscanf(cfp,"PRODID %s\n",mission_area.leaves[3].leaves[0].value); /* product id */
+// //	if (verbose) fprintf(stderr, "read PRODID res = %d value = %s\n", res, mission_area.leaves[3].leaves[0].value);
+// 	res=fscanf(cfp,"SWNAME %s\n",mission_area.leaves[3].leaves[0].value); /* <psa:psa:processing_software_title> (software name) */
+// 	for(j=0;j<strlen(mission_area.leaves[3].leaves[0].value);j++)
+// 		if(mission_area.leaves[3].leaves[0].value[j]=='>') mission_area.leaves[3].leaves[0].value[j]=' ';
+// 	if (verbose) fprintf(stderr, "read SWNAME res = %d value = %s\n", res, mission_area.leaves[3].leaves[1].value);
+// 	res=fscanf(cfp,"SWVERS %s\n",mission_area.leaves[3].leaves[1].value); /* <psa:processing_software_version>  */
+// 	if (verbose) fprintf(stderr, "read SWVERS res = %d value = %s\n", res, mission_area.leaves[3].leaves[1].value);
+//
+// /* END reading <psa:Processing_Context> */
+//
+// 	/* START reading Cassis_Data */
+// //	res=fscanf(cfp,"DATA_NAME %s\n",dname); /* instrument:DATA (element name) */
+// 	strcpy((char*)dname, "em16_tgo_cas:Cassis_Data");
+// /*
+//  * <em16_tgo_cas:Cassis_Data> --> mission_area.leaves[4]
+//  *
+// INSTR_IFOV 1.142E-5
+// IFOV_DESCR rad/px
+// FILTERS BLU>RED>NIR>PAN
+// HK_FILTER PAN
+// FOCAL_LENGTH 0.876
+// FOCAL_DESCR M
+// F_NUMBER 6.49
+// TELESCOPE Three-mirror>anastigmat>with>powered>fold>mirror
+// CAS_DESCR 2D>Array
+// PIX_HEIGHT 10.0
+// PIX_HE_UNIT MICRON
+// PIX_WIDTH 10.0
+// PIX_WI_UNIT MICRON
+// DET_DESCR SI>CMOS>HYBRID>(OSPREY>2K)
+// NOISE 61.0
+// NOISE_UNIT ELECTRON
+//
+//  */
+// 			/*                 <em16_tgo_cas:Instrument_Information> */
+// 			                                            /* CassisData.InstrumentInformation.instrument_ifov */
+// 	res=fscanf(cfp,"INSTR_IFOV %s\n",mission_area.leaves[4].leaves[0].leaves[0].value); /* <em16_tgo_cas:instrument_ifov>  */
+// 	if (verbose) fprintf(stderr, "read INSTR_IFOV res = %d value = %s\n", res, mission_area.leaves[4].leaves[0].leaves[0].value);
+// 			                                            /* CassisData.InstrumentInformation.ifov_unit */
+// 	res=fscanf(cfp,"IFOV_UNIT %s\n",mission_area.leaves[4].leaves[0].leaves[1].value); /* instrument_ifov_unit_description>  */
+// 	if (verbose) fprintf(stderr, "read IFOV_UNIT res = %d value = %s\n", res, mission_area.leaves[4].leaves[0].leaves[1].value);
+// 			                                            /* CassisData.InstrumentInformation.filters_available */
+// 	res=fscanf(cfp,"FILTERS %s\n",mission_area.leaves[4].leaves[0].leaves[2].value); /* <em16_tgo_cas:filters_available>  */
+// 	for(j=0;j<strlen(mission_area.leaves[4].leaves[0].leaves[2].value);j++)
+// 		if(mission_area.leaves[4].leaves[0].leaves[2].value[j]=='>') mission_area.leaves[4].leaves[0].leaves[2].value[j]=' ';
+// 	if (verbose) fprintf(stderr, "read FILTERS res = %d value = %s\n", res, mission_area.leaves[4].leaves[0].leaves[2].value);
+// 							/*	<em16_tgo_cas:HK_Derived_Data> */
+// 			                                            /* CassisData.HK_Derived_Data.filter */
+// 	res=fscanf(cfp,"HK_FILTER %s\n",mission_area.leaves[4].leaves[1].leaves[0].value); /* <em16_tgo_cas:filter>  */
+// 	if (verbose) fprintf(stderr, "read HK_FILTER res = %d value = %s\n", res, mission_area.leaves[4].leaves[1].leaves[0].value);
+// 							/*	<em16_tgo_cas:HK_Derived_Data> */
+//
+// 							/* <em16_tgo_cas:Telescope_Information> */
+// 												/* CassisData.Telescope_Information.focal_length */
+// 	res=fscanf(cfp,"FOCAL_LENGTH %s\n",mission_area.leaves[4].leaves[2].leaves[0].value); /* <em16_tgo_cas:focal_length>  */
+// 	if (verbose) fprintf(stderr, "read FOCAL_LENGTH res = %d value = %s\n", res, mission_area.leaves[4].leaves[2].leaves[0].value);
+// 												/* CassisData.Telescope_Information.focal_unit */
+// 	res=fscanf(cfp,"FOCAL_UNIT %s\n",mission_area.leaves[4].leaves[2].leaves[1].value); /* <em16_tgo_cas:focal_length_unit_description>  */
+// 	if (verbose) fprintf(stderr, "read FOCAL_UNIT res = %d value = %s\n", res, mission_area.leaves[4].leaves[2].leaves[1].value);
+// 												/* CassisData.Telescope_Information.focal_number */
+// 	res=fscanf(cfp,"F_NUMBER %s\n",mission_area.leaves[4].leaves[2].leaves[2].value); /* <em16_tgo_cas:focal_length_unit_description>  */
+// 	if (verbose) fprintf(stderr, "read F_NUMBER res = %d value = %s\n", res, mission_area.leaves[4].leaves[2].leaves[2].value);
+// 												/* CassisData.Telescope_Information.telescope_description */
+// 	res=fscanf(cfp,"TELESCOPE %s\n",mission_area.leaves[4].leaves[2].leaves[3].value); /* <em16_tgo_cas:telescope_description>  */
+// 	for(j=0;j<strlen(mission_area.leaves[4].leaves[2].leaves[3].value);j++)
+// 		if(mission_area.leaves[4].leaves[2].leaves[3].value[j]=='>') mission_area.leaves[4].leaves[2].leaves[3].value[j]=' ';
+// 	if (verbose) fprintf(stderr, "read TELESCOPE res = %d value = %s\n", res, mission_area.leaves[4].leaves[2].leaves[3].value);
+// 	 							/* <em16_tgo_cas:Detector_Information> */
+// 												/* CassisData.Detector_Information.cassis_description */
+// 	res=fscanf(cfp,"CAS_DESCR %s\n",mission_area.leaves[4].leaves[3].leaves[0].value); /* <em16_tgo_cas:cassis_description>  */
+// 	for(j=0;j<strlen(mission_area.leaves[4].leaves[3].leaves[0].value);j++)
+// 		if(mission_area.leaves[4].leaves[3].leaves[0].value[j]=='>') mission_area.leaves[4].leaves[3].leaves[0].value[j]=' ';
+// 	if (verbose) fprintf(stderr, "read CAS_DESCR res = %d value = %s\n", res, mission_area.leaves[4].leaves[3].leaves[0].value);
+// 												/* CassisData.Detector_Information.pixel_height */
+// 	res=fscanf(cfp,"PIX_HEIGHT %s\n",mission_area.leaves[4].leaves[3].leaves[1].value); /* <em16_tgo_cas:pixel_height>  */
+// 	if (verbose) fprintf(stderr, "read PIX_HEIGHT res = %d value = %s\n", res, mission_area.leaves[4].leaves[3].leaves[1].value);
+// 												/* CassisData.Detector_Information.pixel_height_unit */
+// 	res=fscanf(cfp,"PIX_HE_UNIT %s\n",mission_area.leaves[4].leaves[3].leaves[2].value); /* <em16_tgo_cas:pixel_height_unit_description>  */
+// 	if (verbose) fprintf(stderr, "read PIX_HE_UNIT res = %d value = %s\n", res, mission_area.leaves[4].leaves[3].leaves[2].value);
+// 												/* CassisData.Detector_Information.pixel_width */
+// 	res=fscanf(cfp,"PIX_WIDTH %s\n",mission_area.leaves[4].leaves[3].leaves[3].value); /* <em16_tgo_cas:pixel_width>  */
+// 	if (verbose) fprintf(stderr, "read PIX_WIDTH res = %d value = %s\n", res, mission_area.leaves[4].leaves[3].leaves[3].value);
+// 												/* CassisData.Detector_Information.pixel_width_unit */
+// 	res=fscanf(cfp,"PIX_WI_UNIT %s\n",mission_area.leaves[4].leaves[3].leaves[4].value); /* <em16_tgo_cas:pixel_width_unit_description>  */
+// 	if (verbose) fprintf(stderr, "read PIX_WI_UNIT res = %d value = %s\n", res, mission_area.leaves[4].leaves[3].leaves[4].value);
+// 												/* CassisData.Detector_Information.detector_description */
+// 	res=fscanf(cfp,"DET_DESCR %s\n",mission_area.leaves[4].leaves[3].leaves[5].value); /* <em16_tgo_cas:detector_description>  */
+// 	for(j=0;j<strlen(mission_area.leaves[4].leaves[3].leaves[5].value);j++)
+// 		if(mission_area.leaves[4].leaves[3].leaves[5].value[j]=='>') mission_area.leaves[4].leaves[3].leaves[5].value[j]=' ';
+// 	if (verbose) fprintf(stderr, "read DET_DESCR res = %d value = %s\n", res, mission_area.leaves[4].leaves[3].leaves[5].value);
+// 												/* CassisData.Detector_Information.read_noise */
+// 	res=fscanf(cfp,"NOISE %s\n",mission_area.leaves[4].leaves[3].leaves[6].value); /* <em16_tgo_cas:read_noise>  */
+// 	if (verbose) fprintf(stderr, "read NOISE res = %d value = %s\n", res, mission_area.leaves[4].leaves[3].leaves[6].value);
+// 												/* CassisData.Detector_Information.read_noise_unit */
+// 	res=fscanf(cfp,"NOISE_UNIT %s\n",mission_area.leaves[4].leaves[3].leaves[7].value); /* <em16_tgo_cas:read_noise_unit_description>  */
+// 	if (verbose) fprintf(stderr, "read NOISE_UNIT res = %d value = %s\n", res, mission_area.leaves[4].leaves[3].leaves[7].value);
+// 	/* STOP reading Cassis_Data */
+// 	/*  */
+// 	res=fscanf(cfp,"AV_INT %s\n",mission_area.leaves[2].leaves[0].value); /*  */
+// 	res=fscanf(cfp,"CAL_TYPE %s\n",mission_area.leaves[2].leaves[0].value); /*  */
+// 	res=fscanf(cfp,"MEAS_RANGE_IDX %s\n",mission_area.leaves[2].leaves[1].value); /* */
+// 	res=fscanf(cfp,"MEAS_RANGE %s\n",mission_area.leaves[2].leaves[2].value); /*  */
+// 	res=fscanf(cfp,"REF_FRAME %s\n",mission_area.leaves[2].leaves[3].value);/*  */
+// 	res=fscanf(cfp,"SPICE_FRAME %s\n",mission_area.leaves[2].leaves[4].value); /*  */
+//
+// 	/*START Instrument Status*/
+// 	res=fscanf(cfp,"STATUS_NAME %s\n",istatus); /*  */
+// 	res=fscanf(cfp,"SC_STATUS %s\n",mission_area.leaves[3].leaves[0].value); /*  */
+// 	/*STOP Instrument Status*/
+// 	res=fscanf(cfp,"NRLIR %d\n",&nrlir); /*  */
+// /* NRLIR = number of REFERENCE_LIST Internal Reference items
+//  * reference_list.irefs[i] */
+//   for(i=0;i<nrlir;i++){
+// 	res=fscanf(cfp,"%11s %s\n",key,reference_list.irefs[i].lid_reference.value);
+// 	res=fscanf(cfp,"%15s %s\n",key,reference_list.irefs[i].reference_type.value);
+// /*	for(j=0;j<strlen(reference_list.irefs[i].lid_reference.value);j++){
+// 		if(reference_list.irefs[i].lid_reference.value[j]=='>') reference_list.irefs[i].lid_reference.value[j]=' ';
+// 		if(reference_list.irefs[i].reference_type.value[j]=='>') reference_list.irefs[i].reference_type.value[j]=' ';
+// 	}*/
+//   }
+//   /*<Source_Product_External> input
+//    <Source_Product_External>
+//             <external_source_product_identifier>SCI__DCAS__0180E932_2025-106T23-35-39__00003.EXM</external_source_product_identifier>
+//             <reference_type>data_to_telemetry_source_product</reference_type>
+//             <curating_facility>ExoMars 16 Science Operations Center</curating_facility>
+// 	</Source_Product_External>
+// 	SPE_PRODID SCI__DCAS__0180E932_2025-106T23-35-39__00003.EXM
+// 	SPE_REFTYPE data_to_telemetry_source_product
+// 	SPE_CURFAC ExoMars>16>Science>Operations>Center
+//    */
+//   res=fscanf(cfp,"SPE_PRODID %s\n",reference_list.spe.external_source_product_identifier.value);
+//   if (verbose) fprintf(stderr, "read SPE_PRODID res = %d value = %s\n", res, reference_list.spe.external_source_product_identifier.value);
+//   res=fscanf(cfp,"SPE_REFTYPE %s\n",reference_list.spe.reference_type.value);
+//   if (verbose) fprintf(stderr, "read SPE_REFTYPE res = %d value = %s\n", res, reference_list.spe.reference_type.value);
+//   res=fscanf(cfp,"SPE_CURFAC %s\n",reference_list.spe.curating_facility.value);
+// 	for(j=0;j<strlen(reference_list.spe.curating_facility.value);j++)
+// 		if(reference_list.spe.curating_facility.value[j]=='>') reference_list.spe.curating_facility.value[j]=' ';
+//   if (verbose) fprintf(stderr, "read SPE_CURFAC res = %d value = %s\n", res, reference_list.spe.curating_facility.value);
+//   for(j=0;j<strlen(reference_list.spe.curating_facility.value);j++)
+// 		if(reference_list.spe.curating_facility.value[j]=='>') reference_list.spe.curating_facility.value[j]=' ';
+//   if (verbose)   fprintf(stderr, "now value = %s\n", reference_list.spe.curating_facility.value);
+// /*
+//          <File>
+//             <file_name>cas_raw_sc_20250416T233856-20250416T233900-33001-50-PAN-1409764716-29-0__4_0.dat</file_name>
+//             <local_identifier>cas_raw_sc_20250416T233856-20250416T233900-33001-50-PAN-1409764716-29-0__4_0.dat</local_identifier>
+//             <creation_date_time>2025-04-17T07:02:54.893Z</creation_date_time>
+//             <file_size unit="byte">931840</file_size>
+//             <md5_checksum>c72ce8fa7a76c3dcd3fbb33ea72b8bad</md5_checksum>
+//             <comment>Image Data File</comment>
+//         </File>
+//
+//  */
+// for(i=0;i<numproducts;i++){
+//   res=fscanf(cfp,"%11s %s\n",key,file.leaves[1].value); /* <local_identifier> LOCAL_ID_NN */
+//   fprintf(stderr, "read LOCAL_ID key = %s res = %d value = %s\n",key, res, file.leaves[1].value);
+//   res=fscanf(cfp,"%11s %s\n",key,file.leaves[2].value); /* <creation_date_time> CREATION_NN */
+//   fprintf(stderr, "read CREATION key = %s res = %d value = %s\n",key, res, file.leaves[2].value);
+//   res=fscanf(cfp,"%12s %s\n",key,file.leaves[3].value); /* <file_size unit="byte"> FILE_SIZE_NN */
+//   fprintf(stderr, "read FILE_SIZE key = %s res = %d value = %s\n",key, res, file.leaves[3].value);
+//   res=fscanf(cfp,"%12s %s\n",key,file.leaves[4].value); /* <md5_checksum> MD5_CHECK_NN */
+//   fprintf(stderr, "read MD5_CHECK key = %s res = %d value = %s\n",key, res, file.leaves[4].value);
+//   res=fscanf(cfp,"%10s %s\n",key,file.leaves[5].value); /* <comment> COMMENT_NN */
+//   for(j=0;j<strlen(file.leaves[5].value);j++)
+// 		if(file.leaves[5].value[j]=='>') file.leaves[5].value[j]=' ';
+//   fprintf(stderr, "read COMMENT key = %s res = %d value = %s\n",key, res, file.leaves[5].value);
+// 	/*
+// 			<psa:Sub-Instrument>
+//                 <psa:identifier>SCI</psa:identifier>
+//                 <psa:name>CASSIS Science</psa:name>
+//                 <psa:type>Imager</psa:type>
+//             </psa:Sub-Instrument>
+// SI_ID SCI
+// SI_NAME CASSIS>Science
+// SI_TYPE Imager
+//
+// 	 */
+// //   res=fscanf(cfp,"SI_ID %s\n",file.leaves[].value); /* <psa:identifier> SI_ID */
+// //   fprintf(stderr, "read SI_ID res = %d value = %s\n", res, file.leaves[].value);
+// //   res=fscanf(cfp,"SI_NAME %s\n",file.leaves[].value); /* <psa:name> SI_NAME */
+// //   fprintf(stderr, "read SI_NAME res = %d value = %s\n", res, file.leaves[].value);
+// //   for(j=0;j<strlen(file.leaves[].value);j++)
+// // 		if(file.leaves[].value[j]=='>') file.leaves[].value[j]=' ';
+// //   res=fscanf(cfp,"SI_TYPE %s\n",file.leaves[1].value); /* <psa:type> SI_TYPE */
+// //   fprintf(stderr, "read SI_TYPE res = %d value = %s\n", res, file.leaves[].value);
+//   }
+
+
+/* write output configuration file */
+strcpy(key, "MISSION_NAME"); strcpy(value, " ExoMars>2016");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "SPACECRAFT_NAME"); strcpy(value, " TGO");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "TARGET_NAME"); strcpy(value, " MARS");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "INSTRUMENT_ID"); strcpy(value, " CaSSIS");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PRODUCT_TYPE"); strcpy(value, " DTM");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "BITPIX"); strcpy(value, "    8");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "SIGN"); strcpy(value, " unsigned");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "ENDIAN"); strcpy(value, "   LSB");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "WIDTH"); strcpy(value, "  500");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "HEIGHT"); strcpy(value, " 320");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "NPI"); strcpy(value, " 6");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PI_00"); strcpy(value, " href=\"https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1L00.sch\">schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PI_01"); strcpy(value, " href=\"https://psa.esa.int/psa/v1/PDS4_PSA_1L00_1401.sch\">schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PI_02"); strcpy(value, " href=\"https://pds.nasa.gov/pds4/geom/v1/PDS4_GEOM_1L00_1970.sch\">schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PI_03"); strcpy(value, " href=\"https://pds.nasa.gov/pds4/disp/v1/PDS4_DISP_1L00_1510.sch\">schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PI_04"); strcpy(value, " href=\"https://psa.esa.int/psa/em16/tgo/cas/v1/PDS4_EM16_TGO_CAS_1L00_1200.sch\">schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PI_05"); strcpy(value, " href=\"https://psa.esa.int/psa/mission/em16/v1/PDS4_EM16_1L00_1300.sch\">schematypens=\"http://purl.oclc.org/dsdl/schematron\"");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "NPOATTR"); strcpy(value, " 7");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PO_ATTR_00_NAME"); strcpy(value, " xsi:schemaLocation");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PO_ATTR_00_VALUE"); strcpy(value, " http://pds.nasa.gov/pds4/pds/v1>https://pds.nasa.gov/pds4/pds/v1/PDS4_PDS_1L00.xsd>http://psa.esa.int/psa/v1>https://psa.esa.int/psa/v1/PDS4_PSA_1L00_1401.xsd>http://pds.nasa.gov/pds4/geom/v1>https://pds.nasa.gov/pds4/geom/v1/PDS4_GEOM_1L00_1970.xsd>http://pds.nasa.gov/pds4/disp/v1>https://pds.nasa.gov/pds4/disp/v1/PDS4_DISP_1L00_1510.xsd>http://psa.esa.int/psa/em16/tgo/cas/v1>https://psa.esa.int/psa/em16/tgo/cas/v1/PDS4_EM16_TGO_CAS_1L00_1200.xsd>http://psa.esa.int/psa/mission/em16/v1>https://psa.esa.int/psa/mission/em16/v1/PDS4_EM16_1L00_1300.xsd");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PO_ATTR_01_NAME"); strcpy(value, " xmlns");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PO_ATTR_01_VALUE"); strcpy(value, " http://pds.nasa.gov/pds4/pds/v1");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PO_ATTR_02_NAME"); strcpy(value, " xmlns:em16_tgo_cas");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PO_ATTR_02_VALUE"); strcpy(value, " http://psa.esa.int/psa/em16/tgo/cas/v1");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PO_ATTR_03_NAME"); strcpy(value, " xmlns:geom");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PO_ATTR_03_VALUE"); strcpy(value, " http://pds.nasa.gov/pds4/geom/v1");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PO_ATTR_04_NAME"); strcpy(value, " xmlns:disp");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PO_ATTR_04_VALUE"); strcpy(value, " http://pds.nasa.gov/pds4/disp/v1");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PO_ATTR_05_NAME"); strcpy(value, " xmlns:psa");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PO_ATTR_05_VALUE"); strcpy(value, " http://psa.esa.int/psa/v1");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PO_ATTR_06_NAME"); strcpy(value, " xmlns:xsi");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PO_ATTR_06_VALUE"); strcpy(value, " http://www.w3.org/2001/XMLSchema-instance");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PROD_LID"); strcpy(value, " urn:esa:psa:em16_tgo_cas:data_derived:cas_der_sc_20250416t233856-20250416t233900-33001-50-pan-1409764716-29-0");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PROD_VID"); strcpy(value, " 4.0");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "TITLE"); strcpy(value, " CaSSIS>experiment");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "IM_VERS"); strcpy(value, " 1.21.0.0");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PROD_CLASS"); strcpy(value, " Product_Observational");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "NCI"); strcpy(value, " 0");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "MOD_DATE"); strcpy(value, " 2025-04-17");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "VERSID"); strcpy(value, " 4.0");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "DESCR PDS4>product>label>generated>by>SETM>libraries");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "TSTART"); strcpy(value, " 2025-08-03T00:08:00Z");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "TSTOP"); strcpy(value, " 2025-08-03T23:59:59Z");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PURP"); strcpy(value, " Science");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PROC_LEV"); strcpy(value, " Derived");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "RES_DESCR"); strcpy(value, " Summary>Of>Results");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "LAMBDA"); strcpy(value, " Visible");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "DOMAIN"); strcpy(value, " Surface");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "DISCIPL"); strcpy(value, " Imaging");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "INVEST_AREA"); strcpy(value, " ExoMars>2016");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "INVEST_TYPE"); strcpy(value, " Mission");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "INV_LID"); strcpy(value, " urn:esa:psa:context:investigation:mission.em16");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "REFTYPE"); strcpy(value, " data_to_investigation");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "OSNAME"); strcpy(value, " Observing>System>for>TGO+CASSIS");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "NOSC_COMP"); strcpy(value, " 2");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "COMPNAME_00"); strcpy(value, " TRACE>GAS>ORBITER");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "COMPTYPE_00"); strcpy(value, " Host");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "COMPDESCR_00"); strcpy(value, " Mars>Orbiter");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "COMPLID_00"); strcpy(value, " urn:esa:psa:context:instrument_host:spacecraft.tgo");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "COMPREFTYPE_00"); strcpy(value, " is_instrument_host");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "COMPNAME_01"); strcpy(value, " CaSSIS");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "COMPTYPE_01"); strcpy(value, " Instrument");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "COMPDESCR_01"); strcpy(value, " Mars>Camera");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "COMPLID_01"); strcpy(value, " urn:esa:psa:context:instrument:tgo.cassis");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "COMPREFTYPE_01"); strcpy(value, " is_instrument");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "TARGET_NAME"); strcpy(value, " mars");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "TARGET_TYPE"); strcpy(value, " Planet");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "TARGET_LID"); strcpy(value, " urn:nasa:pds:context:target:planet.mars");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "TARGET_REFTYPE"); strcpy(value, " data_to_target");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "MISSION"); strcpy(value, " EM:EXOMARS");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PHASE_NAME"); strcpy(value, " Science>Phase");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PHASE_ID"); strcpy(value, " psp");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "CLOCK_START"); strcpy(value, " 1/0755740806:00000");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "CLOCK_STOP"); strcpy(value, " 1/0755827197:00000");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "START_ORB"); strcpy(value, " 33001");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "STOP_ORB"); strcpy(value, " 33002");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "SU_ID"); strcpy(value, " SCI");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "SU_NAME"); strcpy(value, " CASSIS>Science");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "SU_TYPE"); strcpy(value, " Imager");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "OBSCON_IPM"); strcpy(value, " Surface");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "OBSCON_IPD"); strcpy(value, " TARGETED");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "OBSCON_OID"); strcpy(value, " 1409764716");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "OBSCON_OTYPE"); strcpy(value, " INDIVIDUAL");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "SWNAME"); strcpy(value, " EM16>Data>Processing>System");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "SWVERS"); strcpy(value, " 5.6.0");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "INSTR_IFOV"); strcpy(value, " 1.142E-5");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "IFOV_UNIT"); strcpy(value, " rad/px");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "FILTERS"); strcpy(value, " BLU>RED>NIR>PAN");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "HK_FILTER"); strcpy(value, " PAN");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "FOCAL_LENGTH"); strcpy(value, " 0.876");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "FOCAL_UNIT"); strcpy(value, " M");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "F_NUMBER"); strcpy(value, " 6.49");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "TELESCOPE"); strcpy(value, " Three-mirror>anastigmat>with>powered>fold>mirror");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "CAS_DESCR"); strcpy(value, " 2D>Array");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PIX_HEIGHT"); strcpy(value, " 10.0");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PIX_HE_UNIT"); strcpy(value, " MICRON");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PIX_WIDTH"); strcpy(value, " 10.0");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "PIX_WI_UNIT"); strcpy(value, " MICRON");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "DET_DESCR"); strcpy(value, " SI>CMOS>HYBRID>(OSPREY>2K)");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "NOISE"); strcpy(value, " 61.0");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "NOISE_UNIT"); strcpy(value, " ELECTRON");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "AV_INT"); strcpy(value, " 1");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "CAL_TYPE"); strcpy(value, " ground");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "MEAS_RANGE_IDX"); strcpy(value, " 4");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "MEAS_RANGE"); strcpy(value, " 128");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "REF_FRAME"); strcpy(value, " scf");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "SPICE_FRAME"); strcpy(value, " TGO_SPACECRAFT");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "STATUS_NAME"); strcpy(value, " urn:esa:psa:em16_spice:spice_kernels:mk_em16");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "SC_STATUS"); strcpy(value, " orbit");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "NRLIR"); strcpy(value, " 3");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "RLIR_LID_00"); strcpy(value, " urn:esa:psa:em16_tgo_cas:document:cassis_eaicd_v2");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "RLIR_REFTYPE_00"); strcpy(value, " data_to_document");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "RLIR_LID_01"); strcpy(value, " urn:esa:psa:em16_spice:spice_kernels:mk_em16");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "RLIR_REFTYPE_01"); strcpy(value, " data_to_spice_kernel");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "RLIR_LID_02"); strcpy(value, " urn:esa:psa:em16_tgo_cas:browse_raw:cas_raw_sc_browse_20250416t233856-20250416t233900-33001-50-pan-1409764716-29-0::4.0");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "RLIR_REFTYPE"); strcpy(value, "_02 data_to_browse");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "SPE_PRODID"); strcpy(value, " SCI__DCAS__0180E932_2025-106T23-35-39__00003.EXM");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "SPE_REFTYPE"); strcpy(value, " data_to_telemetry_source_product");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "SPE_CURFAC"); strcpy(value, " ExoMars>16>Science>Operations>Center");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "LOCAL_ID_00"); strcpy(value, " cas_raw_sc_20250416T233856-20250416T233900-33001-50-PAN-1409764716-29-0__4_0.dat");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "CREATION_00"); strcpy(value, " 2025-04-17T07:02:54.893Z");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "FILE_SIZE_00"); strcpy(value, " 160000");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "MD5_CHECK_00"); strcpy(value, " 98888d232f30c21515c056cb619cd053");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+strcpy(key, "COMMENT_00"); strcpy(value, " Image>Data>File");
+if (key) {fprintf(ocfp, "%s %s\n", key, (value && strlen(value) > 0) ? (char *)value : "n/a");}
+
+
+
+/* close input configuration file */
+  fclose(icfp);
+/* close output configuration file */
+  fclose(ocfp);
+
+  	/* deallocate memory */
+	free(mypds.po->ia);
+	free(mypds.po->oa);
+	free(mypds.po->rl);
+	free(mypds.po->fao);
+	free(mypds.po);
+
+	return 0;
+}
+
+
+
+int read_pam_metadata(xmlNode * a_node) {
+    xmlNode *cur_node = NULL;
+
+    for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
+        if (cur_node->type == XML_ELEMENT_NODE) {
+            // Cerchiamo il tag (elemento) <MDI> / search <MDI> tag (element)
+            if (xmlStrEqual(cur_node->name, (const xmlChar *)"MDI")) {
+                // Leggiamo l'attributo xml "key" / read the key xml attribute
+                xmlChar *key = xmlGetProp(cur_node, (const xmlChar *)"key");
+                // Leggiamo il contenuto testuale / read the text content
+                xmlChar *value = xmlNodeGetContent(cur_node);
+
+                if (key) {
+                    printf("%s %s\n", key, (value && xmlStrlen(value) > 0) ? (char *)value : "n/a");
+                }
+
+                xmlFree(key);
+                xmlFree(value);
+            }
+        }
+        // Ricorsione sui figli del nodo corrente / recursion on siblings of the current node
+        read_pam_metadata(cur_node->children);
+    }
+}
+/* takes in input the PamDataset xml file name
+ returns 0 if no errors */
+int process_pam(char pamfile[MAXFNAML]) {
+    xmlDoc *doc = NULL;
+    xmlNode *root_element = NULL;
+
+
+    // Inizializza la libreria e leggi il file
+    // Initialize the libxml2 library and read the input file
+    LIBXML_TEST_VERSION
+    doc = xmlReadFile(pamfile, NULL, 0);
+
+    if (doc == NULL) {
+        fprintf(stderr, "Error: impossible to analyze the file %s\n", pamfile);
+        return 1;
+    }
+
+    // Ottieni l'elemento radice <PAMDataset>
+    // Obtain the root element <PAMDataset>
+    root_element = xmlDocGetRootElement(doc);
+
+    if (root_element != NULL) {
+        fprintf(stderr,"Extracting Metadata from: %s\n", pamfile);
+        fprintf(stderr,"----------------------------------------\n");
+        read_pam_metadata(root_element);
+    }
+
+    // Clean / Pulizia
+    xmlFreeDoc(doc);
+    xmlCleanupParser();
+
+    return 0;
 }
