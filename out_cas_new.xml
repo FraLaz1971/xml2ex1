@@ -23,13 +23,13 @@
   <Observation_Area>
     <comment>Observational Intent</comment>
     <Time_Coordinates>
-      <start_date_time>1970-01-01T00:00:00Z</start_date_time>
-      <stop_date_time>1970-01-01T00:00:00Z</stop_date_time>
+      <start_date_time>2025-08-03T00:08:00Z</start_date_time>
+      <stop_date_time>2025-08-03T23:59:59Z</stop_date_time>
     </Time_Coordinates>
     <Primary_Result_Summary>
       <purpose>Science</purpose>
-      <processing_level/>
-      <description/>
+      <processing_level>Derived</processing_level>
+      <description>Summary Of Results</description>
       <Science_Facets>
         <wavelength_range>Visible</wavelength_range>
         <domain>Surface</domain>
@@ -37,101 +37,120 @@
       </Science_Facets>
     </Primary_Result_Summary>
     <Investigation_Area>
-      <name/>
-      <type/>
+      <name>ExoMars 2016</name>
+      <type>Mission</type>
       <Internal_Reference>
-        <lid_reference/>
+        <lid_reference>urn:esa:psa:context:investigation:mission.em16</lid_reference>
         <reference_type>data_to_investigation</reference_type>
       </Internal_Reference>
     </Investigation_Area>
-    <Observing_System/>
+    <Observing_System>
+      <Observing_System_Component>
+        <name>TRACE GAS ORBITER</name>
+        <type>Host</type>
+        <description>Mars Orbiter</description>
+        <Internal_Reference>
+          <lid_reference>urn:esa:psa:context:instrument_host:spacecraft.tgo</lid_reference>
+          <reference_type>is_instrument_host</reference_type>
+        </Internal_Reference>
+      </Observing_System_Component>
+      <Observing_System_Component>
+        <name>CaSSIS</name>
+        <type>Instrument</type>
+        <description>Mars Camera</description>
+        <Internal_Reference>
+          <lid_reference>urn:esa:psa:context:instrument:tgo.cassis</lid_reference>
+          <reference_type>is_instrument</reference_type>
+        </Internal_Reference>
+      </Observing_System_Component>
+    </Observing_System>
     <Target_Identification>
-      <name/>
-      <type/>
+      <name>mars</name>
+      <type>Planet</type>
       <Internal_Reference>
-        <lid_reference>TSTART</lid_reference>
-        <reference_type>TSTOP</reference_type>
+        <lid_reference>urn:nasa:pds:context:target:planet.mars</lid_reference>
+        <reference_type>data_to_target</reference_type>
       </Internal_Reference>
     </Target_Identification>
     <Mission_Area>
       <psa:Mission_Information>
         <psa:Mission_Phase>
-          <psa:name/>
-          <psa:id/>
+          <psa:name>Science Phase</psa:name>
+          <psa:id>psp</psa:id>
         </psa:Mission_Phase>
-        <psa:start_orbit_number/>
-        <psa:stop_orbit_number/>
+        <psa:start_orbit_number>33001</psa:start_orbit_number>
+        <psa:stop_orbit_number>33002</psa:stop_orbit_number>
       </psa:Mission_Information>
       <psa:Sub-Instrument>
-        <psa:identifier/>
-        <psa:name/>
-        <psa:type/>
+        <psa:identifier>SCI</psa:identifier>
+        <psa:name>CASSIS Science</psa:name>
+        <psa:type>Imager</psa:type>
       </psa:Sub-Instrument>
       <psa:Observation_Context>
-        <psa:instrument_pointing_mode/>
-        <psa:instrument_pointing_description/>
-        <psa:observation_identifier/>
-        <psa:observation_type/>
+        <psa:instrument_pointing_mode>ground</psa:instrument_pointing_mode>
+        <psa:instrument_pointing_description>4</psa:instrument_pointing_description>
+        <psa:observation_identifier>128</psa:observation_identifier>
+        <psa:observation_type>scf</psa:observation_type>
       </psa:Observation_Context>
       <psa:Processing_Context>
-        <psa:processing_software_title/>
-        <psa:processing_software_version/>
+        <psa:processing_software_title>orbit</psa:processing_software_title>
+        <psa:processing_software_version>5.6.0</psa:processing_software_version>
       </psa:Processing_Context>
       <em16_tgo_cas:Cassis_Data>
         <em16_tgo_cas:Instrument_Information>
-          <em16_tgo_cas:instrument_ifov/>
-          <em16_tgo_cas:instrument_ifov_unit_description/>
-          <em16_tgo_cas:filters_available/>
+          <em16_tgo_cas:instrument_ifov>1.142E-5</em16_tgo_cas:instrument_ifov>
+          <em16_tgo_cas:instrument_ifov_unit_description>rad/px</em16_tgo_cas:instrument_ifov_unit_description>
+          <em16_tgo_cas:filters_available>BLU RED NIR PAN</em16_tgo_cas:filters_available>
         </em16_tgo_cas:Instrument_Information>
         <em16_tgo_cas:HK_Derived_Data>
-          <em16_tgo_cas:filter/>
+          <em16_tgo_cas:filter>PAN</em16_tgo_cas:filter>
         </em16_tgo_cas:HK_Derived_Data>
         <em16_tgo_cas:Telescope_Information>
-          <em16_tgo_cas:focal_length/>
-          <em16_tgo_cas:focal_length_unit_description/>
-          <em16_tgo_cas:f_number/>
-          <em16_tgo_cas:telescope_description/>
+          <em16_tgo_cas:focal_length>0.876</em16_tgo_cas:focal_length>
+          <em16_tgo_cas:focal_length_unit_description>M</em16_tgo_cas:focal_length_unit_description>
+          <em16_tgo_cas:f_number>6.49</em16_tgo_cas:f_number>
+          <em16_tgo_cas:telescope_description>Three-mirror anastigmat with powered fold mirror</em16_tgo_cas:telescope_description>
         </em16_tgo_cas:Telescope_Information>
         <em16_tgo_cas:Detector_Information>
-          <em16_tgo_cas:cassis_description/>
-          <em16_tgo_cas:pixel_height/>
-          <em16_tgo_cas:pixel_height_unit_description/>
-          <em16_tgo_cas:pixel_width/>
-          <em16_tgo_cas:pixel_width_unit_description/>
-          <em16_tgo_cas:detector_description/>
-          <em16_tgo_cas:read_noise/>
-          <em16_tgo_cas:read_noise_unit_description/>
+          <em16_tgo_cas:cassis_description>2D Array</em16_tgo_cas:cassis_description>
+          <em16_tgo_cas:pixel_height>10.0</em16_tgo_cas:pixel_height>
+          <em16_tgo_cas:pixel_height_unit_description>MICRON</em16_tgo_cas:pixel_height_unit_description>
+          <em16_tgo_cas:pixel_width>10.0</em16_tgo_cas:pixel_width>
+          <em16_tgo_cas:pixel_width_unit_description>MICRON</em16_tgo_cas:pixel_width_unit_description>
+          <em16_tgo_cas:detector_description>SI CMOS HYBRID (OSPREY 2K)</em16_tgo_cas:detector_description>
+          <em16_tgo_cas:read_noise>61.0</em16_tgo_cas:read_noise>
+          <em16_tgo_cas:read_noise_unit_description>ELECTRON</em16_tgo_cas:read_noise_unit_description>
         </em16_tgo_cas:Detector_Information>
       </em16_tgo_cas:Cassis_Data>
     </Mission_Area>
   </Observation_Area>
   <Reference_List>
     <Internal_Reference>
-      <lid_reference/>
-      <reference_type/>
+      <lid_reference>urn:esa:psa:em16_tgo_cas:document:cassis_eaicd_v2</lid_reference>
+      <reference_type>data_to_document</reference_type>
     </Internal_Reference>
     <Internal_Reference>
-      <lid_reference/>
-      <reference_type/>
+      <lid_reference>urn:esa:psa:em16_spice:spice_kernels:mk_em16</lid_reference>
+      <reference_type>data_to_spice_kernel</reference_type>
     </Internal_Reference>
     <Internal_Reference>
-      <lidvid_reference/>
-      <reference_type/>
+      <lidvid_reference>urn:esa:psa:em16_tgo_cas:browse_raw:cas_raw_sc_browse_20250416t233856-20250416t233900-33001-50-pan-1409764716-29-0::4.0</lidvid_reference>
+      <reference_type>data_to_browse</reference_type>
     </Internal_Reference>
     <Source_Product_External>
-      <external_source_product_identifier/>
-      <reference_type/>
-      <curating_facility/>
+      <external_source_product_identifier>SCI__DCAS__0180E932_2025-106T23-35-39__00003.EXM</external_source_product_identifier>
+      <reference_type>data_to_telemetry_source_product</reference_type>
+      <curating_facility>ExoMars 16 Science Operations Center</curating_facility>
     </Source_Product_External>
   </Reference_List>
   <File_Area_Observational>
     <File>
       <file_name>mercury1_500x320.raw</file_name>
-      <local_identifier>23:59:59Z</local_identifier>
-      <creation_date_time>Science</creation_date_time>
-      <file_size unit="byte">Derived</file_size>
-      <md5_checksum>Summary&gt;Of&gt;Results</md5_checksum>
-      <comment>Visible</comment>
+      <local_identifier>cas_raw_sc_20250416T233856-20250416T233900-33001-50-PAN-1409764716-29-0__4_0.dat</local_identifier>
+      <creation_date_time>2025-04-17T07:02:54.893Z</creation_date_time>
+      <file_size unit="byte">160000</file_size>
+      <md5_checksum>98888d232f30c21515c056cb619cd053</md5_checksum>
+      <comment>Image Data File</comment>
     </File>
     <Array_2D_Image>
       <offset unit="byte">0</offset>

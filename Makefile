@@ -25,6 +25,8 @@ archivepds: archivepds.c pds.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
 archivepds_cas: archivepds_cas.c pds.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
+create_conf: create_conf.c pds.o
+	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
 prodid: prodid.c pds.o
 	$(CC) $(CFLAGS) $^ -o $@ $(LDFLAGS) $(LIBS)
 readxml: readxml.c
