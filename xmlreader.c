@@ -1,8 +1,7 @@
 #include <libxml/xmlreader.h>
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-/* 
- * Enum xmlReaderTypes {
+/** Enum xmlReaderTypes {
     XML_READER_TYPE_NONE = 0
     XML_READER_TYPE_ELEMENT = 1
     XML_READER_TYPE_ATTRIBUTE = 2
@@ -22,23 +21,26 @@
     XML_READER_TYPE_END_ENTITY = 16
     XML_READER_TYPE_XML_DECLARATION = 17
 }
- * */
+ **/
 void process_attributes(xmlNode *node);
+
+/** main function of the program */
 int main(int argc, char **argv) {
 	int i;
 	if (argc<2){
 	  fprintf(stderr,"usage:%s <file.xml>\n",argv[0]);
 	  return 1;
 	}
+	/** the input file name is took as the first argument of the program */
 	char *fname = argv[1];
-    // Create a reader for a file with named given as input
+    /** Create a reader object for a file with name given as input */
     xmlTextReaderPtr reader = xmlReaderForFile(fname, NULL, 0);
 
     if (reader != NULL) {
-        // Loop through the document, node by node
+        /** Loop through the document, node by node */
         int ret = xmlTextReaderRead(reader);
         while (ret == 1) {
-            // Get the node type and name
+            /* Get the node type and name */
             int nodeType = xmlTextReaderNodeType(reader);
             const xmlChar *name = xmlTextReaderName(reader);
 			printf("%d %d %s %d %d\n", 
@@ -63,7 +65,7 @@ int main(int argc, char **argv) {
                 const xmlChar *value = xmlTextReaderValue(reader);
                 printf("Value: %s\n", value);
 			}
-            // Process based on node type
+            /** Process based on node type */
             if (nodeType == XML_READER_TYPE_ELEMENT) {
                 printf("Element: %s\n", name);
             } else if (nodeType == XML_READER_TYPE_TEXT) {
@@ -73,16 +75,16 @@ int main(int argc, char **argv) {
                 printf("significant white space\n");
             }
 
-            // Move to the next node
+            / Move to the next node
             ret = xmlTextReaderRead(reader);
         }
 
-        // Check for parsing errors
+        /** Check for parsing errors */
         if (ret != 0) {
             fprintf(stderr, "Failed to parse XML\n");
         }
 
-        // Clean up
+        /** Clean up */
         xmlFreeTextReader(reader);
     } else {
         fprintf(stderr, "Failed to open XML file\n");
@@ -90,15 +92,17 @@ int main(int argc, char **argv) {
 
     return 0;
 }
-
+/**
+ * @brief  function that processes over all the xml attributes
+ * */
 void process_attributes(xmlNode *node) {
     if (node == NULL || node->type != XML_ELEMENT_NODE) {
         return;
     }
-
+    /** print node name */
     printf("node: %s\n", node->name);
 
-    // Iterate over regular attributes (non-namespace)
+    /** Iterate over regular attributes (non-namespace) */
     xmlAttr *attribute;
     for (attribute = node->properties; attribute != NULL; attribute = attribute->next) {
         xmlChar *attr_name = attribute->name;
@@ -109,13 +113,16 @@ void process_attributes(xmlNode *node) {
         }
     }
 
-    // Iterate over namespace declarations
+    /** Iterate over namespace declarations */
     xmlNs *namespace_decl;
     for (namespace_decl = node->nsDef; namespace_decl != NULL; namespace_decl = namespace_decl->next) {
         if (namespace_decl->prefix) {
             printf("  Namespace: xmlns:%s = %s\n", namespace_decl->prefix, namespace_decl->href);
+            /** Namespace: xmlns:namespace_decl->prefix = namespace_decl->href */
         } else {
-            // Default namespace
+            /** Default namespace
+             * Namespace: xmlns = namespace_decl->href
+             *  */
             printf("  Namespace: xmlns = %s\n", namespace_decl->href);
         }
     }

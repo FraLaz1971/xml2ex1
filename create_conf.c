@@ -7,14 +7,24 @@
 #include "pds.h"
 #include "cassis.h"
 
-
+/** create_conf_main() is the main method of the create_conf program */
 int create_conf_main(char iconf[MAXFNAML], char oconf[MAXFNAML])
 {	int verbose = 1;
 	int res;
 	res=create_conf(iconf, oconf);
 	return res;
 }
+/** 
+the real c language main() function 
 
+usage: ./create_conf <infile.conf> <outfile.conf>
+
+e.g: ./create_conf arpds.conf arpds_002.conf
+
+*  
+takes in input an old configuration file and saves as output the new configuration file
+*
+* */
 int main(int argc, char **argv)
 {	
 	char iconf[MAXFNAML]; char oconf[MAXFNAML];
@@ -79,8 +89,8 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
 	char istatus[64];
 	char onamval[MAXLEAV][1024];
 	char otypval[MAXLEAV][1024];
-    unsigned int width = 0;  /* Sample == n. of columns */
-    unsigned int height = 0; /* Line == n. of rows */
+    unsigned int width = 0;  /** unsigned int width Sample == n. of columns */
+    unsigned int height = 0; /** unsigned int width Line == n. of rows */
     const char* confname;
     int j;
     char buf[MAXFNAML];
@@ -111,7 +121,7 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
 	FILE *lp; /* pds4 label file handler */
 	char **prodfnam;
 
-	/* allocate memory new part */
+	/** allocate memory for metadata structures (classes) */
 	
 	mypds.po = (struct PRODUCT_OBSERVATIONAL*)malloc(sizeof(struct PRODUCT_OBSERVATIONAL));
 	mypds.po->ia = (struct IDENTIFICATION_AREA*)malloc(sizeof(struct IDENTIFICATION_AREA));
@@ -137,9 +147,10 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
 	for(i=0;i<MAXLEAV;i++)
 		mission_area.leaves[i].leaves=(struct ELEMENT *)malloc(MAXLEAV*sizeof(struct ELEMENT));
 
-	mission_area.leaves[0].leaves[0].leaves=(struct ELEMENT *)malloc(MAXLEAV*sizeof(struct ELEMENT)); /* psa:Mission_Phase */
-	mission_area.leaves[0].leaves[0].leaves[0].leaves=(struct ELEMENT *)malloc(MAXLEAV*sizeof(struct ELEMENT)); /* psa:name
-																											 psa:id   */
+	mission_area.leaves[0].leaves[0].leaves=(struct ELEMENT *)malloc(MAXLEAV*sizeof(struct ELEMENT)); /** psa:Mission_Phase */
+	mission_area.leaves[0].leaves[0].leaves[0].leaves=(struct ELEMENT *)malloc(MAXLEAV*sizeof(struct ELEMENT)); /**  psa:name
+	
+																											         psa:id   */
 	mission_area.leaves[2].leaves[0].attributes=(struct ATTRIBUTE *)malloc(MAXLEAV*sizeof(struct ATTRIBUTE));
 
 	for(i=0;i<MAXLEAV;i++)
@@ -159,14 +170,14 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
 	for(i=0;i<MAXLEAV;i++)
 		array2d.leaves[i].leaves=(struct ELEMENT*)malloc(MAXLEAV*sizeof(struct ELEMENT));
 	file.leaves[3].attributes=(struct ATTRIBUTE *)malloc(sizeof(struct ATTRIBUTE));
-	for(i=0;i<MAXLEAV;i++) /* max number of products files = MAXLEAV */
+	for(i=0;i<MAXLEAV;i++) /** max number of products files = MAXLEAV */
 		array2d.leaves[i].leaves=(struct ELEMENT*)malloc(MAXFNAML*sizeof(struct ELEMENT));
 	prodfnam=(char **)malloc(numproducts*sizeof(char *));
 	for(i=0;i<numproducts;i++)
 		prodfnam[i]=(char *)malloc(MAXFNAML);
 	po.attributes=(struct ATTRIBUTE *)malloc(MAXLEAV*sizeof(struct ATTRIBUTE));
 	pds.products=(FILE**)malloc(numproducts*sizeof(FILE *));
-	/*observing_system.osc=(struct OBSERVING_SYSTEM_COMPONENT*)malloc(2*sizeof(struct OBSERVING_SYSTEM_COMPONENT));*/
+	/** observing_system.osc=(struct OBSERVING_SYSTEM_COMPONENT*)malloc(2*sizeof(struct OBSERVING_SYSTEM_COMPONENT)); */
 	modification_history.leaves=(struct ELEMENT *)malloc(sizeof(struct ELEMENT));
 	modification_history.leaves[0].leaves=(struct ELEMENT *)malloc(3*sizeof(struct ELEMENT));
 	primary_result_summary.leaves=(struct ELEMENT *)malloc(4*sizeof(struct ELEMENT));
@@ -179,30 +190,30 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
 	oa.target = (struct TARGET_IDENTIFICATION *)malloc(sizeof(struct TARGET_IDENTIFICATION));
 	oa.target[0].iref = (struct INTERNAL_REFERENCE *)malloc(sizeof(struct INTERNAL_REFERENCE));
 
-	/*set default values */
+	/** set default values */
    strcpy(moddate,"def1" );
    strcpy(svers, "def2");
    strcpy(descr, "def3");
    strcpy(tstart, "1970-01-01T00:00:00Z");
    strcpy(tstop, "1970-01-01T00:00:00Z");
-	/*read configuration file */
+	/** read configuration file */
 
 
-	/* open  input configuration file */
+	/** open  input configuration file for reading */
   icfp=fopen(iconf, "r");
   if(icfp==NULL){
      perror("cannot open input configuration file for reading");
      exit(1);
   }
 
-  	/* open  output configuration file */
+  	/** open  output configuration file for writing */
   ocfp=fopen(oconf, "w");
   if(ocfp==NULL){
      perror("cannot open output configuration file for writing");
      exit(1);
   }
 
-  /* read input configuration file content into variables in memory */
+  /** read input configuration file content and save it into variables in volatile memory (RAM) */
 
     res=fscanf(icfp, "MISSION_NAME %s\n",mypam.mission);
     for(j=0;j<strlen(mypam.mission);j++)
@@ -243,7 +254,7 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
   }
    sprintf(swidth,"%u",width);
    sprintf(sheight,"%u",height);
-     /* Observation Area */
+     /** read Processing Instructions keys */
  	  res=fscanf(icfp,"NPI %d\n",&npi);
    if (verbose) fprintf(stderr,"n. of Processing Instructions: %d\n",npi);
    for(i=0;i<npi;i++){
@@ -262,7 +273,7 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
  	if (verbose) fprintf(stderr,"%16s  %s\n",po.attributes[i].name,po.attributes[i].value);
    }
    if (verbose) fprintf(stderr,"going to read configuration file about Identification_Area\n");
- 	/*Identification_Area*/
+ 	/** read Identification_Area keys */
 
 
    res=fscanf(icfp,"PROD_LID %s\n",prodlid[0]);
@@ -284,7 +295,7 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
    strcpy(logical_identifier.leaves[4].value,prodclass);
 
    if (verbose) fprintf(stderr,"going to read configuration file about Citation_Information\n");
- 	/*Citation_Information*/
+ 	/* read Citation_Information keys */
    res=fscanf(icfp,"NCI %d\n",&nci);
    if (verbose) fprintf(stderr,"Number of Citation Information = %d\n", nci);
    citation_information.leaves=(struct ELEMENT *)malloc(nci*sizeof(struct ELEMENT));
@@ -312,7 +323,7 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
  		if(verbose)fprintf(stderr,"read description: %s\n",citation_information.leaves[i].leaves[7].value);
    }
    if (verbose) fprintf(stderr,"going to read configuration file about Modification_History\n");
-   /* Modification_History*/
+   /** read Modification_History keys */
    res=fscanf(icfp,"MOD_DATE %s\n",moddate);
    res=fscanf(icfp,"VERSID %s\n",svers);
    res=fscanf(icfp,"DESCR %s\n",descr);
@@ -321,13 +332,13 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
    if (verbose) fprintf(stderr,"read MOD_DATE = %s\n", moddate);
    if (verbose) fprintf(stderr,"read VERSID = %s\n", svers);
    if (verbose) fprintf(stderr,"read DESCR = %s\n", descr);
-   /* Observation Area */
+   /** read Observation Area keys */
    if (verbose) fprintf(stderr,"going to read configuration file about Observation_Area\n");
    fprintf(stderr,"going to read configuration file about Time_Coordinates\n");
    res=fscanf(icfp,"TSTART %s\n",tstart);
    res=fscanf(icfp,"TSTOP %s\n",tstop);
    /****************************************/
-   /* printout variables content for debug */
+   /** printout variables content for debug */
    /****************************************/
    /* new keys 2026-05-14 */
    if (verbose) fprintf(stderr,"Now printing variables content for debug\n");
@@ -339,11 +350,11 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
    if (verbose) fprintf(stderr,"BITPIX = %d\n",bitpix);
    if (verbose) fprintf(stderr,"SIGN = %d\n",sign);
    if (verbose) fprintf(stderr,"ENDIAN = %d\n",end);
-   if (verbose) fprintf(stderr,"WIDTH = %u\n",width);/* Sample == n. of columns */
+   if (verbose) fprintf(stderr,"WIDTH = %u\n",width);   /* Sample == n. of columns */
    if (verbose) fprintf(stderr,"HEIGHT = %u\n",height); /* Line == n. of rows */
    if (verbose) fprintf(stderr,"PDS4 <data_type> = %s\n",dtype);
-   if (verbose) fprintf(stderr,"TSTART = %s\n",tstart);/* Sample == n. of columns */
-   if (verbose) fprintf(stderr,"TSTOP = %s\n",tstop);/* Sample == n. of columns */
+   if (verbose) fprintf(stderr,"TSTART = %s\n",tstart);/** TSTART: timestamp of measurements start */
+   if (verbose) fprintf(stderr,"TSTOP = %s\n",tstop);  /** TSTOP: timestamp of measurements stop  */
    if (verbose) fprintf(stderr,"going to read configuration file about Primary_Result_Summary\n");
    res=fscanf(icfp,"PURP %s\n",purp);
    res=fscanf(icfp,"PROC_LEV %s\n",proclev);
@@ -381,7 +392,7 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
  	res=fscanf(icfp,"%s %s\n",key,observing_system.osc[i].ir.reference_type.value);
  	if(verbose)fprintf(stderr,"OSC[%d] n. reference_type: %s\n",i,observing_system.osc[i].ir.reference_type.value);
    }
-   /* target identification */
+   /** target identification */
  	oa.target[0].iref[0].lid_reference.value[0] = 'A';
  	oa.target[0].iref[0].reference_type.value[0] = 'B';
  	oa.target[0].iref[0].lid_reference.name[0] = 'C';
@@ -392,22 +403,22 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
  	if(verbose)fprintf(stderr,"TARGET[%d] n. lid_reference: %s\n",0,oa.target[0].iref[0].lid_reference.value);
  	res=fscanf(icfp,"%s %s\n",key,oa.target[0].iref[0].reference_type.value);
  	if(verbose)fprintf(stderr,"TARGET[%d] n. reference_type: %s\n",0,oa.target[0].iref[0].reference_type.value);
-   /* read Mission Area configuration */
+   /** read Mission Area configuration */
  	res=fscanf(icfp,"MISSION %s\n",mission); /* MISSION */
  	if(verbose)fprintf(stderr,"MISSION: %s\n",mission);
- 	/* START reading Mission Information
+ 	/** START reading Mission Information
  	 * res=fscanf(icfp,"MISS_ID %s\n",miss_id); /* MISS_ID (element name)
  	psa:Mission_Information
  */
  	strcpy((char*)miss_id, "psa:Mission_Information");
  	if(verbose)fprintf(stderr,"Before PHASE\n");
  	/* <psa:Mission_Information>  ---> mission_area.leaves[0] */
- 												  /* MissInf.MissPhase.PhaseName */
+ 												  /** MissInf.MissPhase.PhaseName */
  	res=fscanf(icfp,"PHASE_NAME %s\n",mission_area.leaves[0].leaves[0].leaves[0].value); /* mission phase name */
  	for(j=0;j<strlen(mission_area.leaves[0].leaves[0].leaves[0].value);j++)
  		if(mission_area.leaves[0].leaves[0].leaves[0].value[j]=='>') mission_area.leaves[0].leaves[0].leaves[0].value[j]=' ';
  	if (verbose) fprintf(stderr, "read PHASE_NAME res = %d value = %s\n", res, mission_area.leaves[0].leaves[0].leaves[0].value);
- 												/* MissInf.MissPhase.PhaseID */
+ 												/** MissInf.MissPhase.PhaseID */
  	res=fscanf(icfp,"PHASE_ID %s\n",mission_area.leaves[0].leaves[0].leaves[1].value); /* mission phase id */
  	for(j=0;j<strlen(mission_area.leaves[0].leaves[0].leaves[1].value);j++)
  		if(mission_area.leaves[0].leaves[0].leaves[1].value[j]=='>') mission_area.leaves[0].leaves[0].leaves[1].value[j]=' ';
@@ -416,15 +427,15 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
  	if (verbose) fprintf(stderr, "read CLOCK_START res = %d value = %s\n", res, mission_area.leaves[0].leaves[0].value);
  	res=fscanf(icfp,"CLOCK_STOP %s\n",mission_area.leaves[0].leaves[1].value); /* clock tsop */
  	if (verbose) fprintf(stderr, "read CLOCK_STOP res = %d value = %s\n", res, mission_area.leaves[0].leaves[1].value);
- 												/* MissInf.StartOrbit */
+ 												/** MissInf.StartOrbit */
  	res=fscanf(icfp,"START_ORB %s\n",mission_area.leaves[0].leaves[1].value); /* start orbit */
  	if (verbose) fprintf(stderr, "read START_ORB res = %d value = %s\n", res, mission_area.leaves[0].leaves[1].value);
- 												/* MissInf.StopOrbit */
+ 												/** MissInf.StopOrbit */
  	res=fscanf(icfp,"STOP_ORB %s\n",mission_area.leaves[0].leaves[2].value); /* stop orbit */
  	if (verbose) fprintf(stderr, "read STOP_ORB res = %d value = %s\n", res, mission_area.leaves[0].leaves[2].value);
  	/* END reading Mission Information */
-
- 	/* START reading Sub Instrument */
+ 	
+ 	/** START reading Sub Instrument */
  //	res=fscanf(icfp,"SU %s\n",su); /* SUB INSTRUMENT (element name) */
  	strcpy((char*)su, "psa:Sub-Instrument");
  										/* Sub-Instrument.Identifier */
@@ -439,7 +450,7 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
  	res=fscanf(icfp,"SU_TYPE %s\n",mission_area.leaves[1].leaves[2].value); /* <psa:type>  */
  	if (verbose) fprintf(stderr, "read SU_TYPE res = %d value = %s\n", res, mission_area.leaves[1].leaves[2].value);
  		/* END reading Sub Instrument */
- 	/* START reading <psa:Observation_Context> */
+ 	/** START reading <psa:Observation_Context> */
  	res=fscanf(icfp,"OBSCON_IPM %s\n",mission_area.leaves[2].leaves[0].value);   /* <psa:instrument_pointing_mode>  */
  	if (verbose) fprintf(stderr, "read OBSCON_IPM res = %d value = %s\n", res, mission_area.leaves[2].leaves[0].value);
  	res=fscanf(icfp,"OBSCON_IPD %s\n",mission_area.leaves[2].leaves[1].value);   /* <psa:instrument_pointing_description> */
@@ -450,9 +461,9 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
  	if (verbose) fprintf(stderr, "read OBSCON_OTYPE res = %d value = %s\n", res, mission_area.leaves[2].leaves[3].value);
  /* END reading <psa:Observation_Context> */
 
- 	/* START reading <psa:Processing_Context> */
- //	res=fscanf(icfp,"PRODID %s\n",mission_area.leaves[3].leaves[0].value); /* product id */
- //	if (verbose) fprintf(stderr, "read PRODID res = %d value = %s\n", res, mission_area.leaves[3].leaves[0].value);
+ 	/** START reading <psa:Processing_Context> */
+/**	res=fscanf(icfp,"PRODID %s\n",mission_area.leaves[3].leaves[0].value); /* product id */
+/**	if (verbose) fprintf(stderr, "read PRODID res = %d value = %s\n", res, mission_area.leaves[3].leaves[0].value); */
  	res=fscanf(icfp,"SWNAME %s\n",mission_area.leaves[3].leaves[0].value); /* <psa:psa:processing_software_title> (software name) */
  	for(j=0;j<strlen(mission_area.leaves[3].leaves[0].value);j++)
  		if(mission_area.leaves[3].leaves[0].value[j]=='>') mission_area.leaves[3].leaves[0].value[j]=' ';
@@ -460,9 +471,9 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
  	res=fscanf(icfp,"SWVERS %s\n",mission_area.leaves[3].leaves[1].value); /* <psa:processing_software_version>  */
  	if (verbose) fprintf(stderr, "read SWVERS res = %d value = %s\n", res, mission_area.leaves[3].leaves[1].value);
 
- /* END reading <psa:Processing_Context> */
+ /** END reading <psa:Processing_Context> */
 
- 	/* START reading Cassis_Data */
+ 	/** read Cassis_Data */
  //	res=fscanf(icfp,"DATA_NAME %s\n",dname); /* instrument:DATA (element name) */
  	strcpy((char*)dname, "em16_tgo_cas:Cassis_Data");
  	res=fscanf(icfp,"INSTR_IFOV %s\n",mission_area.leaves[4].leaves[0].leaves[0].value); /* <em16_tgo_cas:instrument_ifov>  */
@@ -533,13 +544,13 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
  	res=fscanf(icfp,"REF_FRAME %s\n",mission_area.leaves[2].leaves[3].value);/*  */
  	res=fscanf(icfp,"SPICE_FRAME %s\n",mission_area.leaves[2].leaves[4].value); /*  */
 
- 	/*START Instrument Status*/
+ 	/** read Instrument Status*/
  	res=fscanf(icfp,"STATUS_NAME %s\n",istatus); /*  */
  	res=fscanf(icfp,"SC_STATUS %s\n",mission_area.leaves[3].leaves[0].value); /*  */
- 	/*STOP Instrument Status*/
+ 	/* STOP Instrument Status*/
  	res=fscanf(icfp,"NRLIR %d\n",&nrlir); /*  */
- /* NRLIR = number of REFERENCE_LIST Internal Reference items
-  * reference_list.irefs[i] */
+ /** NRLIR = number of REFERENCE_LIST Internal Reference items
+  ** reference_list.irefs[i] */
    for(i=0;i<nrlir;i++){
  	res=fscanf(icfp,"%11s %s\n",key,reference_list.irefs[i].lid_reference.value);
  	res=fscanf(icfp,"%15s %s\n",key,reference_list.irefs[i].reference_type.value);
@@ -572,7 +583,7 @@ int create_conf(char iconf[MAXFNAML], char oconf[MAXFNAML]){
    }
 
 
-/* write output configuration file */
+/** write output configuration file */
 strcpy(key, "MISSION_NAME"); strcpy(val, mypam.mission);
 if (key) {fprintf(ocfp, "%s %s\n", key, (val && strlen(val) > 0) ? (char *)val : "n/a");}
 strcpy(key, "SPACECRAFT_NAME"); strcpy(val, mypam.spacecraft);
@@ -847,11 +858,14 @@ int read_pam_metadata(xmlNode * a_node) {
 	xmlChar *val;
     for (cur_node = a_node; cur_node; cur_node = cur_node->next) {
         if (cur_node->type == XML_ELEMENT_NODE) {
-            // Cerchiamo il tag (elemento) <MDI> / search <MDI> tag (element)
+            // Cerchiamo il tag (elemento) <MDI> / 
+            /** search <MDI> tag (element) */
             if (xmlStrEqual(cur_node->name, (const xmlChar *)"MDI")) {
-                // Leggiamo l'attributo xml "key" / read the key xml attribute
+                // Leggiamo l'attributo xml "key" / 
+                /** read the key xml attribute */
                 key = xmlGetProp(cur_node, (const xmlChar *)"key");
-                // Leggiamo il contenuto testuale / read the text content
+                // Leggiamo il contenuto testuale / 
+                /** read the text content */
                 val = xmlNodeGetContent(cur_node);
 
                 if (key) {
@@ -862,11 +876,12 @@ int read_pam_metadata(xmlNode * a_node) {
                 xmlFree(val);
             }
         }
-        // Ricorsione sui figli del nodo corrente / recursion on siblings of the current node
+        // Ricorsione sui figli del nodo corrente / 
+            /** recursion on siblings of the current node */
         read_pam_metadata(cur_node->children);
     }
 }
-/* takes in input the PamDataset xml file name
+/** takes in input the PamDataset xml file name
  returns 0 if no errors */
 int process_pam(char pamfile[MAXFNAML]) {
     xmlDoc *doc = NULL;
@@ -874,7 +889,7 @@ int process_pam(char pamfile[MAXFNAML]) {
 
 
     // Inizializza la libreria e leggi il file
-    // Initialize the libxml2 library and read the input file
+    /**  Initialize the libxml2 library and read the input file */
     LIBXML_TEST_VERSION
     doc = xmlReadFile(pamfile, NULL, 0);
 
@@ -884,7 +899,7 @@ int process_pam(char pamfile[MAXFNAML]) {
     }
 
     // Ottieni l'elemento radice <PAMDataset>
-    // Obtain the root element <PAMDataset>
+    /** Obtain the root element <PAMDataset> */
     root_element = xmlDocGetRootElement(doc);
 
     if (root_element != NULL) {

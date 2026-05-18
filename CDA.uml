@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<uml:Model xmi:version="20131001" xmlns:xmi="http://www.omg.org/spec/XMI/20131001" xmlns:uml="http://www.eclipse.org/uml2/5.0.0/UML" xmi:id="_i-d1wFK7EfGbIc7D22B6aA" name="CDA">
+  <packageImport xmi:type="uml:PackageImport" xmi:id="_jG0ggFK7EfGbIc7D22B6aA">
+    <importedPackage xmi:type="uml:Model" href="pathmap://UML_LIBRARIES/UMLPrimitiveTypes.library.uml#_0"/>
+  </packageImport>
+  <packagedElement xmi:type="uml:Activity" xmi:id="_jBq6wFK7EfGbIc7D22B6aA" name="Activity1" node="_tZm-8FK7EfGbIc7D22B6aA">
+    <ownedBehavior xmi:type="uml:Activity" xmi:id="_WzhGYFK8EfGbIc7D22B6aA" name="declare variables and set default values"/>
+    <ownedBehavior xmi:type="uml:Activity" xmi:id="_m-pRMFK8EfGbIc7D22B6aA" name="declare structures (Classes) "/>
+    <node xmi:type="uml:InitialNode" xmi:id="_tZm-8FK7EfGbIc7D22B6aA" name="start processing"/>
+  </packagedElement>
+</uml:Model>
